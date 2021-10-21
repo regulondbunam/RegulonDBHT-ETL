@@ -10,7 +10,7 @@ import logging
 
 # local
 from libs import utils
-from ht_etl import sites_dataset
+from ht_etl import peaks_datasets, sites_dataset
 
 
 def open_excel_file(keyargs):
@@ -52,6 +52,8 @@ def get_author_data(authors_data_path, filename):
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
         raw = utils.get_data_frame(excel_path)
         author_raw = raw.to_csv(encoding='utf-8')
+    else:
+        return None
     return author_raw
 
 
@@ -119,6 +121,36 @@ def set_sample(experimentId, controlId, title):
     return sample
 
 
+def set_linked_dataset(experimentId, controlId, dataset_type):
+    '''
+    Formats sample object and converts IDs Strings into Strings arrays.
+
+    Param
+        experimentId, String, Sample experiment ID unformatted.
+        controlId, String, Sample control ID unformatted.
+        title, String, Sample title.
+
+    Returns
+        sample, Dict, dictionary with the formatted Sample data.
+    '''
+    if not experimentId:
+        experimentId = None
+    else:
+        experimentId = experimentId.replace(
+            '[', '').replace(']', '').split(', ')
+    if not controlId:
+        controlId = None
+    else:
+        controlId = controlId.replace('[', '').replace(']', '').split(', ')
+
+    sample = {
+        'experimentId': experimentId,
+        'controlId': controlId,
+        'datasetType': dataset_type,
+    }
+    return sample
+
+
 def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
     '''
     Reads one by one all the valid XLSX files and returns the corresponding data dictionaries.
@@ -141,6 +173,9 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
         dataset_dict, Dict, a dictionary with the necessary dataset data.
     '''
     dataset_dict_list = []
+    peaks_dict_list = []
+    sites_dict_list = []
+    authors_data_list = []
     dataframe_dict = utils.get_excel_data(filename)
     for row in dataframe_dict:
         dataset_dict = {}
@@ -168,23 +203,11 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
             row['Samples Replicates Binding GEO ID Experiment  [ID, ID, ID] *'],
             row['Samples Replicates Binding GEO ID Control type1  [ID, ID, ID] Control type2 [ID, ID, ID]'],
             row['Sample GEO Title for all replicates']))
-        dataset_dict.setdefault('linkedDataset', [
-            {
-                # TODO: is this the original dataset source data?
-                'expID': row['Dataset ID*'],
-                'contrltID': row['Dataset ID*'],
-                'sampleType': keyargs.get('dataset_type'),  # Binding/ GeneExp
-            }
-        ])
+        dataset_dict.setdefault('linkedDataset', set_linked_dataset(
+            row['Sample Replicates  Expression GEO ID Experimental [ID, ID, ID]'], row['Sample Replicates Expression GEO ID Control [ID, ID, ID]'], keyargs.get('dataset_type')))
         dataset_dict.setdefault('referenceGenome', row['Reference genome'])
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
         dataset_dict.setdefault('temporalDatasetID', row['Dataset ID*'])
-        dataset_dict.setdefault(
-            'peaks', f'{bed_files_path},{row["Dataset ID*"]}/peaks.bed')
-        dataset_dict.setdefault(
-            'tfbinding', sites_dataset.open_bed_file(f'{bed_files_path}/{row["Dataset ID*"]}/results/sites/peak-motifs_all_motifs_seqcoord.bed'))
-        dataset_dict.setdefault('tfbindingAuthorsData',
-                                get_author_data(authors_data_path, row['TFBS Dataset File Name']))
         dataset_dict.setdefault(
             'growthConditions', get_growth_conditions(row['Binding Growth Conditions Experimental*']))
         dataset_dict.setdefault('releaseDataControl', {
@@ -214,6 +237,28 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
                 'notInDataset': 0,
             },
         })
+        peaks_dict_list.extend(peaks_datasets.bed_file_mapping(
+            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/data/sequences/peak-motifs_test_seqcoord.bed', keyargs.get('db'), keyargs.get('url')))
+
+        sites_dict_list.extend(sites_dataset.bed_file_mapping(
+            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/results/sites/peak-motifs_all_motifs_seqcoord.bed', keyargs.get('db'), keyargs.get('url')))
+        authors_data_list.append({
+            'tfbindingAuthorsData': get_author_data(authors_data_path, row['TFBS Dataset File Name']),
+            'datasetId': row['Dataset ID*'],
+        })
         dataset_dict_list.append(dataset_dict)
+
+    collection_data = utils.set_json_object(
+        "Peaks", peaks_dict_list, keyargs.get('organism'))
+    utils.create_json(collection_data, "peaks", keyargs.get('output_path'))
+
+    collection_data = utils.set_json_object(
+        "Sites", sites_dict_list, keyargs.get('organism'))
+    utils.create_json(collection_data, "sites", keyargs.get('output_path'))
+
+    collection_data = utils.set_json_object(
+        "AuthorsData", authors_data_list, keyargs.get('organism'))
+    utils.create_json(collection_data, "authorsData",
+                      keyargs.get('output_path'))
 
     return dataset_dict_list

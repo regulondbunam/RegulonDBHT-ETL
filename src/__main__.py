@@ -14,26 +14,6 @@ from libs import utils
 from ht_etl import dataset
 
 
-def set_json_object(filename, data_list, organism):
-    '''
-    Sets the JSON output format of the collection..
-
-    Param
-        filename, String, the the output file name.
-        data_list, List, the list with the collection data.
-        organism, String, the organism name.
-
-    Returns
-        json_object, Dict, the dictionary with the final JSON file format
-    '''
-    json_object = {
-        "collectionName": filename,
-        "collectionData": data_list,
-        "organism": organism
-    }
-    return json_object
-
-
 def run(keyargs):
     '''
     Run function, controls program functions and generates output files.
@@ -49,7 +29,7 @@ def run(keyargs):
         logging.info(
             f'Reading Datasets from {keyargs.get("datasets_record_path")}')
         datasets_list = dataset.open_excel_file(keyargs)
-        collection_data = set_json_object(
+        collection_data = utils.set_json_object(
             "Dataset", datasets_list, keyargs.get('organism'))
         utils.create_json(collection_data, "dataset",
                           keyargs.get('output_path'))

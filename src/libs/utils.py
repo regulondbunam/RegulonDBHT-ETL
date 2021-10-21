@@ -16,6 +16,47 @@ import multigenomic_api as mg_api
 # local
 
 
+def set_json_object(filename, data_list, organism):
+    '''
+    Sets the JSON output format of the collection..
+
+    Param
+        filename, String, the the output file name.
+        data_list, List, the list with the collection data.
+        organism, String, the organism name.
+
+    Returns
+        json_object, Dict, the dictionary with the final JSON file format
+    '''
+    json_object = {
+        "collectionName": filename,
+        "collectionData": data_list,
+        "organism": organism
+    }
+    return json_object
+
+
+def verify_bed_path(bed_path):
+    '''
+    This function filters BED files in the path and returns only correctly formatted path.
+
+    Param
+        bed_path, String, raw directory path.
+
+    Returns
+        bed_path, String, verified directory path.
+    '''
+
+    if os.path.isfile(bed_path) and bed_path.endswith('.bed'):
+        logging.info(
+            f'Reading dataset {bed_path}')
+        return bed_path
+    else:
+        logging.warning(
+            f'{bed_path} is not a valid BED file will be ignored')
+        return None
+
+
 def validate_directories(data_path):
     '''
     Verify that the output path directory exists.
@@ -211,7 +252,7 @@ def get_object_tested(protein_name, database, url):
         '_id': mg_tf[0].id,
         'name': mg_tf[0].name,
         'synonyms': mg_tf[0].synonyms,
-        'genes': genes,  # TODO: now is an string array
+        'genes': genes,
         'summary': mg_tf[0].note,
         'activeConformations': active_conformations,
         'externalCrossReferences': external_cross_references
@@ -220,5 +261,73 @@ def get_object_tested(protein_name, database, url):
     return object_tested
 
 
-def find_site(abs_pos):
-    pass
+def get_center_pos(left_pos, right_pos):  # TODO: PENDIENTE
+    '''
+    Calculates the center center position of the chromosome.
+
+    Param
+        left_pos, String, Start position in the sequence (it's converted to Integer).
+        right_pos, String, End position in the sequence (it's converted to Integer).
+
+    Returns
+        center_pos, Float, Center position in the sequence.
+    '''
+    center_pos = int(right_pos) - int(left_pos)
+    center_pos = (center_pos / 2) + int(left_pos)
+    return center_pos
+
+
+def find_gene(left_pos, right_pos, database, url):  # TODO: PENDIENTE
+    '''
+    Calculates the center center position of the chromosome.
+
+    Param
+        left_pos, String, Start position in the sequence (it's converted to Integer).
+        right_pos, String, End position in the sequence (it's converted to Integer).
+
+    Returns
+
+    '''
+    limit = 500
+    genome_length = 5000000
+    intervals = 200
+    genome_range = int(genome_length / intervals)
+    genome_ranges = []
+    for r in range(intervals):
+        #print(genome_range+((r-1)*genome_range), genome_range+(r*genome_range))
+        genome_ranges.append(
+            [genome_range + ((r - 1) * genome_range), genome_range + (r * genome_range)])
+
+    center_pos = get_center_pos(int(left_pos), int(right_pos))
+    # print(center_pos)
+    genome_interval = genome_ranges[int(
+        (center_pos * intervals) / genome_length)]
+
+    mg_api.connect(database, url)
+
+    mg_genes = mg_api.genes.find_genes_in_range(
+        genome_interval[0], genome_interval[1])
+
+    genes_list = []
+    for gene in mg_genes:
+        gene_dict = {
+            '_id': gene.id,
+            'name': gene.name,
+            'leftEndPosition': gene.left_end_position,
+            'rightEndPosition': gene.right_end_position,
+            'strand': gene.strand,
+            'centerPosition': get_center_pos(gene.left_end_position, gene.right_end_position),
+        }
+        genes_list.append(gene_dict)
+    genes_list = sorted(genes_list, key=lambda d: d['centerPosition'])
+    # print(genome_interval)
+    closer_genes = []
+    for gene in genes_list:
+        g_center = gene.get('centerPosition')
+        if g_center < (center_pos + limit) and g_center > (center_pos - limit):
+            # print(gene)
+            closer_genes.append(
+                {'_id': gene.get('_id'), 'name': gene.get('name')})
+        # gene.setdefault('distanceToNextGene', 0)
+    # print(genes_list)
+    return closer_genes
