@@ -12,7 +12,7 @@ import logging
 from libs import utils
 
 
-def bed_file_mapping(dataset_id, filename, database, url):
+def bed_file_mapping(dataset_id, filename, database, url, genes_ranges):
     '''
     Reads one by one all the valid BED files and returns the corresponding data dictionaries.
 
@@ -38,13 +38,13 @@ def bed_file_mapping(dataset_id, filename, database, url):
                 dataset_dict.setdefault(
                     '_id', None)
                 dataset_dict.setdefault('chromosome', row[0])
-                dataset_dict.setdefault('closerGene', utils.find_gene(
-                    row[1], row[2], database, url))
+                dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
+                    row[1], row[2], database, url, genes_ranges))
                 dataset_dict.setdefault('peakLeftPosition', row[1])
                 dataset_dict.setdefault('peakRightPosition', row[2])
                 dataset_dict.setdefault('score', row[4])
                 dataset_dict.setdefault('name', row[3])
-                dataset_dict.setdefault('siteId', [])
+                dataset_dict.setdefault('siteIds', [])
                 dataset_dict_list.append(dataset_dict)
 
     return dataset_dict_list

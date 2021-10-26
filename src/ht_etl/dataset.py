@@ -238,10 +238,10 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
             },
         })
         peaks_dict_list.extend(peaks_datasets.bed_file_mapping(
-            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/data/sequences/peak-motifs_test_seqcoord.bed', keyargs.get('db'), keyargs.get('url')))
+            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/data/sequences/peak-motifs_test_seqcoord.bed', keyargs.get('db'), keyargs.get('url'), keyargs.get('genes_ranges')))
 
         sites_dict_list.extend(sites_dataset.bed_file_mapping(
-            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/results/sites/peak-motifs_all_motifs_seqcoord.bed', keyargs.get('db'), keyargs.get('url')))
+            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/results/sites/peak-motifs_all_motifs_seqcoord.bed', keyargs.get('db'), keyargs.get('url'), keyargs.get('genes_ranges')))
         authors_data_list.append({
             'tfbindingAuthorsData': get_author_data(authors_data_path, row['TFBS Dataset File Name']),
             'datasetId': row['Dataset ID*'],

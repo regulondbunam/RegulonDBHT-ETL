@@ -12,7 +12,7 @@ import logging
 from libs import utils
 
 
-def bed_file_mapping(dataset_id, filename, database, url):
+def bed_file_mapping(dataset_id, filename, database, url, genes_ranges):
     '''
     Reads one by one all the valid BED files and returns the corresponding data dictionaries.
 
@@ -39,15 +39,15 @@ def bed_file_mapping(dataset_id, filename, database, url):
                 # TODO: siteID -> array
                 # TODO: De donde se toma el Site?
                 dataset_dict.setdefault('datasetId', [dataset_id])
-                dataset_dict.setdefault('siteId', [])
+                dataset_dict.setdefault('siteIds', [])
                 dataset_dict.setdefault('chromosome', row[0])
                 dataset_dict.setdefault('chrLeftPosition', row[1])
                 dataset_dict.setdefault('chrRightPosition', row[2])
                 dataset_dict.setdefault('name', row[3])
                 dataset_dict.setdefault('score', row[4])
                 dataset_dict.setdefault('strand', row[5])
-                dataset_dict.setdefault('closerGene', utils.find_gene(
-                    row[1], row[2], database, url))
+                dataset_dict.setdefault('closestGenes', '''utils.find_closest_gene(
+                    row[1], row[2], database, url, genes_ranges)''')
                 dataset_dict.setdefault('transcriptionUnit', {
                     # TODO: find site in RI -> get reg_entity -> check if TU Promoter or Gene
                     '_id': None,

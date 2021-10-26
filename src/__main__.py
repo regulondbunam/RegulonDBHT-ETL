@@ -57,7 +57,8 @@ if __name__ == '__main__':
         'db': args.database,
         'email': args.email,
         'source_name': args.source_name,
-        'dataset_type': args.dataset_type
+        'dataset_type': args.dataset_type,
+        'genes_ranges': utils.set_genome_intervals()
     }
     utils.validate_directories(keyargs.get('output_path'))
 
@@ -65,3 +66,5 @@ if __name__ == '__main__':
     logging.info(f'Initializing RegulonDB HT ETL')
 
     run(keyargs)
+
+    logging.info(f'RegulonDB HT ETL process complete')

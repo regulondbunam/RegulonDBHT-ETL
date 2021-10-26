@@ -14,6 +14,7 @@ from Bio import Entrez, Medline
 import multigenomic_api as mg_api
 
 # local
+from libs import constants as EC
 
 
 def set_json_object(filename, data_list, organism):
@@ -261,7 +262,7 @@ def get_object_tested(protein_name, database, url):
     return object_tested
 
 
-def get_center_pos(left_pos, right_pos):  # TODO: PENDIENTE
+def get_center_pos(left_pos, right_pos):
     '''
     Calculates the center center position of the chromosome.
 
@@ -277,57 +278,67 @@ def get_center_pos(left_pos, right_pos):  # TODO: PENDIENTE
     return center_pos
 
 
-def find_gene(left_pos, right_pos, database, url):  # TODO: PENDIENTE
+def set_genome_intervals():
+    '''
+    Set the genes ranges to calculate the closest_genes.
+
+    Param
+
+    Returns
+        genes_ranges, List, Array of coordinate pairs of the calculated ranges.
+    '''
+    genome_length = EC.GENOME_LENGTH
+    intervals = EC.INTERVALS
+    intervals_length = int(genome_length / intervals)
+    genes_ranges = []
+    for interval in range(intervals):
+        genes_ranges.append(
+            [intervals_length + ((interval - 1) * intervals_length), intervals_length + (interval * intervals_length)])
+    return genes_ranges
+
+
+def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):  # TODO: PENDIENTE
     '''
     Calculates the center center position of the chromosome.
 
     Param
         left_pos, String, Start position in the sequence (it's converted to Integer).
         right_pos, String, End position in the sequence (it's converted to Integer).
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+        genes_ranges, List, Array of coordinate pairs of the calculated ranges.
 
     Returns
-
+        closest_genes, List, Dict List with the verified closest genes.
     '''
-    limit = 500
-    genome_length = 5000000
-    intervals = 200
-    genome_range = int(genome_length / intervals)
-    genome_ranges = []
-    for r in range(intervals):
-        #print(genome_range+((r-1)*genome_range), genome_range+(r*genome_range))
-        genome_ranges.append(
-            [genome_range + ((r - 1) * genome_range), genome_range + (r * genome_range)])
+    minimum_distance = EC.MINIMUM_DISTANCE
+    genome_length = EC.GENOME_LENGTH
+    intervals = EC.INTERVALS
 
-    center_pos = get_center_pos(int(left_pos), int(right_pos))
-    # print(center_pos)
-    genome_interval = genome_ranges[int(
-        (center_pos * intervals) / genome_length)]
+    chromosome_center_pos = get_center_pos(int(left_pos), int(right_pos))
+
+    found_genes_interval = genes_ranges[int(
+        (chromosome_center_pos * intervals) / genome_length)]
 
     mg_api.connect(database, url)
 
     mg_genes = mg_api.genes.find_genes_in_range(
-        genome_interval[0], genome_interval[1])
+        (found_genes_interval[0] - minimum_distance), (found_genes_interval[1] + minimum_distance))
 
-    genes_list = []
+    closest_genes = []
     for gene in mg_genes:
-        gene_dict = {
-            '_id': gene.id,
-            'name': gene.name,
-            'leftEndPosition': gene.left_end_position,
-            'rightEndPosition': gene.right_end_position,
-            'strand': gene.strand,
-            'centerPosition': get_center_pos(gene.left_end_position, gene.right_end_position),
-        }
-        genes_list.append(gene_dict)
-    genes_list = sorted(genes_list, key=lambda d: d['centerPosition'])
-    # print(genome_interval)
-    closer_genes = []
-    for gene in genes_list:
-        g_center = gene.get('centerPosition')
-        if g_center < (center_pos + limit) and g_center > (center_pos - limit):
-            # print(gene)
-            closer_genes.append(
-                {'_id': gene.get('_id'), 'name': gene.get('name')})
-        # gene.setdefault('distanceToNextGene', 0)
-    # print(genes_list)
-    return closer_genes
+        gene_strand = gene.strand
+        gene_left_pos = gene.left_end_position
+        gene_right_pos = gene.right_end_position
+        if gene_strand == 'forward':
+            distance = float(gene_left_pos) - chromosome_center_pos
+            if distance > 0 and distance < minimum_distance:
+                closest_genes.append(
+                    {'_id': gene.id, 'name': gene.name, 'distanceTo': distance})
+        elif gene_strand == 'reverse':
+            distance = chromosome_center_pos - float(gene_right_pos)
+            if distance > 0 and distance < minimum_distance:
+                closest_genes.append(
+                    {'_id': gene.id, 'name': gene.name, 'distanceTo': distance})
+    mg_api.disconnect()
+    return closest_genes
