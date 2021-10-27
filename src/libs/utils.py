@@ -322,9 +322,8 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):  # TODO
 
     mg_api.connect(database, url)
 
-    mg_genes = mg_api.genes.find_genes_in_range(
-        (found_genes_interval[0] - minimum_distance), (found_genes_interval[1] + minimum_distance))
-
+    mg_genes = mg_api.genes.get_closest_genes_to_central_position(
+        (found_genes_interval[0] - minimum_distance), (found_genes_interval[1] + minimum_distance), chromosome_center_pos, minimum_distance)
     closest_genes = []
     for gene in mg_genes:
         gene_strand = gene.strand
@@ -332,13 +331,11 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):  # TODO
         gene_right_pos = gene.right_end_position
         if gene_strand == 'forward':
             distance = float(gene_left_pos) - chromosome_center_pos
-            if distance > 0 and distance < minimum_distance:
-                closest_genes.append(
-                    {'_id': gene.id, 'name': gene.name, 'distanceTo': distance})
+            closest_genes.append(
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance)})
         elif gene_strand == 'reverse':
             distance = chromosome_center_pos - float(gene_right_pos)
-            if distance > 0 and distance < minimum_distance:
-                closest_genes.append(
-                    {'_id': gene.id, 'name': gene.name, 'distanceTo': distance})
+            closest_genes.append(
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance)})
     mg_api.disconnect()
     return closest_genes

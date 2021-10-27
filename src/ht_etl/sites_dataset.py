@@ -53,7 +53,7 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges):
                     '_id': None,
                     'name': None,
                 })
-                dataset_dict.setdefault('foundClassicRIs', {
+                '''dataset_dict.setdefault('foundClassicRIs', {
                     'tfbsLeftPosition': None,
                     'tfbsRightPosition': None,
                     'transcriptionFactorID': None,
@@ -73,7 +73,7 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges):
                     'relativeTSSDistance': None,
                     'strand': None,
                     'sequence': None,
-                })
+                })'''
                 dataset_dict_list.append(dataset_dict)
 
     return dataset_dict_list
