@@ -297,7 +297,7 @@ def set_genome_intervals():
     return genes_ranges
 
 
-def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):  # TODO: PENDIENTE
+def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
     '''
     Calculates the center center position of the chromosome.
 
@@ -339,3 +339,38 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):  # TODO
                 {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance)})
     mg_api.disconnect()
     return closest_genes
+
+
+def get_sites_ids(tf_name, database, url):
+    '''
+    [Description]
+
+    Param
+        [Description]
+
+    Returns
+        [Description]
+    '''
+    sites_ids = []
+    mg_api.connect(database, url)
+    try:
+        mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
+        tf_id = mg_tf[0].id
+        try:
+            mg_sites = mg_api.regulatory_sites.get_tf_binding_sites(tf_id)
+            for site in mg_sites:
+                sites_ids.append(site.id)
+        except Exception:
+            logging.error(f'Can not find Sites in TF {tf_id}')
+    except IndexError:
+        logging.error(f'Can not find Trasncription Factor {tf_name}')
+    mg_api.disconnect()
+    return sites_ids
+
+
+def find_one_in_dict_list(dict_list, key_name, value):
+    found_dict = next(
+        (item for item in dict_list if item[key_name] == value),
+        None
+    )
+    return found_dict
