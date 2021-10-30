@@ -329,14 +329,21 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
         gene_strand = gene.strand
         gene_left_pos = gene.left_end_position
         gene_right_pos = gene.right_end_position
+        gene_product_name = None
+        try:
+            mg_products = mg_api.products.find_by_gene_id(gene.id)
+            for product in mg_products:
+                gene_product_name = product.name
+        except Exception:
+            logging.error(f'Can not find Product Name in Gene {gene.id}')
         if gene_strand == 'forward':
             distance = float(gene_left_pos) - chromosome_center_pos
             closest_genes.append(
-                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance)})
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name})
         elif gene_strand == 'reverse':
             distance = chromosome_center_pos - float(gene_right_pos)
             closest_genes.append(
-                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance)})
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name})
     mg_api.disconnect()
     return closest_genes
 

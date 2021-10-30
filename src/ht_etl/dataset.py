@@ -91,14 +91,14 @@ def get_growth_conditions(gc_raw):
     return gc_dict
 
 
-def set_sample(experimentId, controlId, title):
+def set_sample(experimentId, controlId, dataset_type):
     '''
     Formats sample object and converts IDs Strings into Strings arrays.
 
     Param
         experimentId, String, Sample experiment ID unformatted.
         controlId, String, Sample control ID unformatted.
-        title, String, Sample title.
+        dataset_type, String, Dataset type.
 
     Returns
         sample, Dict, dictionary with the formatted Sample data.
@@ -116,7 +116,7 @@ def set_sample(experimentId, controlId, title):
     sample = {
         'experimentId': experimentId,
         'controlId': controlId,
-        'title': title,
+        'datasetType': dataset_type,
     }
     return sample
 
@@ -128,7 +128,7 @@ def set_linked_dataset(experimentId, controlId, dataset_type):
     Param
         experimentId, String, Sample experiment ID unformatted.
         controlId, String, Sample control ID unformatted.
-        title, String, Sample title.
+        dataset_type, String, Dataset type.
 
     Returns
         sample, Dict, dictionary with the formatted Sample data.
@@ -201,10 +201,14 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
         })
         dataset_dict.setdefault('sample', set_sample(
             row['Samples Replicates Binding GEO ID Experiment  [ID, ID, ID] *'],
-            row['Samples Replicates Binding GEO ID Control type1  [ID, ID, ID] Control type2 [ID, ID, ID]'],
-            row['Sample GEO Title for all replicates']))
-        dataset_dict.setdefault('linkedDataset', set_linked_dataset(
-            row['Sample Replicates  Expression GEO ID Experimental [ID, ID, ID]'], row['Sample Replicates Expression GEO ID Control [ID, ID, ID]'], keyargs.get('dataset_type')))
+            row['Samples Replicates Binding GEO ID Control type1  [ID, ID, ID] Control type2 [ID, ID, ID]'], keyargs.get('dataset_type')))
+        dataset_dict.setdefault('linkedDataset',
+                                set_linked_dataset(
+                                    row['Sample Replicates  Expression GEO ID Experimental [ID, ID, ID]'],
+                                    row['Sample Replicates Expression GEO ID Control [ID, ID, ID]'],
+                                    'GeneExpression')
+                                )
+        '''keyargs.get('dataset_type')'''
         dataset_dict.setdefault('referenceGenome', row['Reference genome'])
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
         dataset_dict.setdefault('temporalDatasetID', row['Dataset ID*'])
@@ -237,11 +241,28 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
                 'notInDataset': 0,
             },
         })
-        peaks_dict_list.extend(peaks_datasets.bed_file_mapping(
-            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/data/sequences/peak-motifs_test_seqcoord.bed', keyargs.get('db'), keyargs.get('url'), keyargs.get('genes_ranges')))
 
-        sites_dict_list.extend(sites_dataset.bed_file_mapping(
-            row['Dataset ID*'], f'{bed_files_path}/{row["Dataset ID*"]}/results/sites/peak-motifs_all_motifs_seqcoord.bed', keyargs.get('db'), keyargs.get('url'), keyargs.get('genes_ranges'), sites_dict_list))
+        bed_paths = f'{bed_files_path}/{row["Dataset ID*"]}/{row["Dataset ID*"]}'
+        sites_dict_list.extend(
+            sites_dataset.bed_file_mapping(
+                row['Dataset ID*'],
+                f'{bed_paths}_sites.bed',
+                keyargs.get('db'),
+                keyargs.get('url'),
+                keyargs.get('genes_ranges'),
+                sites_dict_list
+            )
+        )
+        peaks_dict_list.extend(
+            peaks_datasets.bed_file_mapping(
+                row['Dataset ID*'],
+                f'{bed_paths}_peaks.bed',
+                keyargs.get('db'),
+                keyargs.get('url'),
+                keyargs.get('genes_ranges'),
+                sites_dict_list
+            )
+        )
         authors_data_list.append({
             'tfbindingAuthorsData': get_author_data(authors_data_path, row['TFBS Dataset File Name']),
             'datasetId': row['Dataset ID*'],
