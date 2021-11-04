@@ -60,7 +60,6 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     }'''
                     dataset_dict.setdefault('foundDatasetRIs', [])
                     '''{
-                        # TODO: PENDIENTE
                         'tfbsLeftPosition': None,
                         'tfbsRightPosition': None,
                         'transcriptionFactorID': None,

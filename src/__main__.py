@@ -11,7 +11,7 @@ import datetime
 # local
 from libs import arguments
 from libs import utils
-from ht_etl import dataset
+from ht_etl import dataset_metadata
 
 
 def run(keyargs):
@@ -28,10 +28,10 @@ def run(keyargs):
         print(f'Reading Datasets from {keyargs.get("datasets_record_path")}')
         logging.info(
             f'Reading Datasets from {keyargs.get("datasets_record_path")}')
-        datasets_list = dataset.open_excel_file(keyargs)
+        datasets_list = dataset_metadata.open_excel_file(keyargs)
         collection_data = utils.set_json_object(
             "Dataset", datasets_list, keyargs.get('organism'))
-        utils.create_json(collection_data, "dataset",
+        utils.create_json(collection_data, "dataset_metadata",
                           keyargs.get('output_path'))
 
 

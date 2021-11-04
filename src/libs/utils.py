@@ -114,7 +114,7 @@ def list_to_dict(data):  # TODO: Not used, must be deleted?
     return data_dict
 
 
-def get_data_frame(filename: str, load_sheet: int = 0, rows_to_skip: int = 0) -> pandas.DataFrame:
+def get_data_frame(filename: str, load_sheet: str = EC.METADATA_SHEET, rows_to_skip: int = EC.ROWS_TO_SKIP) -> pandas.DataFrame:
     '''
     Read and convert the Excel file to Panda DataFrame.
 
@@ -223,41 +223,43 @@ def get_object_tested(protein_name, database, url):
         object_tested, Dict, dictionary with the object tested data.
     '''
     mg_api.connect(database, url)
+    object_tested = {}
     mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
-    active_conformations = []
-    external_cross_references = []
-    for active_conf in mg_tf[0].active_conformations:
-        active_conformations.append(active_conf.id)
-    for cross_ref in mg_tf[0].external_cross_references:
-        mg_cross_ref = mg_api.external_cross_references.find_by_id(
-            cross_ref.external_cross_references_id)
-        external_cross_references.append(
-            {
-                'externalCrossReferenceId': cross_ref.external_cross_references_id,
-                'objectId': cross_ref.object_id,
-                'externalCrossReferenceName': mg_cross_ref.name,
-                'url': mg_cross_ref.url
+    if mg_tf:
+        active_conformations = []
+        external_cross_references = []
+        for active_conf in mg_tf[0].active_conformations:
+            active_conformations.append(active_conf.id)
+        for cross_ref in mg_tf[0].external_cross_references:
+            mg_cross_ref = mg_api.external_cross_references.find_by_id(
+                cross_ref.external_cross_references_id)
+            external_cross_references.append(
+                {
+                    'externalCrossReferenceId': cross_ref.external_cross_references_id,
+                    'objectId': cross_ref.object_id,
+                    'externalCrossReferenceName': mg_cross_ref.name,
+                    'url': mg_cross_ref.url
+                }
+            )
+        genes = []
+        for product_id in mg_tf[0].products_ids:
+            mg_product = mg_api.products.find_by_id(product_id)
+            mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
+            gene = {
+                '_id': mg_gene.id,
+                'name': mg_gene.name
             }
-        )
-    genes = []
-    for product_id in mg_tf[0].products_ids:
-        mg_product = mg_api.products.find_by_id(product_id)
-        mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
-        gene = {
-            '_id': mg_gene.id,
-            'name': mg_gene.name
-        }
-        genes.append(gene)
+            genes.append(gene)
 
-    object_tested = {
-        '_id': mg_tf[0].id,
-        'name': mg_tf[0].name,
-        'synonyms': mg_tf[0].synonyms,
-        'genes': genes,
-        'summary': mg_tf[0].note,
-        'activeConformations': active_conformations,
-        'externalCrossReferences': external_cross_references
-    }
+        object_tested = {
+            '_id': mg_tf[0].id,
+            'name': mg_tf[0].name,
+            'synonyms': mg_tf[0].synonyms,
+            'genes': genes,
+            'summary': mg_tf[0].note,
+            'activeConformations': active_conformations,
+            'externalCrossReferences': external_cross_references
+        }
     mg_api.disconnect()
     return object_tested
 
@@ -329,11 +331,11 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
         gene_strand = gene.strand
         gene_left_pos = gene.left_end_position
         gene_right_pos = gene.right_end_position
-        gene_product_name = None
+        gene_product_name = []
         try:
             mg_products = mg_api.products.find_by_gene_id(gene.id)
             for product in mg_products:
-                gene_product_name = product.name
+                gene_product_name.append(product.name)
         except Exception:
             logging.error(f'Can not find Product Name in Gene {gene.id}')
         if gene_strand == 'forward':

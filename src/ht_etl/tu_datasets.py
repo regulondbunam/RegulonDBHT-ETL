@@ -12,15 +12,7 @@ import logging
 from libs import utils
 
 
-def get_sites_ids(sites, peak_name):
-    sites_ids = []
-    for site in sites:
-        if site.get('name') == peak_name:
-            sites_ids.append(site.get('siteId'))
-    return sites_ids
-
-
-def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_dict_list):
+def bed_file_mapping(dataset_id, filename, database, url, genes_ranges):
     '''
     Reads one by one all the valid BED files and returns the corresponding data dictionaries.
 
@@ -39,16 +31,19 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
             if not line.startswith('track') and not line.startswith('browser') and not line.startswith('##') and not line.startswith('#'):
                 dataset_dict = {}
                 row = line.strip().split()
-                dataset_dict.setdefault('_id', row[3])
-                dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
-                    row[1], row[2], database, url, genes_ranges))
+                dataset_dict.setdefault('_id', '')
                 dataset_dict.setdefault('chromosome', row[0])
-                dataset_dict.setdefault('peakLeftPosition', row[1])
-                dataset_dict.setdefault('peakRightPosition', row[2])
-                dataset_dict.setdefault('score', row[4])
-                dataset_dict.setdefault('name', row[3])
+                dataset_dict.setdefault('leftEndPosition', row[1])
+                dataset_dict.setdefault('lightEndPosition', row[2])
                 dataset_dict.setdefault(
-                    'siteIds', get_sites_ids(sites_dict_list, row[3]))
+                    'name', 'concatenación de nombres de genes de acuerdo a su strand')
+                dataset_dict.setdefault('strand', '')
+                dataset_dict.setdefault('length', '')
+                dataset_dict.setdefault('termType', '')
+                dataset_dict.setdefault('genes', utils.find_closest_gene(
+                    row[1], row[2], database, url, genes_ranges))  # TODO: Is the same?
+                dataset_dict.setdefault('phantom', '')
+                dataset_dict.setdefault('pseudo', '')
                 dataset_dict.setdefault('datasetIds', [dataset_id])
                 dataset_dict = {k: v for k, v in dataset_dict.items() if v}
                 dataset_dict_list.append(dataset_dict)
