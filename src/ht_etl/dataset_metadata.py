@@ -29,7 +29,7 @@ def open_excel_file(keyargs):
 
     if os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.xlsx'):
         collection_data.extend(excel_file_mapping(
-            keyargs.get('datasets_record_path'), keyargs.get('authors_data_path'), keyargs.get('bed_files_path'), keyargs))
+            keyargs.get('datasets_record_path'), keyargs))
     else:
         logging.warning(
             f'{keyargs.get("datasets_record_path")} is not a valid XLSX file will be ignored')
@@ -153,14 +153,13 @@ def set_linked_dataset(experimentId, controlId, dataset_type):
     return sample
 
 
-def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
+def excel_file_mapping(filename, keyargs):
     '''
     Reads one by one all the valid XLSX files and returns the corresponding data dictionaries.
 
     Param
         filename, String, full XLSX file path.
-        authors_data_path, String, authors' XLSX file path.
-        bed_files_path, String, bed files path.
+        keyargs.collection_path, String, Path to read de origin files data.
         keyargs.db, String, Database to get some external data.
         keyargs.url, String, URL where database is located.
         keyargs.source_name, String, Excel record surce ("GEO or ArrayExpress").
@@ -220,14 +219,14 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
             'version': keyargs.get('version'),
         })
         authors_data_list.append({
-            'tfbindingAuthorsData': get_author_data(authors_data_path, row[EC.DATASET_FILE_NAME]),
+            'tfbindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}/{EC.AUTHORS_PATHS}', row[EC.DATASET_FILE_NAME]),
             'datasetId': row[EC.DATASET_ID],
         })
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
         if keyargs.get('dataset_type') == 'TFBINDING':
-            bed_paths = f'{bed_files_path}/{row[EC.DATASET_ID]}/{row[EC.DATASET_ID]}'
+            bed_paths = f'{keyargs.get("collection_path")}/{EC.BED_PATHS}/examples/{row[EC.DATASET_ID]}/{row[EC.DATASET_ID]}'
             sites_dict_list.extend(
                 sites_dataset.bed_file_mapping(
                     row[EC.DATASET_ID],
@@ -256,14 +255,14 @@ def excel_file_mapping(filename, authors_data_path, bed_files_path, keyargs):
         dataset_dict.setdefault(
             'summary', {
                 'totalOfPeaks': {
-                    'inDataset': len(peaks_dict_list),
+                    'inDataset': 0,
                     'inRDBClassic': 0,
                     'sharedItems': 0,
                     'notInRDB': 0,
                     'notInDataset': 0,
                 },
                 'totalOfTFBS': {
-                    'inDataset': len(sites_dict_list),
+                    'inDataset': 0,
                     'inRDBClassic': 0,
                     'sharedItems': 0,
                     'notInRDB': 0,

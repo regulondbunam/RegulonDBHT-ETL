@@ -34,6 +34,14 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-collection",
+        "--collection-path",
+        help="Path to read de origin files data.",
+        metavar="../InputData/",
+        default="../InputData/",
+    )
+
+    parser.add_argument(
         "-in",
         "--input",
         help="Path to read de origin file data.",

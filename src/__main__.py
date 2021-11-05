@@ -46,10 +46,9 @@ if __name__ == '__main__':
     utils.set_log(args.log)
 
     keyargs = {
+        'collection_path': args.collection_path,
         'release_process_date': str(datetime.datetime.now()),
         'datasets_record_path': args.input,
-        'authors_data_path': args.author,
-        'bed_files_path': args.bed,
         'output_path': args.output,
         'organism': args.organism,
         'version': args.version,
