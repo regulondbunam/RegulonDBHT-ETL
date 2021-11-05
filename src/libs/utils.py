@@ -210,6 +210,11 @@ def get_pubmed_data(pmid, email):
     return publication
 
 
+def format_cross_reference_url(url, object_id):
+    formated_url = f'{url.replace("~A", "")}{object_id}'
+    return formated_url
+
+
 def get_object_tested(protein_name, database, url):
     '''
     Gets TF data from the RegulonDBMultigenomic database and returns the object tested dictionary.
@@ -238,7 +243,7 @@ def get_object_tested(protein_name, database, url):
                     'externalCrossReferenceId': cross_ref.external_cross_references_id,
                     'objectId': cross_ref.object_id,
                     'externalCrossReferenceName': mg_cross_ref.name,
-                    'url': mg_cross_ref.url
+                    'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
                 }
             )
         genes = []
