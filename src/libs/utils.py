@@ -114,7 +114,7 @@ def list_to_dict(data):  # TODO: Not used, must be deleted?
     return data_dict
 
 
-def get_data_frame(filename: str, load_sheet: str = EC.METADATA_SHEET, rows_to_skip: int = EC.ROWS_TO_SKIP) -> pandas.DataFrame:
+def get_data_frame(filename: str, load_sheet, rows_to_skip: int) -> pandas.DataFrame:
     '''
     Read and convert the Excel file to Panda DataFrame.
 
@@ -157,7 +157,7 @@ def get_excel_data(filename: str) -> dict:
     Returns
         data_frame_json, Dict, json dictionary with the Excel data.
     '''
-    data_frame = get_data_frame(filename)
+    data_frame = get_data_frame(filename, EC.METADATA_SHEET, EC.ROWS_TO_SKIP)
     data_frame_json = get_json_from_data_frame(data_frame)
     return data_frame_json
 
@@ -190,6 +190,8 @@ def get_pubmed_data(pmid, email):
     Returns
         publication, Dict, dictionary with the publication data.
     '''
+    if not pmid:
+        return None
     Entrez.email = email
     handle = Entrez.efetch(db='pubmed', id=pmid,
                            rettype='medline', retmode='text')

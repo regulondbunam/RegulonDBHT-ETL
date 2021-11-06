@@ -48,10 +48,12 @@ def get_author_data(authors_data_path, filename):
     Returns
         authors_raw, String, CSV formated String.
     '''
+    if not filename:
+        return None
     author_raw = filename
     excel_path = os.path.join(authors_data_path, filename)
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
-        raw = utils.get_data_frame(excel_path)
+        raw = utils.get_data_frame(excel_path, 0, EC.ROWS_TO_SKIP)
         author_raw = raw.to_csv(encoding='utf-8')
     else:
         return None
@@ -180,7 +182,10 @@ def excel_file_mapping(filename, keyargs):
     dataframe_dict = utils.get_excel_data(filename)
     for row in dataframe_dict:
         dataset_dict = {}
-        dataset_dict.setdefault('datasetID', row[EC.DATASET_ID])
+        dataset_id = row[EC.DATASET_ID]
+        serie_id = ((row[EC.SERIE_ID]).split(' '))[0]
+        print(dataset_id, serie_id)
+        dataset_dict.setdefault('datasetID', dataset_id)
         dataset_dict.setdefault(
             'publication', utils.get_pubmed_data(row[EC.PMID], keyargs.get('email')))
         dataset_dict.setdefault(
@@ -190,7 +195,7 @@ def excel_file_mapping(filename, keyargs):
                                                     )
         )
         dataset_dict.setdefault('sourceSerie', {
-            'sourceId': row[EC.SERIE_ID],
+            'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
             'title': row[EC.PROTEIN_NAME],
             'platformID': row[EC.PLATFORM_ID],
@@ -211,25 +216,27 @@ def excel_file_mapping(filename, keyargs):
                                     'GeneExpression')
                                 )
         dataset_dict.setdefault('referenceGenome', row[EC.REFERENCE_GENOME])
-        dataset_dict.setdefault('temporalDatasetID', row[EC.DATASET_ID])
+        dataset_dict.setdefault('temporalDatasetID', dataset_id)
         dataset_dict.setdefault(
             'growthConditions', get_growth_conditions(row[EC.GC_EXPERIMENTAL]))
         dataset_dict.setdefault('releaseDataControl', {
             'date': keyargs.get('release_process_date'),
             'version': keyargs.get('version'),
         })
+        print(
+            f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/{row[EC.DATASET_FILE_NAME]}')
         authors_data_list.append({
-            'tfbindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}/{EC.AUTHORS_PATHS}', row[EC.DATASET_FILE_NAME]),
-            'datasetId': row[EC.DATASET_ID],
+            'tfbindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row[EC.DATASET_FILE_NAME]),
+            'datasetId': dataset_id,
         })
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
         if keyargs.get('dataset_type') == 'TFBINDING':
-            bed_paths = f'{keyargs.get("collection_path")}/{EC.BED_PATHS}/examples/{row[EC.DATASET_ID]}/{row[EC.DATASET_ID]}'
+            bed_paths = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}/{dataset_id}'
             sites_dict_list.extend(
                 sites_dataset.bed_file_mapping(
-                    row[EC.DATASET_ID],
+                    dataset_id,
                     f'{bed_paths}_sites.bed',
                     keyargs.get('db'),
                     keyargs.get('url'),
@@ -239,7 +246,7 @@ def excel_file_mapping(filename, keyargs):
             )
             peaks_dict_list.extend(
                 peaks_datasets.bed_file_mapping(
-                    row[EC.DATASET_ID],
+                    dataset_id,
                     f'{bed_paths}_peaks.bed',
                     keyargs.get('db'),
                     keyargs.get('url'),

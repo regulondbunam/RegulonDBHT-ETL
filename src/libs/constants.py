@@ -1,6 +1,6 @@
 # Stat Paths
 BED_PATHS = 'uniformized'
-AUTHORS_PATHS = 'author_files_standard'
+AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
 
 # Closest Genes
@@ -9,7 +9,7 @@ GENOME_LENGTH = 5000000
 INTERVALS = 200
 
 # Metadata Columns
-METADATA_SHEET = 'Metadata Datasets'
+METADATA_SHEET = 'Binding_dataset_ChIP-seq'
 ROWS_TO_SKIP = 4
 DATASET_ID = 'Dataset ID'
 PMID = 'PMID'
