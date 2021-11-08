@@ -58,6 +58,24 @@ def verify_bed_path(bed_path):
         return None
 
 
+def validate_directory(data_path):
+    '''
+    Verify that the output path directory exists.
+
+    Param
+        data_path, String, directory path.
+
+    Return
+        Boolean, boolean.
+    '''
+    if not os.path.isdir(data_path):
+        logging.error(
+            f'There is not {data_path} directory')
+        return False
+    else:
+        return True
+
+
 def validate_directories(data_path):
     '''
     Verify that the output path directory exists.

@@ -183,11 +183,25 @@ def excel_file_mapping(filename, keyargs):
     for row in dataframe_dict:
         dataset_dict = {}
         dataset_id = row[EC.DATASET_ID]
-        serie_id = ((row[EC.SERIE_ID]).split(' '))[0]
+        serie_id = None
+        if row[EC.SERIE_ID]:
+            serie_id = (((row[EC.SERIE_ID]).split(' '))[0]).replace(';', '')
         print(dataset_id, serie_id)
         dataset_dict.setdefault('datasetID', dataset_id)
-        dataset_dict.setdefault(
-            'publication', utils.get_pubmed_data(row[EC.PMID], keyargs.get('email')))
+        if row[EC.PMID]:
+            dataset_dict.setdefault(
+                'publication', utils.get_pubmed_data(row[EC.PMID], keyargs.get('email')))
+        else:
+            dataset_dict.setdefault('publication',
+                                    {
+                                        'authors': row[EC.AUTHORS],
+                                        'abstract': None,
+                                        'date': row[EC.RELEASE_DATE],
+                                        'pmcid': None,
+                                        'pmid': None,
+                                        'title': row[EC.EXPERIMENT_TITLE]
+                                    }
+                                    )
         dataset_dict.setdefault(
             'objectTested', utils.get_object_tested(row[EC.PROTEIN_NAME],
                                                     keyargs.get('db'),
@@ -233,27 +247,34 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
         if keyargs.get('dataset_type') == 'TFBINDING':
-            bed_paths = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}/{dataset_id}'
-            sites_dict_list.extend(
-                sites_dataset.bed_file_mapping(
-                    dataset_id,
-                    f'{bed_paths}_sites.bed',
-                    keyargs.get('db'),
-                    keyargs.get('url'),
-                    keyargs.get('genes_ranges'),
-                    sites_dict_list
-                )
-            )
-            peaks_dict_list.extend(
-                peaks_datasets.bed_file_mapping(
-                    dataset_id,
-                    f'{bed_paths}_peaks.bed',
-                    keyargs.get('db'),
-                    keyargs.get('url'),
-                    keyargs.get('genes_ranges'),
-                    sites_dict_list
-                )
-            )
+            if serie_id:
+                bed_paths = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
+                if utils.validate_directory(bed_paths):
+                    bed_paths = f'{bed_paths}/{dataset_id}'
+                    sites_dict_list.extend(
+                        sites_dataset.bed_file_mapping(
+                            dataset_id,
+                            f'{bed_paths}_sites.bed',
+                            keyargs.get('db'),
+                            keyargs.get('url'),
+                            keyargs.get('genes_ranges'),
+                            sites_dict_list
+                        )
+                    )
+                    peaks_dict_list.extend(
+                        peaks_datasets.bed_file_mapping(
+                            dataset_id,
+                            f'{bed_paths}_peaks.bed',
+                            keyargs.get('db'),
+                            keyargs.get('url'),
+                            keyargs.get('genes_ranges'),
+                            sites_dict_list
+                        )
+                    )
+            else:
+                logging.error(
+                    f'There is not Serie ID for {dataset_id} can not read .bed files')
+
         if keyargs.get('dataset_type') == 'TUS':
             dataset_dict.setdefault(
                 'assemblyGenomeId', row['Assembly Genome ID'])
