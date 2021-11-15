@@ -4,6 +4,7 @@ Dataset record processing.
 # standard
 import os
 import logging
+import shutil
 
 # third party
 
@@ -37,7 +38,7 @@ def open_excel_file(keyargs):
     return collection_data
 
 
-def get_author_data(authors_data_path, filename):
+def get_author_data(authors_data_path, filename, dataset_id):
     '''
     Gets and converts the author's Excel data to a CSV formatted String.
 
@@ -49,18 +50,30 @@ def get_author_data(authors_data_path, filename):
         authors_raw, String, CSV formated String.
     '''
     if not filename:
+        logging.error(
+            f'There is not File Name for {dataset_id} can not read Author\'s files')
         return None
     author_raw = filename
     excel_path = os.path.join(authors_data_path, filename)
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
-        raw = utils.get_data_frame(excel_path, 0, EC.ROWS_TO_SKIP)
+        raw = utils.get_data_frame(excel_path, 0, 0)
         author_raw = raw.to_csv(encoding='utf-8')
+        logging.info(
+            f'Reading Author\'s Data files {excel_path}')
+        return author_raw
+    elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
+        raw = utils.get_data_frame_tsv(excel_path)
+        author_raw = raw.to_csv(encoding='utf-8')
+        logging.info(
+            f'Reading Author\'s Data files {excel_path}')
+        return author_raw
     else:
+        logging.error(
+            f'There are not valid Author\'s Data files for {dataset_id} can not read Author\'s files')
         return None
-    return author_raw
 
 
-def get_growth_conditions(gc_raw):
+def get_growth_conditions(gc_raw, dataset_id):
     '''
     Converts the growth conditions sentences in a dictionary.
     Splits the phrase by | and separates the terms names from snake_case to camelCase in a dictionary format.
@@ -87,7 +100,14 @@ def get_growth_conditions(gc_raw):
 
     '''
     gc_dict = {}
-    for condition in gc_raw.split('|'):
+    if not gc_raw:
+        return None
+    gc_list = gc_raw.split(' |')
+    if not ' |' in gc_list:
+        logging.error(
+            f'There are not valid Growth Conditions for {dataset_id} can not read property')
+        return None
+    for condition in gc_list:
         condition = condition.split(':')
         gc_dict.setdefault(utils.to_camel_case(
             condition[0].lower()), condition[1])
@@ -179,22 +199,24 @@ def excel_file_mapping(filename, keyargs):
     peaks_dict_list = []
     sites_dict_list = []
     authors_data_list = []
-    dataframe_dict = utils.get_excel_data(filename)
+    dataframe_dict = utils.get_excel_data(filename, keyargs.get(
+        'metadata_sheet'), keyargs.get('rows_to_skip'))
     for row in dataframe_dict:
         dataset_dict = {}
         dataset_id = row[EC.DATASET_ID]
         serie_id = None
         if row[EC.SERIE_ID]:
             serie_id = (((row[EC.SERIE_ID]).split(' '))[0]).replace(';', '')
-        print(dataset_id, serie_id)
-        dataset_dict.setdefault('datasetID', dataset_id)
         if row[EC.PMID]:
             dataset_dict.setdefault(
                 'publication', utils.get_pubmed_data(row[EC.PMID], keyargs.get('email')))
         else:
+            pubmed_authors = row[EC.AUTHORS]
+            if isinstance(pubmed_authors, str):
+                pubmed_authors = pubmed_authors.split(',')
             dataset_dict.setdefault('publication',
                                     {
-                                        'authors': row[EC.AUTHORS],
+                                        'authors': pubmed_authors,
                                         'abstract': None,
                                         'date': row[EC.RELEASE_DATE],
                                         'pmcid': None,
@@ -230,41 +252,41 @@ def excel_file_mapping(filename, keyargs):
                                     'GeneExpression')
                                 )
         dataset_dict.setdefault('referenceGenome', row[EC.REFERENCE_GENOME])
-        dataset_dict.setdefault('temporalDatasetID', dataset_id)
-        dataset_dict.setdefault(
-            'growthConditions', get_growth_conditions(row[EC.GC_EXPERIMENTAL]))
+        gc_dict = get_growth_conditions(row[EC.GC_EXPERIMENTAL], dataset_id)
+        if gc_dict:
+            dataset_dict.setdefault('growthConditions', gc_dict)
         dataset_dict.setdefault('releaseDataControl', {
             'date': keyargs.get('release_process_date'),
             'version': keyargs.get('version'),
         })
-        print(
-            f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/{row[EC.DATASET_FILE_NAME]}')
-        authors_data_list.append({
-            'tfbindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row[EC.DATASET_FILE_NAME]),
-            'datasetId': dataset_id,
-        })
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
+        beds_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
+        new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
+        new_beds_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
         if keyargs.get('dataset_type') == 'TFBINDING':
             if serie_id:
-                bed_paths = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
-                if utils.validate_directory(bed_paths):
-                    bed_paths = f'{bed_paths}/{dataset_id}'
+                if utils.validate_directory(beds_source_path):
+                    logging.info(
+                        f'Coping datasets from {beds_source_path} \n\t to {new_beds_path}')
+                    shutil.copytree(beds_source_path, new_beds_path)
+                    bed_path = f'{beds_source_path}/{dataset_id}'
                     sites_dict_list.extend(
                         sites_dataset.bed_file_mapping(
-                            dataset_id,
-                            f'{bed_paths}_sites.bed',
+                            new_dataset_id,
+                            f'{bed_path}_sites.bed',
                             keyargs.get('db'),
                             keyargs.get('url'),
                             keyargs.get('genes_ranges'),
-                            sites_dict_list
+                            sites_dict_list,
+                            keyargs.get('collection_path')
                         )
                     )
                     peaks_dict_list.extend(
                         peaks_datasets.bed_file_mapping(
-                            dataset_id,
-                            f'{bed_paths}_peaks.bed',
+                            new_dataset_id,
+                            f'{bed_path}_peaks.bed',
                             keyargs.get('db'),
                             keyargs.get('url'),
                             keyargs.get('genes_ranges'),
@@ -279,6 +301,17 @@ def excel_file_mapping(filename, keyargs):
             dataset_dict.setdefault(
                 'assemblyGenomeId', row['Assembly Genome ID'])
             dataset_dict.setdefault('fiveRichment', row['5\'Richment'])
+
+        dataset_dict.setdefault('temporalID', new_dataset_id)
+        dataset_dict.setdefault('_id', new_dataset_id)
+
+        authors_data = {
+            'tfBindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row[EC.DATASET_FILE_NAME], dataset_id),
+            '_id': f'AD_{new_dataset_id}',
+            'datasetIds': [new_dataset_id]
+        }
+        if authors_data.get('tfBindingAuthorsData'):
+            authors_data_list.append(authors_data)
 
         dataset_dict.setdefault(
             'summary', {
@@ -309,16 +342,18 @@ def excel_file_mapping(filename, keyargs):
 
     if keyargs.get('dataset_type') == 'TFBINDING':
         collection_data = utils.set_json_object(
-            "Peaks", peaks_dict_list, keyargs.get('organism'))
-        utils.create_json(collection_data, "peaks", keyargs.get('output_path'))
+            "peaks", peaks_dict_list, keyargs.get('organism'), 'BSD', 'PK')
+        utils.create_json(
+            collection_data, f'peaks_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
 
         collection_data = utils.set_json_object(
-            "Sites", sites_dict_list, keyargs.get('organism'))
-        utils.create_json(collection_data, "sites", keyargs.get('output_path'))
+            "tfBinding", sites_dict_list, keyargs.get('organism'), 'BSD', 'BS')
+        utils.create_json(
+            collection_data, f'tf_binding_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
 
     collection_data = utils.set_json_object(
-        "AuthorsData", authors_data_list, keyargs.get('organism'))
-    utils.create_json(collection_data, "authorsData",
+        "authorsData", authors_data_list, keyargs.get('organism'), 'BSD', 'AD')
+    utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
                       keyargs.get('output_path'))
 
     return dataset_dict_list

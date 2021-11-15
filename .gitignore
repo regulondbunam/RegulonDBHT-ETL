@@ -10,7 +10,9 @@
 .idea/
 *.pyc
 *.log
-
+__pycache__
+.snakemake/
+pgc_requests_tmp/
 # Icon must end with two \r
 Icon
 

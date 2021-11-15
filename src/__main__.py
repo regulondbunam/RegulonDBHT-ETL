@@ -4,6 +4,8 @@
 # standard
 import logging
 import datetime
+import shutil
+import os
 
 # third party
 
@@ -30,8 +32,8 @@ def run(keyargs):
             f'Reading Datasets from {keyargs.get("datasets_record_path")}')
         datasets_list = dataset_metadata.open_excel_file(keyargs)
         collection_data = utils.set_json_object(
-            "Dataset", datasets_list, keyargs.get('organism'))
-        utils.create_json(collection_data, "dataset_metadata",
+            "dataset", datasets_list, keyargs.get('organism'), 'MDD', None)
+        utils.create_json(collection_data, f'dataset_metadata_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
                           keyargs.get('output_path'))
 
 
@@ -57,9 +59,16 @@ if __name__ == '__main__':
         'email': args.email,
         'source_name': args.source_name,
         'dataset_type': args.dataset_type,
+        'metadata_sheet': args.sheet,
+        'rows_to_skip': int(args.rows_to_skip),
         'genes_ranges': utils.set_genome_intervals()
     }
     utils.validate_directories(keyargs.get('output_path'))
+
+    keyargs.setdefault('output_dirs_path',
+                       f'{keyargs.get("output_path")}{(keyargs.get("collection_path")).replace("../InputData/", "")}')
+    if os.path.isdir(keyargs.get("output_dirs_path")):
+        shutil.rmtree(keyargs.get('output_dirs_path'))
 
     print("Initializing RegulonDB HT ETL")
     logging.info(f'Initializing RegulonDB HT ETL')

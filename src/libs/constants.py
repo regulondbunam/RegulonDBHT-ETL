@@ -1,4 +1,4 @@
-# Stat Paths
+# Start Paths
 BED_PATHS = 'uniformized'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
@@ -7,6 +7,10 @@ METADATA_CATALOG = 'metadata'
 MINIMUM_DISTANCE = 800
 GENOME_LENGTH = 5000000
 INTERVALS = 200
+
+# Chip
+CHIP_EXO = 'ChIP-exo-Maze-v1.0'
+CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'

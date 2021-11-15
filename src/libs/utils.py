@@ -17,7 +17,16 @@ import multigenomic_api as mg_api
 from libs import constants as EC
 
 
-def set_json_object(filename, data_list, organism):
+def get_collection_name(collection_path):
+    collection_name = collection_path
+    if 'CHIP-exo' in collection_name:
+        collection_name = EC.CHIP_EXO
+    if 'CHIP-Seq' in collection_name or 'CHiP-Seq' in collection_name:
+        collection_name = EC.CHIP_SEQ
+    return collection_name
+
+
+def set_json_object(filename, data_list, organism, sub_class_acronym, child_class_acronym):
     '''
     Sets the JSON output format of the collection..
 
@@ -30,9 +39,12 @@ def set_json_object(filename, data_list, organism):
         json_object, Dict, the dictionary with the final JSON file format
     '''
     json_object = {
-        "collectionName": filename,
-        "collectionData": data_list,
-        "organism": organism
+        'collectionName': filename,
+        'collectionData': data_list,
+        'organism': organism,
+        'subClassAcronym': sub_class_acronym,
+        'classAcronym': organism,
+        'childClassAcronym': child_class_acronym,
     }
     return json_object
 
@@ -149,6 +161,22 @@ def get_data_frame(filename: str, load_sheet, rows_to_skip: int) -> pandas.DataF
     return dataset_df
 
 
+def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
+    '''
+    Read and convert the Excel file to Panda DataFrame.
+
+    Param
+        filename, String, full tsv file path.
+        load_sheet, Integer, Excel sheet number that will be loaded.
+        rows_to_skip, Integer, number of rows to skip.
+
+    Returns
+        dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    '''
+    dataset_df = pandas.read_csv(filename, sep='\t', header=0)
+    return dataset_df
+
+
 def get_json_from_data_frame(data_frame: pandas.DataFrame) -> dict:
     '''
     Converts DataFrame into JSON format.
@@ -165,7 +193,7 @@ def get_json_from_data_frame(data_frame: pandas.DataFrame) -> dict:
     return json_dict
 
 
-def get_excel_data(filename: str) -> dict:
+def get_excel_data(filename: str, load_sheet, rows_to_skip: int) -> dict:
     '''
     Process the XLSX file as a DataFrame and return it as a JSON object
 
@@ -175,7 +203,7 @@ def get_excel_data(filename: str) -> dict:
     Returns
         data_frame_json, Dict, json dictionary with the Excel data.
     '''
-    data_frame = get_data_frame(filename, EC.METADATA_SHEET, EC.ROWS_TO_SKIP)
+    data_frame = get_data_frame(filename, load_sheet, rows_to_skip)
     data_frame_json = get_json_from_data_frame(data_frame)
     return data_frame_json
 
@@ -216,7 +244,10 @@ def get_pubmed_data(pmid, email):
 
     publication = {}
     record = Medline.read(handle)
-    publication.setdefault('authors', record.get('AU'))
+    pubmed_authors = record.get('AU')
+    if isinstance(pubmed_authors, str):
+        pubmed_authors = pubmed_authors.split(',')
+    publication.setdefault('authors', pubmed_authors)
     publication.setdefault('abstract', record.get('AB'))
     publication.setdefault('date', record.get('DP'))
     publication.setdefault('pmcid', record.get('PMC'))

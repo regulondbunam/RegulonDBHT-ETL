@@ -10,9 +10,10 @@ import logging
 
 # local
 from libs import utils
+from libs import constants as EC
 
 
-def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_dict_list):
+def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_dict_list, collection_path):
     '''
     Reads one by one all the valid BED files and returns the corresponding data dictionaries.
 
@@ -33,13 +34,13 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                 row = line.strip().split()
                 site_id = f'[{row[1]},{row[2]},{row[4]},{row[5]},{row[6]}]'
                 found_site = utils.find_one_in_dict_list(
-                    sites_dict_list, 'siteId', site_id)
+                    sites_dict_list, '_id', site_id)
                 if found_site is None:
                     dataset_dict.setdefault(
-                        'siteId', site_id)
+                        '_id', site_id)
                     dataset_dict.setdefault('chromosome', row[0])
-                    dataset_dict.setdefault('chrLeftPosition', row[1])
-                    dataset_dict.setdefault('chrRightPosition', row[2])
+                    dataset_dict.setdefault('chrLeftPosition', int(row[1]))
+                    dataset_dict.setdefault('chrRightPosition', int(row[2]))
                     dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                         row[1], row[2], database, url, genes_ranges))
                     dataset_dict.setdefault('transcriptionUnit', {
@@ -69,11 +70,14 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                         'strand': None,
                         'sequence': None,
                     }'''
-                    dataset_dict.setdefault('name', row[3])
-                    dataset_dict.setdefault('score', row[4])
+                    dataset_dict.setdefault('peakId', row[3])
+                    dataset_dict.setdefault('score', float(row[4]))
                     dataset_dict.setdefault('strand', row[5])
                     dataset_dict.setdefault('datasetIds', [dataset_id])
                     dataset_dict.setdefault('sequence', row[6])
+                    dataset_dict.setdefault('temporalID', site_id)
+                    dataset_dict.setdefault(
+                        'nameCollection', utils.get_collection_name(collection_path))
                     dataset_dict["transcriptionUnit"] = {
                         k: v for k, v in dataset_dict["transcriptionUnit"].items() if v
                     }

@@ -117,7 +117,7 @@ def get_arguments():
         "-dstype",
         "--dataset-type",
         help="Dataset record source name.",
-        choices=["TFBINDING", "GENE EXPRESION",
+        choices=["TFBINDING", "GENE_EXPRESION",
                  "TSS", "TUS", "TTS", "REGULONS"]
     )
 
@@ -147,6 +147,22 @@ def get_arguments():
     )
 
     # COLLECTIONS ARGUMENTS
+
+    parser.add_argument(
+        "-sheet",
+        "--sheet",
+        help="URL to DB server.",
+        default="MetaData Datasets",
+        metavar="MetaData Datasets",
+    )
+
+    parser.add_argument(
+        "-rows",
+        "--rows-to-skip",
+        help="URL to DB server.",
+        default=0,
+        metavar=0,
+    )
 
     arguments = parser.parse_args()
 
