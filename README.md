@@ -2,101 +2,110 @@
 
 # Description
 
-These software modules are to be used to process local RegulonDB data. It covers everything for processes after data extraction from Ecocyc.
+This software is used for the extraction and processing of diferent collections of HT Datasets.
 
-# Motivation
-
-[Why the software does things the way it does and why it was designed in the first place. What problems are solved by it. Links to publications and comparisons to similar software.]
 
 
 
 # System requirements
 
-[If the software does make high demand on particular resources, then this should be clearly advertised and explained.]
+- Software:
+  - [Python 2.7](https://www.python.org/)
+  - [Python 3.8](https://www.python.org/) or above
+  - [Snakemake 6.10.0](https://snakemake.readthedocs.io/en/stable/#)
+  - [Pandas 1.3.4](https://pandas.pydata.org/)
+  - [Biopython 1.79](https://biopython.org/docs/1.79/api/Bio.html)
+- Hardware:
+  - RAM: 8 GB (minimal recommended)
+  - Storage: 5 GB
 
 # Install 
 
-[This may be described in a separate INSTALL file, but the README must then clearly state this.]
+[Install guide](INSTALL.md)
 
 
 
 # Quick start
 
-[How the first task can be performed with the software, or, in the more extensive  documentation, a link to the quick start. Outlines how to quickly get started with the software using a basic yet practical example]
+```shell
+$ python src/ -h
+```
 
+# Manuals
+
+- [User Manual](docs/MU)
+- [Operation Manual](docs/MO)
+- [Maintenance Manual](docs/MM)
 
 
 # Project website 
 
-[Website where the software is described and allows users to obtain it as well as its documentation.]
+[RegulonDB WebSite](http://regulondb.ccg.unam.mx/)
+
 
 # License
 
-[Defines the set of rules and conditions for people who want to use the software.]
+[MIT](LICENSE)
+
+
 
 # Support contact information
 
-[It should be clear where to go for support, for example a contact e-mail address]
+[Support contact](http://regulondb.ccg.unam.mx/menu/about_regulondb/contact_us/index.jsp)
+
+
 
 # Software quality checklist
 
-[This may describe the state of the code, providing the necessary guidance on which aspects could be improved]
-
 **Accessibility**
 
-- [ ] Unique DOI [identifier](http://....) (Please update identifier and link)
-- [ ] Version control system
+<!--  - [ ] Unique DOI [identifier](http://....) (Please update identifier and link) -->
+- [x] Version control system
 
 **Documentation**
 
-- [ ] README file
+- [x] README file
 
 **Learnability**
 
-- [ ] Quick start
+- [x] Quick start
 
 **Buildability**
 
-- [ ] INSTALL file
+- [x] INSTALL file
 
 **Identity**
 
-- [ ] Website
+- [x] Website
 
 **Copyright & Licensing**
 
-- [ ] LICENSE file
+- [x] LICENSE file
 
 **Portability**
 
-- [ ] Multiple platforms
-- [ ] Browsers
+- [x] Multiple platforms
 
 **Supportability**
 
-- [ ] E-mail address
-- [ ] Issue tracker
-- [ ] Slack
-- [ ] Gitter
+- [x] E-mail address
+- [x] Issue tracker
 
 **Analysability**
 
-- [ ] Source code structured
-- [ ] Sensible names
-- [ ] Coding standards - [style guides](http://google.github.io/styleguide/)
+- [x] Source code structured
+- [x] Coding standards - [Google style guides](http://google.github.io/styleguide/) [Python style guide](https://pep8.org/#pep-8-%E2%80%94-the-style-guide-for-python-code)
 
 **Changeability**
 
-- [ ] CONTRIBUTING file
-- [ ] Code of Conduct file
-- [ ] Code changes, and their authorship, publicly visible
+- [x] CONTRIBUTING file
+- [x] Code of Conduct file
+- [x] Code changes, and their authorship, publicly visible
 
 **Reusability**
 
-- [ ] Source code set up in a modular fashion
+- [x] Source code set up in a modular fashion
 
 **Security & Privacy**
 
-- [ ] Passwords must never be stored in unhashed form
-
-
+- [x] Passwords must never be stored in unhashed form

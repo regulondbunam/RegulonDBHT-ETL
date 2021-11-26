@@ -3,33 +3,32 @@
 
 
 - ## Installation instructions
-
-[Describe installation instructions of the software.]
+To use HT ETL only need to clone this repository in the place you like and import some libraries.
 
 1. Step 1
-Execute:
+Download this repo [RegulonDB HT ETL](https://github.com/regulondbunam/RegulonDBHT-ETL.git) :
 
 ```shell
-$ command
+$ git clone https://github.com/regulondbunam/RegulonDBHT-ETL.git
 ```
 2. Step 2
-3. Step x
 
-```shell
-$ command
-```
+   Install libraries needed check install guide on the official websites:
+    - [Snakemake 6.10.0](https://snakemake.readthedocs.io/en/stable/#)
+    - [Pandas 1.3.4](https://pandas.pydata.org/)
+    - [Biopython 1.79](https://biopython.org/docs/1.79/api/Bio.html)
 
+3. Step 3
 
-- ### Expected Directory Structure 
-
-[Directory structure after installation. It should be properly organised in sub-directories (for documentation, headers, source, etc.]
-
-
-
-- ### Dependencies
-
-[All required or optional dependencies should be listed, including those by third parties (with references to their websites).]
+   Now you can use the software, for more details checkout the [User Manual](docs/MU) 
 
 
 - ### Errors & Tips
-[Describe possible errors that can be occur during the installation software and their solution.]
+
+  To see the arguments that the program supports use ```-h`` option
+
+  ```shell
+  $ py src/ -h
+  ```
+
+  
