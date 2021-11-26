@@ -12,7 +12,7 @@ import shutil
 # local
 from libs import utils
 from libs import constants as EC
-from ht_etl import peaks_datasets, sites_dataset
+from ht_etl import peaks_datasets, sites_dataset, tu_datasets
 
 
 def open_excel_file(keyargs):
@@ -102,74 +102,94 @@ def get_growth_conditions(gc_raw, dataset_id):
     gc_dict = {}
     if not gc_raw:
         return None
-    gc_list = gc_raw.split(' |')
-    if not ' |' in gc_list:
+    if ' |' not in gc_raw:
         logging.error(
             f'There are not valid Growth Conditions for {dataset_id} can not read property')
         return None
+    gc_list = gc_raw.split(' |')
     for condition in gc_list:
-        condition = condition.split(':')
-        gc_dict.setdefault(utils.to_camel_case(
-            condition[0].lower()), condition[1])
+        if ':' in condition:
+            condition = condition.split(':')
+            gc_dict.setdefault(utils.to_camel_case(
+                condition[0].lower()), condition[1])
+        else:
+            logging.error(
+                f'There are not valid Growth Conditions for {dataset_id} can not read property')
     return gc_dict
 
 
-def set_sample(experimentId, controlId, title):
+def set_sample(experiment_id, control_id, title):
     '''
     Formats sample object and converts IDs Strings into Strings arrays.
 
     Param
-        experimentId, String, Sample experiment ID unformatted.
-        controlId, String, Sample control ID unformatted.
+        experiment_id, String, Sample experiment ID unformatted.
+        control_id, String, Sample control ID unformatted.
         title, String, Sample title.
 
     Returns
         sample, Dict, dictionary with the formatted Sample data.
     '''
-    if not experimentId:
-        experimentId = None
+    if not experiment_id:
+        experiment_id = None
     else:
-        experimentId = experimentId.replace(
+        experiment_id = experiment_id.replace('] [', ', ').replace(
             '[', '').replace(']', '').split(', ')
-    if not controlId:
-        controlId = None
+    if not control_id:
+        control_id = None
     else:
-        controlId = controlId.replace('[', '').replace(']', '').split(', ')
-
+        control_id = control_id.replace('] [', ', ').replace(
+            '[', '').replace(']', '').split(', ')
+    experiment_ids = []
+    control_ids = []
+    if experiment_id:
+        for exp_id in experiment_id:
+            experiment_ids.append(exp_id.replace('\t', ''))
+    if control_id:
+        for ctrl_id in control_id:
+            control_ids.append(ctrl_id.replace('\t', ''))
     sample = {
-        'experimentId': experimentId,
-        'controlId': controlId,
+        'experimentId': experiment_ids,
+        'controlId': control_ids,
         'title': title,
     }
     return sample
 
 
-def set_linked_dataset(experimentId, controlId, dataset_type):
+def set_linked_dataset(experiment_id, control_id, dataset_type):
     '''
     Formats sample object and converts IDs Strings into Strings arrays.
 
     Param
-        experimentId, String, Sample experiment ID unformatted.
-        controlId, String, Sample control ID unformatted.
+        experiment_id, String, Sample experiment ID unformatted.
+        control_id, String, Sample control ID unformatted.
         dataset_type, String, Dataset type.
 
     Returns
         sample, Dict, dictionary with the formatted Sample data.
     '''
-    if not experimentId:
-        experimentId = None
+    if not experiment_id:
+        experiment_id = None
     else:
-        experimentId = experimentId.replace(
-            '[', '').replace(']', '').replace('\t', '').split(', ')
-    if not controlId:
-        controlId = None
+        experiment_id = experiment_id.replace('] [', ', ').replace(
+            '[', '').replace(']', '').split(', ')
+    if not control_id:
+        control_id = None
     else:
-        controlId = controlId.replace('[', '').replace(
-            ']', '').replace('\t', '').split(', ')
+        control_id = control_id.replace('] [', ', ').replace(
+            '[', '').replace(']', '').split(', ')
+    experiment_ids = []
+    control_ids = []
+    if experiment_id:
+        for exp_id in experiment_id:
+            experiment_ids.append(exp_id.replace('\t', ''))
+    if control_id:
+        for ctrl_id in control_id:
+            control_ids.append(ctrl_id.replace('\t', ''))
 
     sample = {
-        'experimentId': experimentId,
-        'controlId': controlId,
+        'experimentId': experiment_ids,
+        'controlId': control_ids,
         'datasetType': dataset_type,
     }
     return sample
@@ -199,66 +219,85 @@ def excel_file_mapping(filename, keyargs):
     peaks_dict_list = []
     sites_dict_list = []
     authors_data_list = []
+    tus_dict_list = []
+
     dataframe_dict = utils.get_excel_data(filename, keyargs.get(
         'metadata_sheet'), keyargs.get('rows_to_skip'))
     for row in dataframe_dict:
         dataset_dict = {}
-        dataset_id = row[EC.DATASET_ID]
-        serie_id = None
-        if row[EC.SERIE_ID]:
+        dataset_id = row.get(EC.DATASET_ID, None)
+        serie_id = row.get(EC.SERIE_ID, None)
+        if serie_id:
             serie_id = (((row[EC.SERIE_ID]).split(' '))[0]).replace(';', '')
-        if row[EC.PMID]:
+        pmid = row.get(EC.PMID, None)
+        if pmid:
             dataset_dict.setdefault(
-                'publication', utils.get_pubmed_data(row[EC.PMID], keyargs.get('email')))
+                'publication', utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
-            pubmed_authors = row[EC.AUTHORS]
+            pubmed_authors = row.get(EC.AUTHORS, None)
             if isinstance(pubmed_authors, str):
                 pubmed_authors = pubmed_authors.split(',')
             dataset_dict.setdefault('publication',
                                     {
                                         'authors': pubmed_authors,
                                         'abstract': None,
-                                        'date': row[EC.RELEASE_DATE],
+                                        'date': row.get(EC.RELEASE_DATE, None),
                                         'pmcid': None,
                                         'pmid': None,
-                                        'title': row[EC.EXPERIMENT_TITLE]
+                                        'title': row.get(EC.EXPERIMENT_TITLE, None)
                                     }
                                     )
         dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(row[EC.PROTEIN_NAME],
+            'objectTested', utils.get_object_tested(row.get(EC.PROTEIN_NAME, None),
                                                     keyargs.get('db'),
                                                     keyargs.get('url')
                                                     )
         )
+        platform_id = row.get(EC.PLATFORM_ID, None)
+        if platform_id:
+            platform_id = platform_id.replace('\t', '')
+        platform_title = row.get(EC.PLATFORM_TITLE, None)
+        if platform_title:
+            platform_title = platform_title.replace('\t', '')
         dataset_dict.setdefault('sourceSerie', {
             'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
-            'title': row[EC.PROTEIN_NAME],
-            'platformID': row[EC.PLATFORM_ID],
-            'platformTitle': row[EC.PLATFORM_TITLE],
-            'strategy': row[EC.STRATEGY],
-            'method': row[EC.METHOD_NAME],
+            'title': row.get(EC.PROTEIN_NAME, None),
+            'platformId': platform_id,
+            'platformTitle': platform_title,
+            'strategy': row.get(EC.STRATEGY),
+            'method': row.get(EC.METHOD_NAME, None),
         })
         dataset_dict.setdefault('sample',
                                 set_sample(
-                                    row[EC.SAMPLES_REPLICATES_EXPERIMET_ID],
-                                    row[EC.SAMPLES_REPLICATES_CONTROL_ID],
-                                    row[EC.TITLE_FOR_ALL_REPLICATES])
+                                    row.get(
+                                        EC.SAMPLES_REPLICATES_EXPERIMET_ID, None),
+                                    row.get(
+                                        EC.SAMPLES_REPLICATES_CONTROL_ID, None),
+                                    row.get(EC.TITLE_FOR_ALL_REPLICATES, None))
                                 )
         dataset_dict.setdefault('linkedDataset',
                                 set_linked_dataset(
-                                    row[EC.SAMPLES_EXPERIMET_REPLICATES_EXPRESSION_ID],
-                                    row[EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID],
+                                    row.get(
+                                        EC.SAMPLES_EXPERIMET_REPLICATES_EXPRESSION_ID, None),
+                                    row.get(
+                                        EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None),
                                     'GeneExpression')
                                 )
-        dataset_dict.setdefault('referenceGenome', row[EC.REFERENCE_GENOME])
-        gc_dict = get_growth_conditions(row[EC.GC_EXPERIMENTAL], dataset_id)
+        dataset_dict.setdefault(
+            'referenceGenome', row.get(EC.REFERENCE_GENOME, None))
+        gc_dict = get_growth_conditions(
+            row.get(EC.GC_EXPERIMENTAL, None), dataset_id)
         if gc_dict:
             dataset_dict.setdefault('growthConditions', gc_dict)
         dataset_dict.setdefault('releaseDataControl', {
             'date': keyargs.get('release_process_date'),
             'version': keyargs.get('version'),
         })
+        dataset_dict.setdefault(
+            'assemblyGenomeId', row.get(EC.ASSEMBLY_GENOME_ID, None))
+        dataset_dict.setdefault('fivePrimeEnrichment',
+                                row.get(EC.FIVE_ENRICHMENT, None))
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
@@ -298,15 +337,28 @@ def excel_file_mapping(filename, keyargs):
                     f'There is not Serie ID for {dataset_id} can not read .bed files')
 
         if keyargs.get('dataset_type') == 'TUS':
-            dataset_dict.setdefault(
-                'assemblyGenomeId', row['Assembly Genome ID'])
-            dataset_dict.setdefault('fiveRichment', row['5\'Richment'])
+            if serie_id:
+                if utils.validate_directory(beds_source_path):
+                    logging.info(
+                        f'Coping datasets from {beds_source_path} \n\t to {new_beds_path}')
+                    shutil.copytree(beds_source_path, new_beds_path)
+                    bed_path = f'{beds_source_path}/{dataset_id}'
+                    print(beds_source_path)
+                    tus_dict_list.extend(
+                        tu_datasets.file_mapping(
+                            new_dataset_id,
+                            f'{bed_path}.tsv',
+                            keyargs.get('db'),
+                            keyargs.get('url'),
+                            keyargs.get("dataset_type")
+                        )
+                    )
 
-        dataset_dict.setdefault('temporalID', new_dataset_id)
+        dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
         authors_data = {
-            'tfBindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row[EC.DATASET_FILE_NAME], dataset_id),
+            'tfBindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row.get(EC.DATASET_FILE_NAME, None), dataset_id),
             '_id': f'AD_{new_dataset_id}',
             'datasetIds': [new_dataset_id]
         }
@@ -338,7 +390,16 @@ def excel_file_mapping(filename, keyargs):
                 },
             }
         )
+        dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
+
+    if keyargs.get('dataset_type') == 'TUS':
+        collection_data = utils.set_json_object(
+            "transcriptionUnit", tus_dict_list, keyargs.get('organism'), 'TUD', 'TU')
+        utils.create_json(
+            collection_data, f'tus_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
+        collection_data = utils.set_json_object(
+            "authorsData", authors_data_list, keyargs.get('organism'), 'TUD', 'AD')
 
     if keyargs.get('dataset_type') == 'TFBINDING':
         collection_data = utils.set_json_object(
@@ -351,8 +412,13 @@ def excel_file_mapping(filename, keyargs):
         utils.create_json(
             collection_data, f'tf_binding_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
 
-    collection_data = utils.set_json_object(
-        "authorsData", authors_data_list, keyargs.get('organism'), 'BSD', 'AD')
+        collection_data = utils.set_json_object(
+            "authorsData", authors_data_list, keyargs.get('organism'), 'BSD', 'AD')
+
+    if peaks_dict_list is [] and authors_data_list is []:
+        logging.error(
+            f'There are not peaks and authors data in {dataset_id}')
+
     utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
                       keyargs.get('output_path'))
 

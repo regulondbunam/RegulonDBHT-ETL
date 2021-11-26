@@ -8,9 +8,12 @@ MINIMUM_DISTANCE = 800
 GENOME_LENGTH = 5000000
 INTERVALS = 200
 
+# Collections
 # Chip
 CHIP_EXO = 'ChIP-exo-Maze-v1.0'
 CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
+# TU
+TUS = 'TU'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'
@@ -45,3 +48,5 @@ ORIGINAL_PATH = 'Original Path'
 FAST_Q_URL_EXPERIMENT = 'FastQ URL File Experiment'
 FAST_Q_URL_CONTROL = 'FastQFile URL File Control'
 RIS_PATH = 'RIs path'
+FIVE_ENRICHMENT = "5'_enrichment"
+ASSEMBLY_GENOME_ID = 'ID Assembly genome'

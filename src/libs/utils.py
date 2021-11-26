@@ -21,8 +21,10 @@ def get_collection_name(collection_path):
     collection_name = collection_path
     if 'CHIP-exo' in collection_name:
         collection_name = EC.CHIP_EXO
-    if 'CHIP-Seq' in collection_name or 'CHiP-Seq' in collection_name:
+    if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
         collection_name = EC.CHIP_SEQ
+    if 'TUs' in collection_name:
+        collection_name = EC.TUS
     return collection_name
 
 
@@ -67,6 +69,27 @@ def verify_bed_path(bed_path):
     else:
         logging.warning(
             f'{bed_path} is not a valid BED file will be ignored')
+        return None
+
+
+def verify_tsv_path(tsv_path):
+    '''
+    This function filters TSV files in the path and returns only correctly formatted path.
+
+    Param
+        tsv_path, String, raw directory path.
+
+    Returns
+        tsv_path, String, verified directory path.
+    '''
+
+    if os.path.isfile(tsv_path) and tsv_path.endswith('.tsv'):
+        logging.info(
+            f'Reading dataset {tsv_path}')
+        return tsv_path
+    else:
+        logging.warning(
+            f'{tsv_path} is not a valid BED file will be ignored')
         return None
 
 
@@ -124,7 +147,7 @@ def create_json(objects, filename, output):
         output, String, output path.
     '''
     filename = os.path.join(output, filename)
-    with open("{}.json".format(filename), 'w') as json_file:
+    with open(f'{filename}.json', 'w') as json_file:
         json.dump(objects, json_file, indent=4, sort_keys=True)
 
 
@@ -163,12 +186,10 @@ def get_data_frame(filename: str, load_sheet, rows_to_skip: int) -> pandas.DataF
 
 def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
     '''
-    Read and convert the Excel file to Panda DataFrame.
+    Read and convert the TSV file to Panda DataFrame.
 
     Param
         filename, String, full tsv file path.
-        load_sheet, Integer, Excel sheet number that will be loaded.
-        rows_to_skip, Integer, number of rows to skip.
 
     Returns
         dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
@@ -312,7 +333,7 @@ def get_object_tested(protein_name, database, url):
             'name': mg_tf[0].name,
             'synonyms': mg_tf[0].synonyms,
             'genes': genes,
-            'summary': mg_tf[0].note,
+            'note': mg_tf[0].note,
             'activeConformations': active_conformations,
             'externalCrossReferences': external_cross_references
         }
@@ -431,6 +452,35 @@ def get_sites_ids(tf_name, database, url):
         logging.error(f'Can not find Trasncription Factor {tf_name}')
     mg_api.disconnect()
     return sites_ids
+
+
+def get_genes_by_bnumber(bnumbers, database, url):
+    '''
+    [Description]
+
+    Param
+        [Description]
+
+    Returns
+        [Description]
+    '''
+    genes = []
+    mg_genes = []
+    mg_api.connect(database, url)
+    try:
+        for bnumber in bnumbers:
+            mg_genes.append(mg_api.genes.find_by_bnumber(bnumber)[0])
+        for gene in mg_genes:
+            gene_dict = {}
+            gene_dict.setdefault('_id', gene.id)
+            gene_dict.setdefault('name', gene.name)
+            gene_dict.setdefault('bnumber', gene.bnumber)
+            genes.append(gene_dict)
+
+    except IndexError:
+        logging.error(f'Can not find Gene bnumbers: {bnumbers}')
+    mg_api.disconnect()
+    return genes
 
 
 def find_one_in_dict_list(dict_list, key_name, value):

@@ -40,7 +40,7 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                 dataset_dict = {}
                 row = line.strip().split()
                 dataset_dict.setdefault('_id', row[3])
-                dataset_dict.setdefault('temporalID', row[3])
+                dataset_dict.setdefault('temporalId', row[3])
                 dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                     row[1], row[2], database, url, genes_ranges))
                 dataset_dict.setdefault('chromosome', row[0])

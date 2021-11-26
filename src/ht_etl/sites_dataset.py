@@ -43,11 +43,11 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('chrRightPosition', int(row[2]))
                     dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                         row[1], row[2], database, url, genes_ranges))
-                    dataset_dict.setdefault('transcriptionUnit', {
+                    '''dataset_dict.setdefault('transcriptionUnit', {
                         # TODO: find site in RI -> get reg_entity -> check if TU Promoter or Gene
                         '_id': None,
                         'name': None,
-                    })
+                    })'''
                     dataset_dict.setdefault('foundClassicRIs', [])
                     '''{
                         'tfbsLeftPosition': None,
@@ -75,12 +75,12 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('strand', row[5])
                     dataset_dict.setdefault('datasetIds', [dataset_id])
                     dataset_dict.setdefault('sequence', row[6])
-                    dataset_dict.setdefault('temporalID', site_id)
+                    dataset_dict.setdefault('temporalId', site_id)
                     dataset_dict.setdefault(
                         'nameCollection', utils.get_collection_name(collection_path))
-                    dataset_dict["transcriptionUnit"] = {
+                    '''dataset_dict["transcriptionUnit"] = {
                         k: v for k, v in dataset_dict["transcriptionUnit"].items() if v
-                    }
+                    }'''
                     dataset_dict = {k: v for k, v in dataset_dict.items() if v}
                     dataset_dict_list.append(dataset_dict)
                 else:

@@ -41,6 +41,7 @@ rule ht_extractor:
     priority: 10
     shell:
         "python {params.main_path} -ev -out {params.output_dir} -l {params.log_dir}"
+'''
 
 rule schema_loader:
     params:
@@ -56,7 +57,6 @@ rule schema_loader:
     priority: 9
     shell:
         "python {params.main_path} -db {params.db} -u {params.url} -s {params.schemas} -l {params.log} -d"
-'''
 rule data_validator:
     params:
         main_path = validation_config["main_path"],
@@ -109,7 +109,7 @@ rule replace_identifiers:
     priority: 6
     shell:
         "python {params.main_path} -org {params.organism} -i {params.valid_data} -o {params.replaced_ids} -u {params.url} -v {params.version} -db {params.db} -l {params.log}"        
-'''
+
 rule re_validate_data:
     params:
         main_path = revalidation_config["main_path"],
@@ -131,6 +131,7 @@ rule data_uploader:
         main_path = data_upload_config["main_path"],
         valid_data = data_upload_config["verified_persistent_ids"],
         log = data_upload_config["log_dir"],
+        db = config["db"],
         url = config["url"]
     log:
         "../logs/data_uploader_log/data_uploader_log.log"
@@ -138,5 +139,4 @@ rule data_uploader:
         "envs/db_dependencies.yaml"
     priority: 4
     shell:
-        "python {params.main_path} -i {params.valid_data} -u {params.url} -mg -l {params.log}"
-'''
+        "python {params.main_path} -i {params.valid_data} -u {params.url} -db {params.db} -l {params.log}"
