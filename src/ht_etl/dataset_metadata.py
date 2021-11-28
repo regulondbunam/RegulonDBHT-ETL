@@ -12,7 +12,7 @@ import shutil
 # local
 from libs import utils
 from libs import constants as EC
-from ht_etl import peaks_datasets, sites_dataset, tu_datasets
+from ht_etl import peaks_datasets, sites_dataset, tu_datasets, tss_datasets
 
 
 def open_excel_file(keyargs):
@@ -103,9 +103,10 @@ def get_growth_conditions(gc_raw, dataset_id):
     if not gc_raw:
         return None
     if ' |' not in gc_raw:
-        logging.error(
-            f'There are not valid Growth Conditions for {dataset_id} can not read property')
-        return None
+        gc_dict = {
+            'otherTerms': gc_raw
+        }
+        return gc_dict
     gc_list = gc_raw.split(' |')
     for condition in gc_list:
         if ':' in condition:
@@ -220,12 +221,15 @@ def excel_file_mapping(filename, keyargs):
     sites_dict_list = []
     authors_data_list = []
     tus_dict_list = []
+    tss_dict_list = []
 
     dataframe_dict = utils.get_excel_data(filename, keyargs.get(
         'metadata_sheet'), keyargs.get('rows_to_skip'))
     for row in dataframe_dict:
         dataset_dict = {}
         dataset_id = row.get(EC.DATASET_ID, None)
+        if not dataset_id:
+            continue
         serie_id = row.get(EC.SERIE_ID, None)
         if serie_id:
             serie_id = (((row[EC.SERIE_ID]).split(' '))[0]).replace(';', '')
@@ -301,16 +305,16 @@ def excel_file_mapping(filename, keyargs):
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
-        beds_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
+        datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
         new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
-        new_beds_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
+        new_datasets_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
         if keyargs.get('dataset_type') == 'TFBINDING':
             if serie_id:
-                if utils.validate_directory(beds_source_path):
+                if utils.validate_directory(datasets_source_path):
                     logging.info(
-                        f'Coping datasets from {beds_source_path} \n\t to {new_beds_path}')
-                    shutil.copytree(beds_source_path, new_beds_path)
-                    bed_path = f'{beds_source_path}/{dataset_id}'
+                        f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
+                    shutil.copytree(datasets_source_path, new_datasets_path)
+                    bed_path = f'{datasets_source_path}/{dataset_id}'
                     sites_dict_list.extend(
                         sites_dataset.bed_file_mapping(
                             new_dataset_id,
@@ -337,22 +341,39 @@ def excel_file_mapping(filename, keyargs):
                     f'There is not Serie ID for {dataset_id} can not read .bed files')
 
         if keyargs.get('dataset_type') == 'TUS':
-            if serie_id:
-                if utils.validate_directory(beds_source_path):
-                    logging.info(
-                        f'Coping datasets from {beds_source_path} \n\t to {new_beds_path}')
-                    shutil.copytree(beds_source_path, new_beds_path)
-                    bed_path = f'{beds_source_path}/{dataset_id}'
-                    print(beds_source_path)
-                    tus_dict_list.extend(
-                        tu_datasets.file_mapping(
-                            new_dataset_id,
-                            f'{bed_path}.tsv',
-                            keyargs.get('db'),
-                            keyargs.get('url'),
-                            keyargs.get("dataset_type")
-                        )
+            datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
+            if utils.validate_directory(datasets_source_path):
+                logging.info(
+                    f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
+                shutil.copytree(datasets_source_path, new_datasets_path)
+                bed_path = f'{datasets_source_path}/{dataset_id}'
+                tus_dict_list.extend(
+                    tu_datasets.file_mapping(
+                        new_dataset_id,
+                        f'{bed_path}.tsv',
+                        keyargs.get('db'),
+                        keyargs.get('url'),
+                        keyargs.get("dataset_type")
                     )
+                )
+
+        if keyargs.get('dataset_type') == 'TSS':
+            datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
+            if utils.validate_directory(datasets_source_path):
+                logging.info(
+                    f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
+                shutil.copytree(datasets_source_path, new_datasets_path)
+                bed_path = f'{datasets_source_path}/{dataset_id}'
+                tss_dict_list.extend(
+                    tss_datasets.file_mapping(
+                        new_dataset_id,
+                        f'{bed_path}.tsv',
+                        keyargs.get('db'),
+                        keyargs.get('url'),
+                        keyargs.get("dataset_type"),
+                        keyargs.get('genes_ranges')
+                    )
+                )
 
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
@@ -392,6 +413,14 @@ def excel_file_mapping(filename, keyargs):
         )
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
+
+    if keyargs.get('dataset_type') == 'TSS':
+        collection_data = utils.set_json_object(
+            "transcriptionStartSite", tss_dict_list, keyargs.get('organism'), 'TSD', 'TS')
+        utils.create_json(
+            collection_data, f'tss_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
+        collection_data = utils.set_json_object(
+            "authorsData", authors_data_list, keyargs.get('organism'), 'TSD', 'AD')
 
     if keyargs.get('dataset_type') == 'TUS':
         collection_data = utils.set_json_object(

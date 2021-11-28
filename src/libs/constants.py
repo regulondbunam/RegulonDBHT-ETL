@@ -1,5 +1,6 @@
 # Start Paths
 BED_PATHS = 'uniformized'
+TSV_PATHS = 'uniformized_data'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
 
@@ -14,6 +15,7 @@ CHIP_EXO = 'ChIP-exo-Maze-v1.0'
 CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
 # TU
 TUS = 'TU'
+TSS = 'TSS'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'

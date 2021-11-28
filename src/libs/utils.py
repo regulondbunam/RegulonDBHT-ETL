@@ -5,6 +5,7 @@ Some functions that help to HT process.
 import os
 import logging
 import json
+from multigenomic_api.services import evidences, promoters
 import pandas
 import json
 import re
@@ -25,6 +26,8 @@ def get_collection_name(collection_path):
         collection_name = EC.CHIP_SEQ
     if 'TUs' in collection_name:
         collection_name = EC.TUS
+    if 'TSS' in collection_name:
+        collection_name = EC.TSS
     return collection_name
 
 
@@ -89,7 +92,7 @@ def verify_tsv_path(tsv_path):
         return tsv_path
     else:
         logging.warning(
-            f'{tsv_path} is not a valid BED file will be ignored')
+            f'{tsv_path} is not a valid TSV file will be ignored')
         return None
 
 
@@ -337,6 +340,16 @@ def get_object_tested(protein_name, database, url):
             'activeConformations': active_conformations,
             'externalCrossReferences': external_cross_references
         }
+    else:
+        object_tested = {
+            '_id': None,
+            'name': protein_name,
+            'synonyms': None,
+            'genes': [],
+            'note': None,
+            'activeConformations': None,
+            'externalCrossReferences': None,
+        }
     mg_api.disconnect()
     return object_tested
 
@@ -452,6 +465,61 @@ def get_sites_ids(tf_name, database, url):
         logging.error(f'Can not find Trasncription Factor {tf_name}')
     mg_api.disconnect()
     return sites_ids
+
+
+def find_min_by(list, key_name):
+    '''
+    [Description]
+
+    Param
+        [Description]
+
+    Returns
+        [Description]
+    '''
+    return min(list, key=lambda d: d.get(key_name, float('inf')))['_id']
+
+
+def get_tu_by_gene_id(gene_id, database, url):
+    tu = None
+    mg_api.connect(database, url)
+    try:
+        tu = mg_api.transcription_units.find_by_gene_id(
+            gene_id)[0]
+    except IndexError:
+        # logging.error(f'Can not find TU from: {gene_id}')
+        pass
+    mg_api.disconnect()
+    return tu
+
+
+def get_promoter(tu, database, url):
+    promoter = {}
+    mg_api.connect(database, url)
+    try:
+        promoter_id = tu.promoters_id
+        if promoter_id:
+            promoter_obj = mg_api.promoters.find_by_id(promoter_id)
+            binds_sigma_factor = promoter_obj.binds_sigma_factor
+            sigma_factor_name = None
+            if binds_sigma_factor:
+                sigma_factor_id = binds_sigma_factor.sigma_factors_id
+                sigma_factor = mg_api.sigma_factors.find_by_id(sigma_factor_id)
+                if sigma_factor:
+                    sigma_factor_name = sigma_factor.name
+
+            promoter = {
+                '_id': promoter_obj.id,
+                'name': promoter_obj.name,
+                'strand': promoter_obj.strand,
+                'pos+1': promoter_obj.pos1,
+                'sigma': sigma_factor_name,
+                'confidenceLevel': promoter_obj.confidence_level,
+            }
+    except IndexError:
+        logging.error(f'Can not find Promoter from: {tu.id}')
+    mg_api.disconnect()
+    return promoter
 
 
 def get_genes_by_bnumber(bnumbers, database, url):
