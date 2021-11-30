@@ -28,6 +28,8 @@ def get_collection_name(collection_path):
         collection_name = EC.TUS
     if 'TSS' in collection_name:
         collection_name = EC.TSS
+    if 'TTS' in collection_name:
+        collection_name = EC.TTS
     return collection_name
 
 
@@ -422,6 +424,16 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
         gene_left_pos = gene.left_end_position
         gene_right_pos = gene.right_end_position
         gene_product_name = []
+        tus_dict_list = []
+        try:
+            mg_tus = mg_api.transcription_units.find_by_gene_id(gene.id)
+            for mg_tu in mg_tus:
+                tu_dict = {}
+                tu_dict.setdefault('_id', mg_tu. id)
+                tu_dict.setdefault('name', mg_tu.name)
+                tus_dict_list.append(tu_dict)
+        except Exception:
+            logging.error(f'Can not find TU in Gene {gene.id}')
         try:
             mg_products = mg_api.products.find_by_gene_id(gene.id)
             for product in mg_products:
@@ -431,16 +443,71 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
         if gene_strand == 'forward':
             distance = float(gene_left_pos) - chromosome_center_pos
             closest_genes.append(
-                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name})
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name, 'transcriptionUnits': tus_dict_list})
         elif gene_strand == 'reverse':
             distance = chromosome_center_pos - float(gene_right_pos)
             closest_genes.append(
-                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name})
+                {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name, 'transcriptionUnits': tus_dict_list})
     mg_api.disconnect()
     return closest_genes
 
 
-def get_sites_ids(tf_name, database, url):
+def find_terminators(left_pos, right_pos, tts_id, database, url):
+    '''
+    Calculates the center center position of the chromosome.
+
+    Param
+        left_pos, String, Start position in the sequence (it's converted to Integer).
+        right_pos, String, End position in the sequence (it's converted to Integer).
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+        genes_ranges, List, Array of coordinate pairs of the calculated ranges.
+
+    Returns
+        closest_genes, List, Dict List with the verified closest genes.
+    '''
+    mg_api.connect(database, url)
+
+    terminators = []
+    try:
+        mg_terminators = mg_api.terminators.get_closer_terminators(
+            (left_pos - 30), (right_pos + 30))
+        for terminator in mg_terminators:
+            terminator_dict = {}
+            terminator_dict.setdefault('_id', terminator.id)
+            terminator_dict.setdefault('name', terminator.name)
+            mg_tus = mg_api.transcription_units.find_by_terminator_id(
+                terminator.id)
+            tus_dict_list = []
+            if mg_tus:
+                for tu in mg_tus:
+                    tu_dict = {}
+                    tu_dict.setdefault('_id', tu.id)
+                    tu_dict.setdefault('name', tu.name)
+                    mg_promoter = mg_api.promoters.find_by_id(tu.promoters_id)
+                    promoter = {}
+                    promoter.setdefault('_id', mg_promoter.id)
+                    promoter.setdefault('name', mg_promoter.name)
+                    promoter.setdefault('sequence', mg_promoter.sequence)
+                    promoter.setdefault('leftEndPosition',
+                                        mg_promoter.left_end_position)
+                    promoter.setdefault('rightEndPosition',
+                                        mg_promoter.right_end_position)
+                    promoter.setdefault('strand', mg_promoter.strand)
+
+                    tu_dict.setdefault('promoter', promoter)
+                    tus_dict_list.append(tu_dict)
+
+            terminator_dict.setdefault('transcriptionUnits', tus_dict_list)
+
+            terminators.append(terminator_dict)
+    except Exception:
+        logging.error(f'Can not find Terminator Name in Gene {tts_id}')
+    mg_api.disconnect()
+    return terminators
+
+
+def get_sites_ids_by_tf(tf_name, database, url):
     '''
     [Description]
 
@@ -467,6 +534,42 @@ def get_sites_ids(tf_name, database, url):
     return sites_ids
 
 
+def get_tf_sites_abs_pos(tf_id, database, url):
+    site = None
+    mg_api.connect(database, url)
+    try:
+        mg_site = mg_api.regulatory_sites.find_by_id(tf_id)
+        site = {
+            '_id': tf_id,
+            'absolutePosition': mg_site.absolute_position,
+            'siteObject': mg_site
+        }
+    except Exception:
+        logging.error(f'Can not find Sites in TF {tf_id}')
+    mg_api.disconnect()
+    return site
+
+
+def get_classic_ris(lend, rend, strand, tf_sites):
+    center_pos = get_center_pos(lend, rend)
+    classic_ris = []
+    for site in tf_sites:
+        tf_center = site.get('absolutePosition', None)
+        site_object = site.get('siteObject', None)
+        if tf_center and site_object:
+            if tf_center == center_pos or tf_center == (center_pos + 30) or tf_center == (center_pos - 30):
+                classic_ri = {}
+                classic_ri.setdefault('tfbsLeftPosition',
+                                      site_object.left_end_position)
+                classic_ri.setdefault('tfbsRightPosition',
+                                      site_object.right_end_position)
+                classic_ri.setdefault('strand', strand)
+                classic_ri.setdefault('sequence',
+                                      site_object.sequence)
+                classic_ris.append(classic_ri)
+    return classic_ris
+
+
 def find_min_by(list, key_name):
     '''
     [Description]
@@ -481,25 +584,25 @@ def find_min_by(list, key_name):
 
 
 def get_tu_by_gene_id(gene_id, database, url):
-    tu = None
+    tus = None
     mg_api.connect(database, url)
     try:
-        tu = mg_api.transcription_units.find_by_gene_id(
-            gene_id)[0]
+        tus = mg_api.transcription_units.find_by_gene_id(
+            gene_id)
     except IndexError:
         # logging.error(f'Can not find TU from: {gene_id}')
         pass
     mg_api.disconnect()
-    return tu
+    return tus
 
 
-def get_promoter(tu, database, url):
-    promoter = {}
+def get_promoter(lend, rend, database, url):
+    promoters = []
     mg_api.connect(database, url)
     try:
-        promoter_id = tu.promoters_id
-        if promoter_id:
-            promoter_obj = mg_api.promoters.find_by_id(promoter_id)
+        promoters_objects = mg_api.promoters.get_closer_promoters(
+            (lend - 5), (rend + 5))
+        for promoter_obj in promoters_objects:
             binds_sigma_factor = promoter_obj.binds_sigma_factor
             sigma_factor_name = None
             if binds_sigma_factor:
@@ -507,7 +610,6 @@ def get_promoter(tu, database, url):
                 sigma_factor = mg_api.sigma_factors.find_by_id(sigma_factor_id)
                 if sigma_factor:
                     sigma_factor_name = sigma_factor.name
-
             promoter = {
                 '_id': promoter_obj.id,
                 'name': promoter_obj.name,
@@ -516,10 +618,11 @@ def get_promoter(tu, database, url):
                 'sigma': sigma_factor_name,
                 'confidenceLevel': promoter_obj.confidence_level,
             }
+            promoters.append(promoter)
     except IndexError:
-        logging.error(f'Can not find Promoter from: {tu.id}')
+        logging.error(f'Can not find Promoter from: {lend}, {rend}')
     mg_api.disconnect()
-    return promoter
+    return promoters
 
 
 def get_genes_by_bnumber(bnumbers, database, url):

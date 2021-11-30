@@ -12,7 +12,7 @@ import shutil
 # local
 from libs import utils
 from libs import constants as EC
-from ht_etl import peaks_datasets, sites_dataset, tu_datasets, tss_datasets
+from ht_etl import peaks_datasets, sites_dataset, tu_datasets, tss_datasets, tts_datasets
 
 
 def open_excel_file(keyargs):
@@ -222,13 +222,14 @@ def excel_file_mapping(filename, keyargs):
     authors_data_list = []
     tus_dict_list = []
     tss_dict_list = []
+    tts_dict_list = []
 
     dataframe_dict = utils.get_excel_data(filename, keyargs.get(
         'metadata_sheet'), keyargs.get('rows_to_skip'))
     for row in dataframe_dict:
         dataset_dict = {}
         dataset_id = row.get(EC.DATASET_ID, None)
-        if not dataset_id:
+        if dataset_id is None:
             continue
         serie_id = row.get(EC.SERIE_ID, None)
         if serie_id:
@@ -315,6 +316,16 @@ def excel_file_mapping(filename, keyargs):
                         f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
                     shutil.copytree(datasets_source_path, new_datasets_path)
                     bed_path = f'{datasets_source_path}/{dataset_id}'
+                    tf_sites_ids = utils.get_sites_ids_by_tf(
+                        row.get(EC.PROTEIN_NAME, None),
+                        keyargs.get('db'),
+                        keyargs.get('url'),)
+                    tf_sites = []
+                    for tf_site_id in tf_sites_ids:
+                        tf_site = utils.get_tf_sites_abs_pos(
+                            tf_site_id, keyargs.get('db'), keyargs.get('url'))
+                        if tf_site:
+                            tf_sites.append(tf_site)
                     sites_dict_list.extend(
                         sites_dataset.bed_file_mapping(
                             new_dataset_id,
@@ -323,7 +334,8 @@ def excel_file_mapping(filename, keyargs):
                             keyargs.get('url'),
                             keyargs.get('genes_ranges'),
                             sites_dict_list,
-                            keyargs.get('collection_path')
+                            keyargs.get('collection_path'),
+                            tf_sites
                         )
                     )
                     peaks_dict_list.extend(
@@ -375,6 +387,24 @@ def excel_file_mapping(filename, keyargs):
                     )
                 )
 
+        if keyargs.get('dataset_type') == 'TTS':
+            datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
+            if utils.validate_directory(datasets_source_path):
+                logging.info(
+                    f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
+                shutil.copytree(datasets_source_path, new_datasets_path)
+                bed_path = f'{datasets_source_path}/{dataset_id}'
+                tts_dict_list.extend(
+                    tts_datasets.file_mapping(
+                        new_dataset_id,
+                        f'{bed_path}.tsv',
+                        keyargs.get('db'),
+                        keyargs.get('url'),
+                        keyargs.get("dataset_type"),
+                        keyargs.get('genes_ranges')
+                    )
+                )
+
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
@@ -414,6 +444,16 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
 
+    if keyargs.get('dataset_type') == 'TTS':
+        collection_data = utils.set_json_object(
+            "transcriptionTerminatorSite", tts_dict_list, keyargs.get('organism'), 'TTD', 'TT')
+        utils.create_json(
+            collection_data, f'tts_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
+        collection_data = utils.set_json_object(
+            "authorsData", authors_data_list, keyargs.get('organism'), 'TTD', 'AD')
+        utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
+                          keyargs.get('output_path'))
+
     if keyargs.get('dataset_type') == 'TSS':
         collection_data = utils.set_json_object(
             "transcriptionStartSite", tss_dict_list, keyargs.get('organism'), 'TSD', 'TS')
@@ -421,6 +461,8 @@ def excel_file_mapping(filename, keyargs):
             collection_data, f'tss_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
         collection_data = utils.set_json_object(
             "authorsData", authors_data_list, keyargs.get('organism'), 'TSD', 'AD')
+        utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
+                          keyargs.get('output_path'))
 
     if keyargs.get('dataset_type') == 'TUS':
         collection_data = utils.set_json_object(
@@ -429,6 +471,8 @@ def excel_file_mapping(filename, keyargs):
             collection_data, f'tus_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
         collection_data = utils.set_json_object(
             "authorsData", authors_data_list, keyargs.get('organism'), 'TUD', 'AD')
+        utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
+                          keyargs.get('output_path'))
 
     if keyargs.get('dataset_type') == 'TFBINDING':
         collection_data = utils.set_json_object(
@@ -443,12 +487,11 @@ def excel_file_mapping(filename, keyargs):
 
         collection_data = utils.set_json_object(
             "authorsData", authors_data_list, keyargs.get('organism'), 'BSD', 'AD')
+        utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
+                          keyargs.get('output_path'))
 
     if peaks_dict_list is [] and authors_data_list is []:
         logging.error(
             f'There are not peaks and authors data in {dataset_id}')
-
-    utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
-                      keyargs.get('output_path'))
 
     return dataset_dict_list

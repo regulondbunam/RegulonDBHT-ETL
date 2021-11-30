@@ -13,7 +13,7 @@ from libs import utils
 from libs import constants as EC
 
 
-def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_dict_list, collection_path):
+def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_dict_list, collection_path, tf_sites):
     '''
     Reads one by one all the valid BED files and returns the corresponding data dictionaries.
 
@@ -43,22 +43,9 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('chrRightPosition', int(row[2]))
                     dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                         row[1], row[2], database, url, genes_ranges))
-                    '''dataset_dict.setdefault('transcriptionUnit', {
-                        # TODO: find site in RI -> get reg_entity -> check if TU Promoter or Gene
-                        '_id': None,
-                        'name': None,
-                    })'''
-                    dataset_dict.setdefault('foundClassicRIs', [])
-                    '''{
-                        'tfbsLeftPosition': None,
-                        'tfbsRightPosition': None,
-                        'transcriptionFactorID': None,
-                        'transcriptionFactorName': None,
-                        'relativeGeneDistance': None,
-                        'relativeTSSDistance': None,
-                        'strand': None,
-                        'sequence': None,
-                    }'''
+                    classic_ris = utils.get_classic_ris(
+                        row[1], row[2], row[5], tf_sites)
+                    dataset_dict.setdefault('foundClassicRIs', classic_ris)
                     dataset_dict.setdefault('foundDatasetRIs', [])
                     '''{
                         'tfbsLeftPosition': None,

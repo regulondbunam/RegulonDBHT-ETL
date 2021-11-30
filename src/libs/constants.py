@@ -16,6 +16,7 @@ CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
 # TU
 TUS = 'TU'
 TSS = 'TSS'
+TTS = 'TTS'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'

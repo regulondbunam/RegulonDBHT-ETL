@@ -38,12 +38,12 @@ def file_mapping(dataset_id, filename, database, url, dataset_type, genes_ranges
         dataset_dict.setdefault('leftEndPosition', tu_dict.get('start', None))
         dataset_dict.setdefault('rightEndPosition', tu_dict.get('stop', None))
         dataset_dict.setdefault('strand', tu_dict.get('strand', None))
-        dataset_dict.setdefault('pos_1', tu_dict.get('pos_1', None))
+        dataset_dict.setdefault('name', tu_dict.get('id', None))
         dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
             tu_dict.get('start', None), tu_dict.get('stop', None), database, url, genes_ranges))
-        promoters = utils.get_promoter(tu_dict.get(
-            'start', None), tu_dict.get('stop', None), database, url)
-        dataset_dict.setdefault('promoter', promoters)
+        dataset_dict.setdefault('terminator', utils.find_terminators(
+            tu_dict.get('start', None), tu_dict.get('stop', None), tu_dict.get('id', None), database, url))
+
         dataset_dict.setdefault('datasetIds', [dataset_id])
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
