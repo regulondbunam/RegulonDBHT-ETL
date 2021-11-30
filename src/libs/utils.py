@@ -5,7 +5,6 @@ Some functions that help to HT process.
 import os
 import logging
 import json
-from multigenomic_api.services import evidences, promoters
 import pandas
 import json
 import re
@@ -346,11 +345,11 @@ def get_object_tested(protein_name, database, url):
         object_tested = {
             '_id': None,
             'name': protein_name,
-            'synonyms': None,
+            'synonyms': [],
             'genes': [],
             'note': None,
-            'activeConformations': None,
-            'externalCrossReferences': None,
+            'activeConformations': [],
+            'externalCrossReferences': [],
         }
     mg_api.disconnect()
     return object_tested

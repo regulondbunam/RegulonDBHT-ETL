@@ -446,7 +446,7 @@ def excel_file_mapping(filename, keyargs):
 
     if keyargs.get('dataset_type') == 'TTS':
         collection_data = utils.set_json_object(
-            "transcriptionTerminatorSite", tts_dict_list, keyargs.get('organism'), 'TTD', 'TT')
+            "transcriptionTerminationSite", tts_dict_list, keyargs.get('organism'), 'TTD', 'TT')
         utils.create_json(
             collection_data, f'tts_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
         collection_data = utils.set_json_object(
