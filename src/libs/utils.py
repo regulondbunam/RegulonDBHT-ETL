@@ -29,6 +29,8 @@ def get_collection_name(collection_path):
         collection_name = EC.TSS
     if 'TTS' in collection_name:
         collection_name = EC.TTS
+    if 'RNA' in collection_name:
+        collection_name = EC.RNA
     return collection_name
 
 
@@ -76,6 +78,27 @@ def verify_bed_path(bed_path):
         return None
 
 
+def verify_txt_path(txt_path):
+    '''
+    This function filters TXT files in the path and returns only correctly formatted path.
+
+    Param
+        txt_path, String, raw directory path.
+
+    Returns
+        txt_path, String, verified directory path.
+    '''
+
+    if os.path.isfile(txt_path) and txt_path.endswith('.txt'):
+        logging.info(
+            f'Reading dataset {txt_path}')
+        return txt_path
+    else:
+        logging.warning(
+            f'{txt_path} is not a valid TXT file will be ignored')
+        return None
+
+
 def verify_tsv_path(tsv_path):
     '''
     This function filters TSV files in the path and returns only correctly formatted path.
@@ -94,6 +117,27 @@ def verify_tsv_path(tsv_path):
     else:
         logging.warning(
             f'{tsv_path} is not a valid TSV file will be ignored')
+        return None
+
+
+def verify_csv_path(csv_path):
+    '''
+    This function filters TSV files in the path and returns only correctly formatted path.
+
+    Param
+        csv_path, String, raw directory path.
+
+    Returns
+        csv_path, String, verified directory path.
+    '''
+
+    if os.path.isfile(csv_path) and csv_path.endswith('.csv'):
+        logging.info(
+            f'Reading dataset {csv_path}')
+        return csv_path
+    else:
+        logging.warning(
+            f'{csv_path} is not a valid TSV file will be ignored')
         return None
 
 
@@ -202,6 +246,20 @@ def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
     return dataset_df
 
 
+def get_data_frame_tsv_coma(filename: str) -> pandas.DataFrame:
+    '''
+    Read and convert the TSV file to Panda DataFrame.
+
+    Param
+        filename, String, full tsv file path.
+
+    Returns
+        dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    '''
+    dataset_df = pandas.read_csv(filename, sep=',', header=0)
+    return dataset_df
+
+
 def get_json_from_data_frame(data_frame: pandas.DataFrame) -> dict:
     '''
     Converts DataFrame into JSON format.
@@ -229,6 +287,21 @@ def get_excel_data(filename: str, load_sheet, rows_to_skip: int) -> dict:
         data_frame_json, Dict, json dictionary with the Excel data.
     '''
     data_frame = get_data_frame(filename, load_sheet, rows_to_skip)
+    data_frame_json = get_json_from_data_frame(data_frame)
+    return data_frame_json
+
+
+def get_tsv_data(filename: str) -> dict:
+    '''
+    Process the tsv file as a DataFrame and return it as a JSON object
+
+    Param
+        filename, String, tsv file name.
+
+    Returns
+        data_frame_json, Dict, json dictionary with the tsv data.
+    '''
+    data_frame = get_data_frame_tsv(filename)
     data_frame_json = get_json_from_data_frame(data_frame)
     return data_frame_json
 
@@ -653,9 +726,60 @@ def get_genes_by_bnumber(bnumbers, database, url):
     return genes
 
 
+def get_gene_by_bnumber(bnumber, database, url):
+    '''
+    [Description]
+
+    Param
+        [Description]
+
+    Returns
+        [Description]
+    '''
+    gene_dict = {}
+    mg_api.connect(database, url)
+    try:
+        gene = mg_api.genes.find_by_bnumber(bnumber)[0]
+        gene_dict.setdefault('_id', gene.id)
+        gene_dict.setdefault('name', gene.name)
+        gene_dict.setdefault('bnumber', gene.bnumber)
+        gene_dict.setdefault('synonyms', gene.synonyms)
+
+    except IndexError:
+        logging.error(f'Can not find Gene bnumbers: {bnumber}')
+    mg_api.disconnect()
+    return gene_dict
+
+
 def find_one_in_dict_list(dict_list, key_name, value):
     found_dict = next(
         (item for item in dict_list if item[key_name] == value),
         None
     )
     return found_dict
+
+
+def verify_json_path(json_path):
+    '''
+    This function reads JSON file in the path and returns an valid dir for use
+
+    Param
+        json_path, String, raw directory path.
+
+    Returns
+        txt_path, String, verified directory path.
+    '''
+
+    if os.path.isfile(json_path) and json_path.endswith('.json'):
+        logging.info(
+            f'Reading JSON file {json_path}')
+        return json_path
+    else:
+        logging.warning(
+            f'{json_path} is not a valid JSON file will be ignored')
+        return None
+
+
+def read_json_from_path(json_path):
+    json_file = open(json_path)
+    return json.load(json_file)

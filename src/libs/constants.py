@@ -17,6 +17,7 @@ CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
 TUS = 'TU'
 TSS = 'TSS'
 TTS = 'TTS'
+RNA = 'GENE_EXPRESSION'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'
@@ -53,3 +54,7 @@ FAST_Q_URL_CONTROL = 'FastQFile URL File Control'
 RIS_PATH = 'RIs path'
 FIVE_ENRICHMENT = "5'_enrichment"
 ASSEMBLY_GENOME_ID = 'ID Assembly genome'
+
+## GeneExpression
+GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
+GE_DATASET_ID = "#Dataset-ID"
