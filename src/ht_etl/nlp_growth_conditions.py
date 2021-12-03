@@ -24,7 +24,7 @@ def file_mapping(keyargs):
         dataset_dict, Dict, a dictionary with the necessary dataset data.
     '''
     nlp_gc_dict_list = []
-    geo_nlp_gc_json_path = utils.verify_json_path(os.path.join(keyargs.get("collection_path"), "metadata/srr_htregulondb_full.json"))
+    geo_nlp_gc_json_path = utils.verify_json_path(os.path.join(keyargs.get("collection_path"), "metadata/srr_htregulondb_full_V4.json"))
     if not geo_nlp_gc_json_path:
         return nlp_gc_dict_list
     geo_gc_json = utils.read_json_from_path(geo_nlp_gc_json_path)
@@ -50,7 +50,8 @@ def gc_term_mapper(gc_json, nlp_gc_dict_list):
                 term_dict = {
                         "value": term["name"],
                         "associatedPhrase": term["source_data"]["associatedPhrase"],
-                        "score": term["source_data"]["similarity_percentage"] 
+                        "score": term["source_data"]["similarity_percentage"],
+                        "nameField": term["source_data"]["field"]
                 }
                 if term['term_type'] == "Organism" or term['term_type'] == "Strain" or term['term_type'] == "Substrain":
                     gc_term_dict.setdefault("organism", []).append(term_dict)
@@ -77,9 +78,18 @@ def gc_term_mapper(gc_json, nlp_gc_dict_list):
                 elif term['term_type'] == "Medium supplement" or term['term_type'] == "Supp":
                     gc_term_dict.setdefault("mediumSupplements", []).append(term_dict)
                 else:
-                    gc_term_dict["additionalProperties"].append({
-                        "name": term['term_type'], 
-                        "value": term_dict
-                    })
+                    if len(gc_term_dict['additionalProperties']) > 0:
+                        for add_prop in gc_term_dict["additionalProperties"]:
+                            if add_prop['name'] == term['term_type']:
+                                value_list = add_prop['value']
+                                print(gc_term_dict)
+                                value_list.append(term_dict)
+                                add_prop['value'] = value_list
+                    else:
+                        add_prop_dict = {
+                            "name": term['term_type'], 
+                        }
+                        add_prop_dict.setdefault("value", []).append(term_dict)  
+                        gc_term_dict["additionalProperties"].append(add_prop_dict)  
             nlp_gc_dict_list.append(gc_term_dict)
     return nlp_gc_dict_list
