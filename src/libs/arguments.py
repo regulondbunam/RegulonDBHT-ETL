@@ -117,7 +117,7 @@ def get_arguments():
         "-dstype",
         "--dataset-type",
         help="Dataset record source name.",
-        choices=["TFBINDING", "GENE_EXPRESION",
+        choices=["TFBINDING", "GENE_EXPRESSION",
                  "TSS", "TUS", "TTS", "REGULONS"]
     )
 
