@@ -1,5 +1,5 @@
 '''
-Functions that help to process datasets .tsv files.
+Functions that help to process datasets .txt files.
 '''
 # standard
 import os
@@ -12,45 +12,46 @@ import logging
 from libs import utils
 
 
-def file_mapping(keyargs):
+def file_mapping(filename, keyargs):
     '''
-    Reads one by one all the valid TSV files and returns the corresponding data dictionaries.
+    Reads one by one all the valid TXT files and returns the corresponding data dictionaries.
 
     Param
-        filename, String, full TSV file path.
+        filename, String, full TXT file path.
 
     Returns
         dataset_dict, Dict, a dictionary with the necessary dataset data.
     '''
-    filepath = 'uniformized/all_normalized_GEO_data_112921.csv'
-    filename = os.path.join(keyargs.get('collection_path', None), filepath)
+    '''filepath = 'uniformized/all_normalized_GEO_data_112921.csv'
+    filename = os.path.join(keyargs.get('collection_path', None), filepath)'''
     database = keyargs.get('db', None)
     url = keyargs.get('url', None)
     dataset_type = keyargs.get('dataset_type', None)
 
     dataset_dict_list = []
-    tsv_path = utils.verify_csv_path(filename)
-    if not tsv_path:
+    txt_path = utils.verify_txt_path(filename)
+    if not txt_path:
         return dataset_dict_list
-    ge_data_frame = utils.get_data_frame_tsv_coma(tsv_path)
-    ge_json_list = utils.get_json_from_data_frame(ge_data_frame)
 
-    for ge_dict in ge_json_list:
-        dataset_dict = {}
-        gene_exp_id = f'{ge_dict.get("sample_id", None)},{ge_dict.get("feature_id", None)}'
-        print(gene_exp_id)
-        dataset_dict.setdefault('_id', gene_exp_id)
-        new_dataset_id = f'{dataset_type}_{ge_dict.get("sample_id", None)}'
-        dataset_dict.setdefault('temporalId', new_dataset_id)
-        dataset_dict.setdefault('count', ge_dict.get('count', None))
-        dataset_dict.setdefault('tpm', ge_dict.get('tpm', None))
-        dataset_dict.setdefault('fpkm', ge_dict.get('fpkm', None))
+    with open(txt_path)as txt_file:
+        for line in txt_file:
+            dataset_dict = {}
+            # run_id 0 ,sample_id 1, feature_id 2, count 3, fpkm 4, tpm 5
+            row = line.strip().split(',')
+            gene_exp_id = f'{row[1]},{row[2]}'
+            dataset_dict.setdefault('_id', gene_exp_id)
+            new_dataset_id = f'{dataset_type}_{row[1]}'
+            dataset_dict.setdefault('temporalId', new_dataset_id)
+            dataset_dict.setdefault('count', row[3])
+            dataset_dict.setdefault('tpm', row[5])
+            dataset_dict.setdefault('fpkm', row[4])
 
-        dataset_dict.setdefault('gene', utils.get_gene_by_bnumber(
-            ge_dict.get('feature_id', None), database, url))
+            dataset_dict.setdefault('gene', utils.get_gene_by_bnumber(
+                row[2], database, url))
 
-        dataset_dict.setdefault('datasetIds', [ge_dict.get('sample_id', None)])
-        dataset_dict = {k: v for k, v in dataset_dict.items() if v}
-        dataset_dict_list.append(dataset_dict)
+            dataset_dict.setdefault(
+                'datasetIds', [row[1]])
+            dataset_dict = {k: v for k, v in dataset_dict.items() if v}
+            dataset_dict_list.append(dataset_dict)
 
     return dataset_dict_list

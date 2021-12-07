@@ -32,15 +32,14 @@ def run(keyargs):
             f'Reading Datasets from {keyargs.get("datasets_record_path")}')
         datasets_list = []
         if keyargs.get('dataset_type') == 'GENE_EXPRESSION':
-            datasets_list = gene_expression_dataset_metadata.open_tsv_file(keyargs)
-            '''
-            ge_dict_list = []
-            ge_dict_list = gene_exp_datasets.file_mapping(keyargs)
-            collection_data = utils.set_json_object(
-                "geneExpression", ge_dict_list, keyargs.get('organism'), 'GED', 'GE')
-            utils.create_json(
-                collection_data, f'tts_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
-            '''
+            gene_exp_out_path = os.path.join(keyargs.get(
+                'output_path'), utils.get_collection_name(keyargs.get("datasets_record_path")))
+
+            if os.path.isdir(gene_exp_out_path):
+                shutil.rmtree(gene_exp_out_path)
+            os.mkdir(gene_exp_out_path)
+            datasets_list = gene_expression_dataset_metadata.open_tsv_file(
+                keyargs)
         else:
             datasets_list = dataset_metadata.open_excel_file(keyargs)
         collection_data = utils.set_json_object(
