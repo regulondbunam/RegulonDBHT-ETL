@@ -176,15 +176,15 @@ def tsv_file_mapping(filename, keyargs):
 
     nlp_gc_collection_data = nlp_growth_conditions.file_mapping(keyargs)
     collection_data = utils.set_json_object(
-        "nlpGrowthConditions", nlp_gc_collection_data, keyargs.get('organism'), 'NLP_GC', 'AD')
+        "nlpGrowthConditions", nlp_gc_collection_data, keyargs.get('organism'), 'NLP_GC', 'GC')
     utils.create_json(
         collection_data, f'nlp_growth_conditions{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
-
     tsv_path = utils.verify_tsv_path(filename)
     if not tsv_path:
         return dataset_dict_list
     gene_expression_js = utils.get_tsv_data(filename)
 
+    exit()
     filtered_gene_expression_path = utils.verify_txt_path(os.path.join(
         keyargs.get("collection_path"), "metadata/GeneExpList-SRR-GSE-GSM-Filter.txt"))
     if filtered_gene_expression_path:
@@ -192,7 +192,6 @@ def tsv_file_mapping(filename, keyargs):
             filtered_gene_expression_path, delimiter="\t")
         filtered_gene_expression = utils.get_json_from_data_frame(
             filtered_gene_expression_datasets)
-
     for row in gene_expression_js:
         dataset_dict = {}
         dataset_id = row.get(EC.GE_DATASET_ID, None)
@@ -290,13 +289,13 @@ def tsv_file_mapping(filename, keyargs):
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
-        new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
+        new_dataset_id = f'{dataset_id}'  # {keyargs.get("dataset_type")}_
 
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
-        # uniformized
-        ge_dict_list = []
+        # uniformized #TODO: HAPPY 2022!
+        '''ge_dict_list = []
         datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/v1.0/{dataset_id}.txt'
         ge_dict_list = gene_exp_datasets.file_mapping(
             datasets_source_path,
@@ -305,7 +304,7 @@ def tsv_file_mapping(filename, keyargs):
         collection_data = utils.set_json_object(
             "geneExpression", ge_dict_list, keyargs.get('organism'), 'GED', 'GE')
         utils.create_json(
-            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))
+            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))'''
 
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)

@@ -10,14 +10,13 @@ GENOME_LENGTH = 5000000
 INTERVALS = 200
 
 # Collections
-# Chip
 CHIP_EXO = 'ChIP-exo-Maze-v1.0'
 CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
-# TU
 TUS = 'TU'
 TSS = 'TSS'
 TTS = 'TTS'
 RNA = 'GENE_EXPRESSION'
+GSELEX = 'GSELEX'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'
@@ -27,6 +26,7 @@ PMID = 'PMID'
 PDF_PATH = 'PDF Path'
 AUTHORS = 'Authors'
 PROTEIN_NAME = 'Protein Name'
+TF_NAME = 'TF Name'
 SERIE_ID = 'Serie ID'
 EXPERIMENT_TITLE = 'Experiment Title'
 PLATFORM_ID = 'Platform ID'
@@ -53,8 +53,9 @@ FAST_Q_URL_EXPERIMENT = 'FastQ URL File Experiment'
 FAST_Q_URL_CONTROL = 'FastQFile URL File Control'
 RIS_PATH = 'RIs path'
 FIVE_ENRICHMENT = "5'_enrichment"
+EXPERIMENT_CONDITION = "Experiment condition"
 ASSEMBLY_GENOME_ID = 'ID Assembly genome'
 
-## GeneExpression
+# GeneExpression
 GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
 GE_DATASET_ID = "#Dataset-ID"

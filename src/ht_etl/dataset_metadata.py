@@ -252,8 +252,11 @@ def excel_file_mapping(filename, keyargs):
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
                                     }
                                     )
+        tf_name = row.get(EC.PROTEIN_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME, None)
         dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(row.get(EC.PROTEIN_NAME, None),
+            'objectTested', utils.get_object_tested(tf_name,
                                                     keyargs.get('db'),
                                                     keyargs.get('url')
                                                     )
@@ -267,7 +270,7 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict.setdefault('sourceSerie', {
             'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
-            'title': row.get(EC.PROTEIN_NAME, None),
+            'title': tf_name,
             'platformId': platform_id,
             'platformTitle': platform_title,
             'strategy': row.get(EC.STRATEGY),
@@ -303,12 +306,14 @@ def excel_file_mapping(filename, keyargs):
             'assemblyGenomeId', row.get(EC.ASSEMBLY_GENOME_ID, None))
         dataset_dict.setdefault('fivePrimeEnrichment',
                                 row.get(EC.FIVE_ENRICHMENT, None))
-
+        dataset_dict.setdefault('experimentCondition',
+                                row.get(EC.EXPERIMENT_CONDITION, None))
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
         datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
         new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
         new_datasets_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
+        # Uniformized TFBINDING
         if keyargs.get('dataset_type') == 'TFBINDING':
             if serie_id:
                 if utils.validate_directory(datasets_source_path):
@@ -317,7 +322,7 @@ def excel_file_mapping(filename, keyargs):
                     shutil.copytree(datasets_source_path, new_datasets_path)
                     bed_path = f'{datasets_source_path}/{dataset_id}'
                     tf_sites_ids = utils.get_sites_ids_by_tf(
-                        row.get(EC.PROTEIN_NAME, None),
+                        tf_name,
                         keyargs.get('db'),
                         keyargs.get('url'),)
                     tf_sites = []
@@ -352,6 +357,7 @@ def excel_file_mapping(filename, keyargs):
                 logging.error(
                     f'There is not Serie ID for {dataset_id} can not read .bed files')
 
+        # Uniformized TUS
         if keyargs.get('dataset_type') == 'TUS':
             datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
             if utils.validate_directory(datasets_source_path):
@@ -369,6 +375,7 @@ def excel_file_mapping(filename, keyargs):
                     )
                 )
 
+        # Uniformized TSS
         if keyargs.get('dataset_type') == 'TSS':
             datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
             if utils.validate_directory(datasets_source_path):
@@ -387,6 +394,7 @@ def excel_file_mapping(filename, keyargs):
                     )
                 )
 
+        # Uniformized TTS
         if keyargs.get('dataset_type') == 'TTS':
             datasets_source_path = f'{keyargs.get("collection_path")}{EC.TSV_PATHS}'
             if utils.validate_directory(datasets_source_path):
@@ -405,15 +413,19 @@ def excel_file_mapping(filename, keyargs):
                     )
                 )
 
+        if keyargs.get('dataset_type') == 'TFBINDING':
+            collection_type = utils.get_collection_type(
+                keyargs.get("collection_path"))
+            new_dataset_id = f'{keyargs.get("dataset_type")}_{collection_type}_{dataset_id}'
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
         authors_data = {
-            'tfBindingAuthorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row.get(EC.DATASET_FILE_NAME, None), dataset_id),
+            'authorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row.get(EC.DATASET_FILE_NAME, None), dataset_id),
             '_id': f'AD_{new_dataset_id}',
             'datasetIds': [new_dataset_id]
         }
-        if authors_data.get('tfBindingAuthorsData'):
+        if authors_data.get('authorsData'):
             authors_data_list.append(authors_data)
 
         dataset_dict.setdefault(

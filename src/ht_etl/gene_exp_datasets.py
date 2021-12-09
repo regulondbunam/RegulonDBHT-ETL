@@ -50,7 +50,7 @@ def file_mapping(filename, keyargs):
                 row[2], database, url))
 
             dataset_dict.setdefault(
-                'datasetIds', [row[1]])
+                'datasetIds', [f'{keyargs.get("dataset_type")}_{row[1]}'])
             dataset_dict = {k: v for k, v in dataset_dict.items() if v}
             dataset_dict_list.append(dataset_dict)
 

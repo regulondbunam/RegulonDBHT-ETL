@@ -31,6 +31,20 @@ def get_collection_name(collection_path):
         collection_name = EC.TTS
     if 'RNA' in collection_name:
         collection_name = EC.RNA
+    if 'gSELEX' in collection_name:
+        collection_name = EC.GSELEX
+    return collection_name
+
+
+def get_collection_type(collection_path):
+    collection_name = collection_path
+    if 'CHIP-exo' in collection_name:
+        collection_name = 'CHIP_EXO'
+    '''if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
+        collection_name = 'CHIP_SEQ'
+    '''
+    if 'gSELEX' in collection_name:
+        collection_name = EC.GSELEX
     return collection_name
 
 
