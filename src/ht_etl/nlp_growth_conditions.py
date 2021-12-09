@@ -4,6 +4,7 @@ Functions that help to process datasets .tsv files.
 # standard
 import os
 import logging
+from posixpath import join
 from re import S, T, template
 
 # third party
@@ -45,16 +46,41 @@ def file_mapping(keyargs):
     return nlp_gc_dict_list
 
 
+def split_combinated_ids(ids_string):
+    datasetIds = []
+    str_id = ""
+    last_char = None
+    for char in ids_string:
+        if str(char).isalpha() and last_char == None:
+            str_id = f"{str_id}{char}"
+            last_char = char
+        elif str(char).isalpha() and last_char.isalpha():
+            str_id = f"{str_id}{char}"
+            last_char = char
+        elif str(char).isalpha() and last_char.isdigit():
+            datasetIds.append(str_id)
+            str_id = f"{char}"
+            last_char = char
+        elif str(char).isdigit() and last_char.isdigit():
+            str_id = f"{str_id}{char}"
+            last_char = char
+        elif str(char).isdigit() and last_char.isalpha():
+            str_id = f"{str_id}{char}"
+            last_char = char
+    datasetIds.append(str_id)
+    print(datasetIds)
+    return datasetIds
+
+
 def gc_term_mapper(gc_json, nlp_gc_dict_list, dataset_type):
     for key, dict in gc_json.items():
-        if len(key) > 11:
-            logging.error(
-                f'NLP Growth Condition ID is not a valid ID: {key}')
-            continue
         gc_term_dict = {}
+        if len(key) > 11:
+            gc_term_dict.setdefault('datasetIds', split_combinated_ids(key))
+        else:
+            gc_term_dict.setdefault(
+                'datasetIds', [f'{key}'])  # {dataset_type}_
         gc_term_dict.setdefault('_id', f'GC_{key}')
-        gc_term_dict.setdefault(
-            'datasetIds', [f'{key}'])  # {dataset_type}_
         gc_term_dict.setdefault('additionalProperties', [])
         for term in dict['terms']:
             if term['name'] != "Unclear" and term['name'] != "TruSeq" and term['name'] != "GEO_secondstrand" and term['name'] != "ScriptSeq" and term['name'] != "GEO_unclear":
@@ -101,7 +127,6 @@ def gc_term_mapper(gc_json, nlp_gc_dict_list, dataset_type):
                         for add_prop in gc_term_dict["additionalProperties"]:
                             if add_prop['name'] == term['term_type']:
                                 value_list = add_prop['value']
-                                print(gc_term_dict)
                                 value_list.append(term_dict)
                                 add_prop['value'] = value_list
                     else:
