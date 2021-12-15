@@ -17,6 +17,7 @@ TSS = 'TSS'
 TTS = 'TTS'
 RNA = 'GENE_EXPRESSION'
 GSELEX = 'GSELEX'
+DAPS = 'DAPS'
 
 # Metadata Columns
 METADATA_SHEET = 'Binding_dataset_ChIP-seq'
@@ -26,7 +27,10 @@ PMID = 'PMID'
 PDF_PATH = 'PDF Path'
 AUTHORS = 'Authors'
 PROTEIN_NAME = 'Protein Name'
+TF_NAME_TEC = 'TF name in TEC database'
+TF_NAME_CHIP = 'TF Name in proChIPdb'
 TF_NAME = 'TF Name'
+
 SERIE_ID = 'Serie ID'
 EXPERIMENT_TITLE = 'Experiment Title'
 PLATFORM_ID = 'Platform ID'

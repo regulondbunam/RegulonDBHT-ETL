@@ -2,9 +2,9 @@
   "url": "mongodb://127.0.0.1:27017",
   "db": "regulondbht",
   "organism": "ECOLI",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "source": "EcoCyc",
-  "source_version": 2.2,
+  "source_version": 3.1,
   "ptools_config": {
     "compose_file": "../pathway-tools-docker/docker-compose.yml",
     "dotenv_file": "../pathway-tools-docker/.env"
@@ -48,6 +48,7 @@
     "log_dir": "../logs/re_validation_log/"
   },
   "data_upload_config": {
+    "gene_expression": "../PersistentIdentifiers/GENE_EXP/metadata/",
     "main_path": "../data-release-tools/src/data_uploader/",
     "verified_persistent_ids": "../VerifiedPersistentIdentifiers",
     "log_dir": "../logs/data_uploader_log/"

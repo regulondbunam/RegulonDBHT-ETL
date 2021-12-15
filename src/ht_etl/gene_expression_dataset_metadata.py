@@ -184,7 +184,6 @@ def tsv_file_mapping(filename, keyargs):
         return dataset_dict_list
     gene_expression_js = utils.get_tsv_data(filename)
 
-    exit()
     filtered_gene_expression_path = utils.verify_txt_path(os.path.join(
         keyargs.get("collection_path"), "metadata/GeneExpList-SRR-GSE-GSM-Filter.txt"))
     if filtered_gene_expression_path:

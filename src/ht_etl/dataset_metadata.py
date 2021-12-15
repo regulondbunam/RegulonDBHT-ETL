@@ -56,13 +56,13 @@ def get_author_data(authors_data_path, filename, dataset_id):
     author_raw = filename
     excel_path = os.path.join(authors_data_path, filename)
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
-        raw = utils.get_data_frame(excel_path, 0, 0)
+        raw = utils.get_author_data_frame(excel_path, 0, 0)
         author_raw = raw.to_csv(encoding='utf-8')
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
     elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
-        raw = utils.get_data_frame_tsv(excel_path)
+        raw = utils.get_author_data_frame_tsv(excel_path)
         author_raw = raw.to_csv(encoding='utf-8')
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
@@ -230,6 +230,8 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict = {}
         dataset_id = row.get(EC.DATASET_ID, None)
         if dataset_id is None:
+            logging.error(
+                f'Not Dataset ID')
             continue
         serie_id = row.get(EC.SERIE_ID, None)
         if serie_id:
@@ -252,7 +254,11 @@ def excel_file_mapping(filename, keyargs):
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
                                     }
                                     )
-        tf_name = row.get(EC.PROTEIN_NAME, None)
+        tf_name = row.get(EC.TF_NAME_TEC, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_CHIP, None)
+        if not tf_name:
+            tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME, None)
         dataset_dict.setdefault(
@@ -416,7 +422,8 @@ def excel_file_mapping(filename, keyargs):
         if keyargs.get('dataset_type') == 'TFBINDING':
             collection_type = utils.get_collection_type(
                 keyargs.get("collection_path"))
-            new_dataset_id = f'{keyargs.get("dataset_type")}_{collection_type}_{dataset_id}'
+            new_dataset_id = f'{keyargs.get("dataset_type")}_{collection_type}{dataset_id}'
+        print(new_dataset_id)
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 

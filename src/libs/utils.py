@@ -19,7 +19,7 @@ from libs import constants as EC
 
 def get_collection_name(collection_path):
     collection_name = collection_path
-    if 'CHIP-exo' in collection_name:
+    if 'CHIP-exo' in collection_name or 'ChIP-exo' in collection_name:
         collection_name = EC.CHIP_EXO
     if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
         collection_name = EC.CHIP_SEQ
@@ -33,18 +33,21 @@ def get_collection_name(collection_path):
         collection_name = EC.RNA
     if 'gSELEX' in collection_name:
         collection_name = EC.GSELEX
+    if 'DAP' in collection_name:
+        collection_name = EC.DAPS
     return collection_name
 
 
 def get_collection_type(collection_path):
     collection_name = collection_path
-    if 'CHIP-exo' in collection_name:
-        collection_name = 'CHIP_EXO'
-    '''if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
-        collection_name = 'CHIP_SEQ'
-    '''
+    if 'CHIP-exo' in collection_name or 'ChIP-exo' in collection_name:
+        collection_name = 'CHIP_EXO_'
+    if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
+        collection_name = ''
     if 'gSELEX' in collection_name:
-        collection_name = EC.GSELEX
+        collection_name = 'GSELEX_'
+    if 'DAP' in collection_name:
+        collection_name = 'DAPS_'
     return collection_name
 
 
@@ -246,6 +249,23 @@ def get_data_frame(filename: str, load_sheet, rows_to_skip: int) -> pandas.DataF
     return dataset_df
 
 
+def get_author_data_frame(filename: str, load_sheet, rows_to_skip: int) -> pandas.DataFrame:
+    '''
+    Read and convert the Excel file to Panda DataFrame.
+
+    Param
+        filename, String, full XLSX file path.
+        load_sheet, Integer, Excel sheet number that will be loaded.
+        rows_to_skip, Integer, number of rows to skip.
+
+    Returns
+        dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    '''
+    dataset_df = pandas.read_excel(
+        filename, sheet_name=load_sheet, skiprows=rows_to_skip, index_col=0)
+    return dataset_df
+
+
 def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
     '''
     Read and convert the TSV file to Panda DataFrame.
@@ -257,6 +277,20 @@ def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
         dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
     '''
     dataset_df = pandas.read_csv(filename, sep='\t', header=0)
+    return dataset_df
+
+
+def get_author_data_frame_tsv(filename: str) -> pandas.DataFrame:
+    '''
+    Read and convert the TSV file to Panda DataFrame.
+
+    Param
+        filename, String, full tsv file path.
+
+    Returns
+        dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    '''
+    dataset_df = pandas.read_csv(filename, sep='\t',)
     return dataset_df
 
 
