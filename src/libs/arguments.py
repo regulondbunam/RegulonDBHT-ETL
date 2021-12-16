@@ -109,7 +109,7 @@ def get_arguments():
         "-srcname",
         "--source-name",
         help="Dataset record source name.",
-        choices=["GEO", "", ""],
+        choices=["GEO", "SRA", ""],
         default="GEO",
         metavar="GEO",
     )

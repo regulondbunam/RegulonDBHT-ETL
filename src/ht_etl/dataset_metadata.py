@@ -58,12 +58,16 @@ def get_author_data(authors_data_path, filename, dataset_id):
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
         raw = utils.get_author_data_frame(excel_path, 0, 0)
         author_raw = raw.to_csv(encoding='utf-8')
+        print(excel_path)
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
     elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
         raw = utils.get_author_data_frame_tsv(excel_path)
-        author_raw = raw.to_csv(encoding='utf-8')
+        # print(raw)
+        raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
+        author_raw = raw.to_csv(encoding='utf-8', index=True)
+        author_raw = author_raw.replace(',,,,,#', '#')
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
@@ -134,11 +138,13 @@ def set_sample(experiment_id, control_id, title):
     if not experiment_id:
         experiment_id = None
     else:
+        experiment_id = experiment_id.rstrip()
         experiment_id = experiment_id.replace('] [', ', ').replace(
             '[', '').replace(']', '').split(', ')
     if not control_id:
         control_id = None
     else:
+        control_id = control_id.rstrip()
         control_id = control_id.replace('] [', ', ').replace(
             '[', '').replace(']', '').split(', ')
     experiment_ids = []
@@ -149,6 +155,8 @@ def set_sample(experiment_id, control_id, title):
     if control_id:
         for ctrl_id in control_id:
             control_ids.append(ctrl_id.replace('\t', ''))
+    if title:
+        title = title.rstrip()
     sample = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
@@ -172,11 +180,13 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
     if not experiment_id:
         experiment_id = None
     else:
+        experiment_id = experiment_id.rstrip()
         experiment_id = experiment_id.replace('] [', ', ').replace(
             '[', '').replace(']', '').split(', ')
     if not control_id:
         control_id = None
     else:
+        control_id = control_id.rstrip()
         control_id = control_id.replace('] [', ', ').replace(
             '[', '').replace(']', '').split(', ')
     experiment_ids = []
@@ -191,7 +201,7 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
     sample = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
-        'datasetType': dataset_type,
+        'datasetType': dataset_type.rstrip(),
     }
     return sample
 
@@ -233,9 +243,12 @@ def excel_file_mapping(filename, keyargs):
             logging.error(
                 f'Not Dataset ID')
             continue
+        dataset_id = str(dataset_id).rstrip()
+        print(dataset_id)
         serie_id = row.get(EC.SERIE_ID, None)
         if serie_id:
-            serie_id = (((row[EC.SERIE_ID]).split(' '))[0]).replace(';', '')
+            serie_id = (((row[EC.SERIE_ID]).split(' '))
+                        [0]).replace(';', '').rstrip()
         pmid = row.get(EC.PMID, None)
         if pmid:
             dataset_dict.setdefault(
@@ -243,6 +256,7 @@ def excel_file_mapping(filename, keyargs):
         else:
             pubmed_authors = row.get(EC.AUTHORS, None)
             if isinstance(pubmed_authors, str):
+                pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
             dataset_dict.setdefault('publication',
                                     {
@@ -254,33 +268,39 @@ def excel_file_mapping(filename, keyargs):
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
                                     }
                                     )
-        tf_name = row.get(EC.TF_NAME_TEC, None)
+        tf_name = row.get(EC.TF_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_CHIP, None)
         if not tf_name:
             tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
-            tf_name = row.get(EC.TF_NAME, None)
+            tf_name = row.get(EC.TF_NAME_TEC, None)
         dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(tf_name,
+            'objectTested', utils.get_object_tested(tf_name.rstrip(),
                                                     keyargs.get('db'),
                                                     keyargs.get('url')
                                                     )
         )
         platform_id = row.get(EC.PLATFORM_ID, None)
         if platform_id:
-            platform_id = platform_id.replace('\t', '')
+            platform_id = platform_id.replace('\t', '').rstrip()
         platform_title = row.get(EC.PLATFORM_TITLE, None)
         if platform_title:
-            platform_title = platform_title.replace('\t', '')
+            platform_title = platform_title.replace('\t', '').rstrip()
+        strategy = row.get(EC.STRATEGY, None)
+        if strategy:
+            strategy = strategy.rstrip()
+        method_name = row.get(EC.METHOD_NAME, None)
+        if method_name:
+            method_name = method_name.rstrip()
         dataset_dict.setdefault('sourceSerie', {
             'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
             'title': tf_name,
             'platformId': platform_id,
             'platformTitle': platform_title,
-            'strategy': row.get(EC.STRATEGY),
-            'method': row.get(EC.METHOD_NAME, None),
+            'strategy': strategy,
+            'method': method_name,
         })
         dataset_dict.setdefault('sample',
                                 set_sample(
@@ -298,27 +318,38 @@ def excel_file_mapping(filename, keyargs):
                                         EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None),
                                     'GeneExpression')
                                 )
-        dataset_dict.setdefault(
-            'referenceGenome', row.get(EC.REFERENCE_GENOME, None))
-        gc_dict = get_growth_conditions(
-            row.get(EC.GC_EXPERIMENTAL, None), dataset_id)
+        ref_genome = row.get(EC.REFERENCE_GENOME, None)
+        if ref_genome:
+            ref_genome = ref_genome.rstrip()
+        dataset_dict.setdefault('referenceGenome', ref_genome)
+        gc_metadata = row.get(EC.GC_EXPERIMENTAL, None)
+        if gc_metadata:
+            gc_metadata = gc_metadata.rstrip()
+        gc_dict = get_growth_conditions(gc_metadata, dataset_id)
         if gc_dict:
             dataset_dict.setdefault('growthConditions', gc_dict)
         dataset_dict.setdefault('releaseDataControl', {
             'date': keyargs.get('release_process_date'),
             'version': keyargs.get('version'),
         })
-        dataset_dict.setdefault(
-            'assemblyGenomeId', row.get(EC.ASSEMBLY_GENOME_ID, None))
-        dataset_dict.setdefault('fivePrimeEnrichment',
-                                row.get(EC.FIVE_ENRICHMENT, None))
-        dataset_dict.setdefault('experimentCondition',
-                                row.get(EC.EXPERIMENT_CONDITION, None))
+        assembly_genome_id = row.get(EC.ASSEMBLY_GENOME_ID, None)
+        if assembly_genome_id:
+            assembly_genome_id = assembly_genome_id.rstrip()
+        dataset_dict.setdefault('assemblyGenomeId', assembly_genome_id)
+        five_enrichment = row.get(EC.FIVE_ENRICHMENT, None)
+        if five_enrichment:
+            five_enrichment = five_enrichment.rstrip()
+        dataset_dict.setdefault('fivePrimeEnrichment', five_enrichment)
+        experiment_condition = row.get(EC.EXPERIMENT_CONDITION, None)
+        if experiment_condition:
+            experiment_condition = experiment_condition.rstrip()
+        dataset_dict.setdefault('experimentCondition', experiment_condition)
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
         datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
         new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
         new_datasets_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
+
         # Uniformized TFBINDING
         if keyargs.get('dataset_type') == 'TFBINDING':
             if serie_id:
@@ -427,8 +458,11 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
+        authors_file = row.get(EC.DATASET_FILE_NAME, None)
+        if authors_file:
+            authors_file = authors_file.rstrip()
         authors_data = {
-            'authorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', row.get(EC.DATASET_FILE_NAME, None), dataset_id),
+            'authorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', authors_file, dataset_id),
             '_id': f'AD_{new_dataset_id}',
             'datasetIds': [new_dataset_id]
         }

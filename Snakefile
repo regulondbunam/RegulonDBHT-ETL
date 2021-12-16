@@ -73,7 +73,7 @@ rule ht_extractor:
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log} -sp"
 '''
-'''rule create_identifiers:
+rule create_identifiers:
     params:
         main_path = create_identifiers_config["main_path"],
         valid_data = validation_config["raw_data"],
@@ -91,8 +91,8 @@ rule ht_extractor:
     priority: 7
     shell:
         'python3 {params.main_path} -u {params.url} -i {params.valid_data} -org {params.organism} -s {params.source} -sv {params.source_version} -v {params.version} -db "{params.db}" -l {params.log}'
-'''
-'''
+
+
 rule replace_identifiers:
     params:
         main_path = replace_identifiers_config["main_path"],
@@ -110,7 +110,7 @@ rule replace_identifiers:
     priority: 6
     shell:
         "python {params.main_path} -org {params.organism} -i {params.valid_data} -o {params.replaced_ids} -u {params.url} -v {params.version} -db {params.db} -l {params.log}"        
-'''
+
 '''rule re_validate_data:
     params:
         main_path = revalidation_config["main_path"],
@@ -130,8 +130,8 @@ rule replace_identifiers:
 rule data_uploader:
     params:
         main_path = data_upload_config["main_path"],
-        #valid_data = replace_identifiers_config["persistent_ids"],
-        valid_data = data_upload_config["gene_expression"],
+        valid_data = replace_identifiers_config["persistent_ids"],
+        #valid_data = data_upload_config["gene_expression"],
         log = data_upload_config["log_dir"],
         db = config["db"],
         url = config["url"]

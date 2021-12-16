@@ -276,7 +276,7 @@ def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
     Returns
         dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
     '''
-    dataset_df = pandas.read_csv(filename, sep='\t', header=0)
+    dataset_df = pandas.read_csv(filename, sep='\t', header=0, index_col=False)
     return dataset_df
 
 
@@ -403,7 +403,6 @@ def get_pubmed_data(pmid, email):
     for identifier in article_identifier:
         if ' [doi]' in identifier:
             publication.setdefault('doi', identifier.replace(' [doi]', ''))
-
     return publication
 
 
