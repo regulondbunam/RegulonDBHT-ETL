@@ -214,17 +214,18 @@ def tsv_file_mapping(filename, keyargs):
             try:
                 pmid = int(pmid)
                 dataset_dict.setdefault(
-                    'publication', utils.get_pubmed_data(pmid, keyargs.get('email')))
+                    'publications', []).append(utils.get_pubmed_data(pmid, keyargs.get('email')))
             except:
                 pmids = pmid.split(",")
-                pmid = int(pmids[0])
-                dataset_dict.setdefault(
-                    'publication', utils.get_pubmed_data(pmid, keyargs.get('email')))
+                for pmid in pmids:
+                    pmid = int(pmid)
+                    dataset_dict.setdefault(
+                        'publications', []).append(utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
             pubmed_authors = row.get(EC.AUTHORS, None)
             if isinstance(pubmed_authors, str):
                 pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publication',
+            dataset_dict.setdefault('publications', []).append(
                                     {
                                         'authors': pubmed_authors,
                                         'abstract': None,
@@ -232,16 +233,16 @@ def tsv_file_mapping(filename, keyargs):
                                         'pmcid': None,
                                         'pmid': None,
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }
-                                    )
+                                    })
 
         # objectTested
-        dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(row.get(EC.PROTEIN_NAME, None),
+        dataset_dict.setdefault('objectsTested', [])
+        objectsTested = utils.get_object_tested(row.get(EC.PROTEIN_NAME, None),
                                                     keyargs.get('db'),
                                                     keyargs.get('url')
                                                     )
-        )
+        if objectsTested["name"] != None:
+            dataset_dict.setdefault('objectsTested', []).append(objectsTested)
 
         # SourceSerie
         platform_id = row.get(EC.PLATFORM_ID, None)
@@ -254,7 +255,7 @@ def tsv_file_mapping(filename, keyargs):
         dataset_dict.setdefault('sourceSerie', {
             'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
-            'title': row.get(EC.PROTEIN_NAME, None),
+            'titles': row.get(EC.PROTEIN_NAME, None),
             'platformId': platform_id,
             'platformTitle': platform_title,
             'strategy': row.get(EC.STRATEGY),

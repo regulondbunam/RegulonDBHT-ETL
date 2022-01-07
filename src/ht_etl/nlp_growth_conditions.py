@@ -68,7 +68,6 @@ def split_combinated_ids(ids_string):
             str_id = f"{str_id}{char}"
             last_char = char
     datasetIds.append(str_id)
-    print(datasetIds)
     return datasetIds
 
 
