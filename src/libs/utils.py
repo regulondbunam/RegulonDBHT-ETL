@@ -263,6 +263,9 @@ def get_author_data_frame(filename: str, load_sheet, rows_to_skip: int) -> panda
     '''
     dataset_df = pandas.read_excel(
         filename, sheet_name=load_sheet, skiprows=rows_to_skip, index_col=0)
+    nan_value = float("NaN")
+    dataset_df.replace("", nan_value, inplace=True)
+    dataset_df.dropna(how='all', axis=1, inplace=True)
     return dataset_df
 
 
@@ -370,7 +373,7 @@ def to_camel_case(snake_str):
     return camelStr
 
 
-def get_pubmed_data(pmid, email):
+def get_pubmed_data(pmids, email):
     '''
     Connects to PUBMED database through Entrez API and gets the necessary publication data.
     The Entrez API returns a dictionary with the medline data, see also https://biopython.org/docs/1.75/api/Bio.Medline.html for more information about the keys obtained from this dictionary.
@@ -382,28 +385,35 @@ def get_pubmed_data(pmid, email):
     Returns
         publication, Dict, dictionary with the publication data.
     '''
-    if not pmid:
+    if not pmids:
         return None
     Entrez.email = email
-    handle = Entrez.efetch(db='pubmed', id=pmid,
-                           rettype='medline', retmode='text')
-
-    publication = {}
-    record = Medline.read(handle)
-    pubmed_authors = record.get('AU')
-    if isinstance(pubmed_authors, str):
-        pubmed_authors = pubmed_authors.split(',')
-    publication.setdefault('authors', pubmed_authors)
-    publication.setdefault('abstract', record.get('AB'))
-    publication.setdefault('date', record.get('DP'))
-    publication.setdefault('pmcid', record.get('PMC'))
-    publication.setdefault('pmid', int(record.get('PMID')))
-    publication.setdefault('title', record.get('TI'))
-    article_identifier = record.get('AID')
-    for identifier in article_identifier:
-        if ' [doi]' in identifier:
-            publication.setdefault('doi', identifier.replace(' [doi]', ''))
-    return publication
+    publications = []
+    if isinstance(pmids, int):
+        pmids = [pmids]
+    elif isinstance(pmids, str):
+        pmids = pmids.replace(' ', '')
+        pmids = pmids.split(',')
+    for pmid in pmids:
+        handle = Entrez.efetch(db='pubmed', id=pmid,
+                               rettype='medline', retmode='text')
+        publication = {}
+        record = Medline.read(handle)
+        pubmed_authors = record.get('AU')
+        if isinstance(pubmed_authors, str):
+            pubmed_authors = pubmed_authors.split(',')
+        publication.setdefault('authors', pubmed_authors)
+        publication.setdefault('abstract', record.get('AB'))
+        publication.setdefault('date', record.get('DP'))
+        publication.setdefault('pmcid', record.get('PMC'))
+        publication.setdefault('pmid', int(record.get('PMID')))
+        publication.setdefault('title', record.get('TI'))
+        article_identifier = record.get('AID')
+        for identifier in article_identifier:
+            if ' [doi]' in identifier:
+                publication.setdefault('doi', identifier.replace(' [doi]', ''))
+        publications.append(publication)
+    return publications
 
 
 def format_cross_reference_url(url, object_id):
@@ -411,7 +421,7 @@ def format_cross_reference_url(url, object_id):
     return formated_url
 
 
-def get_object_tested(protein_name, database, url):
+def get_object_tested(protein_names, database, url):
     '''
     Gets TF data from the RegulonDBMultigenomic database and returns the object tested dictionary.
 
@@ -424,55 +434,59 @@ def get_object_tested(protein_name, database, url):
         object_tested, Dict, dictionary with the object tested data.
     '''
     mg_api.connect(database, url)
-    object_tested = {}
-    mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
-    if mg_tf:
-        active_conformations = []
-        external_cross_references = []
-        for active_conf in mg_tf[0].active_conformations:
-            active_conformations.append(active_conf.id)
-        for cross_ref in mg_tf[0].external_cross_references:
-            mg_cross_ref = mg_api.external_cross_references.find_by_id(
-                cross_ref.external_cross_references_id)
-            external_cross_references.append(
-                {
-                    'externalCrossReferenceId': cross_ref.external_cross_references_id,
-                    'objectId': cross_ref.object_id,
-                    'externalCrossReferenceName': mg_cross_ref.name,
-                    'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
+    objects_tested = []
+    for protein_name in protein_names:
+        object_tested = {}
+        mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
+        if mg_tf:
+            active_conformations = []
+            external_cross_references = []
+            for active_conf in mg_tf[0].active_conformations:
+                active_conformations.append(active_conf.id)
+            for cross_ref in mg_tf[0].external_cross_references:
+                mg_cross_ref = mg_api.external_cross_references.find_by_id(
+                    cross_ref.external_cross_references_id)
+                external_cross_references.append(
+                    {
+                        'externalCrossReferenceId': cross_ref.external_cross_references_id,
+                        'objectId': cross_ref.object_id,
+                        'externalCrossReferenceName': mg_cross_ref.name,
+                        'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
+                    }
+                )
+            genes = []
+            for product_id in mg_tf[0].products_ids:
+                mg_product = mg_api.products.find_by_id(product_id)
+                mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
+                gene = {
+                    '_id': mg_gene.id,
+                    'name': mg_gene.name
                 }
-            )
-        genes = []
-        for product_id in mg_tf[0].products_ids:
-            mg_product = mg_api.products.find_by_id(product_id)
-            mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
-            gene = {
-                '_id': mg_gene.id,
-                'name': mg_gene.name
-            }
-            genes.append(gene)
+                genes.append(gene)
 
-        object_tested = {
-            '_id': mg_tf[0].id,
-            'name': mg_tf[0].name,
-            'synonyms': mg_tf[0].synonyms,
-            'genes': genes,
-            'note': mg_tf[0].note,
-            'activeConformations': active_conformations,
-            'externalCrossReferences': external_cross_references
-        }
-    else:
-        object_tested = {
-            '_id': None,
-            'name': protein_name,
-            'synonyms': [],
-            'genes': [],
-            'note': None,
-            'activeConformations': [],
-            'externalCrossReferences': [],
-        }
+            object_tested = {
+                '_id': mg_tf[0].id,
+                'name': mg_tf[0].name,
+                'synonyms': mg_tf[0].synonyms,
+                'genes': genes,
+                'note': mg_tf[0].note,
+                'activeConformations': active_conformations,
+                'externalCrossReferences': external_cross_references
+            }
+            objects_tested.append(object_tested)
+        else:
+            object_tested = {
+                '_id': None,
+                'name': protein_name,
+                'synonyms': [],
+                'genes': [],
+                'note': None,
+                'activeConformations': [],
+                'externalCrossReferences': [],
+            }
+            objects_tested.append(object_tested)
     mg_api.disconnect()
-    return object_tested
+    return objects_tested
 
 
 def get_center_pos(left_pos, right_pos):

@@ -5,6 +5,7 @@ Dataset record processing.
 import os
 import logging
 import shutil
+import re
 
 # third party
 
@@ -57,14 +58,14 @@ def get_author_data(authors_data_path, filename, dataset_id):
     excel_path = os.path.join(authors_data_path, filename)
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
         raw = utils.get_author_data_frame(excel_path, 0, 0)
+        print(raw)
         author_raw = raw.to_csv(encoding='utf-8')
-        print(excel_path)
+        print(author_raw)
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
     elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
         raw = utils.get_author_data_frame_tsv(excel_path)
-        # print(raw)
         raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
         author_raw = raw.to_csv(encoding='utf-8', index=True)
         author_raw = author_raw.replace(',,,,,#', '#')
@@ -244,15 +245,27 @@ def excel_file_mapping(filename, keyargs):
                 f'Not Dataset ID')
             continue
         dataset_id = str(dataset_id).rstrip()
-        print(dataset_id)
-        serie_id = row.get(EC.SERIE_ID, None)
-        if serie_id:
-            serie_id = (((row[EC.SERIE_ID]).split(' '))
-                        [0]).replace(';', '').rstrip()
+        # print(dataset_id)
+        serie_ids = row.get(EC.SERIE_ID, None)
+        serie_id = None
+        if serie_ids:
+            serie_ids = serie_ids.split(',')
+            for s_id in serie_ids:
+                serie_id = s_id.split(':')[0]
+                if serie_id:
+                    serie_id = (((row[EC.SERIE_ID]).split(' '))
+                                [0]).replace(';', '').rstrip()
+                #print('SerieID: ', serie_id)
+                try:
+                    serie_db = s_id.split(':')[1]
+                    #print('SerieDB: ', serie_db)
+                except IndexError:
+                    logging.error(f'Can not find serie_db in {s_id}')
         pmid = row.get(EC.PMID, None)
         if pmid:
+            print(pmid)
             dataset_dict.setdefault(
-                'publication', utils.get_pubmed_data(pmid, keyargs.get('email')))
+                'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
             pubmed_authors = row.get(EC.AUTHORS, None)
             if isinstance(pubmed_authors, str):
@@ -277,11 +290,18 @@ def excel_file_mapping(filename, keyargs):
             tf_name = row.get(EC.TF_NAME_TEC, None)
         if tf_name:
             tf_name = tf_name.rstrip()
+            if re.findall('([α-ωΑ-Ω])', tf_name):
+                tf_name = row.get(EC.TF_NAME_CHIP, None)
+            if 'Mixed TFs: ' in tf_name:
+                tf_name = tf_name.replace('Mixed TFs: ', '')
+                tf_name = tf_name.split(', ')
+            if isinstance(tf_name, str):
+                tf_name = [tf_name]
         dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(tf_name,
-                                                    keyargs.get('db'),
-                                                    keyargs.get('url')
-                                                    )
+            'objectsTested', utils.get_object_tested(tf_name,
+                                                     keyargs.get('db'),
+                                                     keyargs.get('url')
+                                                     )
         )
         platform_id = row.get(EC.PLATFORM_ID, None)
         if platform_id:
@@ -298,7 +318,7 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict.setdefault('sourceSerie', {
             'sourceId': serie_id,
             'sourceName': keyargs.get('source_name'),
-            'title': tf_name,
+            'titles': tf_name,
             'platformId': platform_id,
             'platformTitle': platform_title,
             'strategy': strategy,
@@ -312,13 +332,16 @@ def excel_file_mapping(filename, keyargs):
                                         EC.SAMPLES_REPLICATES_CONTROL_ID, None),
                                     row.get(EC.TITLE_FOR_ALL_REPLICATES, None))
                                 )
+        linked_dataset_type = None
+        if keyargs.get('dataset_type') == 'TFBINDING':
+            linked_dataset_type = 'GeneExpression'
         dataset_dict.setdefault('linkedDataset',
                                 set_linked_dataset(
                                     row.get(
                                         EC.SAMPLES_EXPERIMET_REPLICATES_EXPRESSION_ID, None),
                                     row.get(
                                         EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None),
-                                    'GeneExpression')
+                                    linked_dataset_type)
                                 )
         ref_genome = row.get(EC.REFERENCE_GENOME, None)
         if ref_genome:
@@ -452,6 +475,7 @@ def excel_file_mapping(filename, keyargs):
                     )
                 )
 
+        # Author's Files
         if keyargs.get('dataset_type') == 'TFBINDING':
             collection_type = utils.get_collection_type(
                 keyargs.get("collection_path"))
