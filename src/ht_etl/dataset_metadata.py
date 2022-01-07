@@ -275,8 +275,10 @@ def excel_file_mapping(filename, keyargs):
             tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_TEC, None)
+        if tf_name:
+            tf_name = tf_name.rstrip()
         dataset_dict.setdefault(
-            'objectTested', utils.get_object_tested(tf_name.rstrip(),
+            'objectTested', utils.get_object_tested(tf_name,
                                                     keyargs.get('db'),
                                                     keyargs.get('url')
                                                     )

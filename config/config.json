@@ -2,9 +2,9 @@
   "url": "mongodb://127.0.0.1:27017",
   "db": "regulondbht",
   "organism": "ECOLI",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source": "EcoCyc",
-  "source_version": 3.1,
+  "source_version": 3.2,
   "ptools_config": {
     "compose_file": "../pathway-tools-docker/docker-compose.yml",
     "dotenv_file": "../pathway-tools-docker/.env"
