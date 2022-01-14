@@ -391,6 +391,8 @@ def get_pubmed_data(pmids, email):
     publications = []
     if isinstance(pmids, int):
         pmids = [pmids]
+    if isinstance(pmids, float):
+        pmids = [pmids]
     elif isinstance(pmids, str):
         pmids = pmids.replace(' ', '')
         pmids = pmids.split(',')
@@ -435,56 +437,68 @@ def get_object_tested(protein_names, database, url):
     '''
     mg_api.connect(database, url)
     objects_tested = []
-    for protein_name in protein_names:
-        object_tested = {}
-        mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
-        if mg_tf:
-            active_conformations = []
-            external_cross_references = []
-            for active_conf in mg_tf[0].active_conformations:
-                active_conformations.append(active_conf.id)
-            for cross_ref in mg_tf[0].external_cross_references:
-                mg_cross_ref = mg_api.external_cross_references.find_by_id(
-                    cross_ref.external_cross_references_id)
-                external_cross_references.append(
-                    {
-                        'externalCrossReferenceId': cross_ref.external_cross_references_id,
-                        'objectId': cross_ref.object_id,
-                        'externalCrossReferenceName': mg_cross_ref.name,
-                        'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
+    if protein_names:
+        for protein_name in protein_names:
+            object_tested = {}
+            mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
+            if mg_tf:
+                active_conformations = []
+                external_cross_references = []
+                for active_conf in mg_tf[0].active_conformations:
+                    active_conformations.append(active_conf.id)
+                for cross_ref in mg_tf[0].external_cross_references:
+                    mg_cross_ref = mg_api.external_cross_references.find_by_id(
+                        cross_ref.external_cross_references_id)
+                    external_cross_references.append(
+                        {
+                            'externalCrossReferenceId': cross_ref.external_cross_references_id,
+                            'objectId': cross_ref.object_id,
+                            'externalCrossReferenceName': mg_cross_ref.name,
+                            'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
+                        }
+                    )
+                genes = []
+                for product_id in mg_tf[0].products_ids:
+                    mg_product = mg_api.products.find_by_id(product_id)
+                    mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
+                    gene = {
+                        '_id': mg_gene.id,
+                        'name': mg_gene.name
                     }
-                )
-            genes = []
-            for product_id in mg_tf[0].products_ids:
-                mg_product = mg_api.products.find_by_id(product_id)
-                mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
-                gene = {
-                    '_id': mg_gene.id,
-                    'name': mg_gene.name
-                }
-                genes.append(gene)
+                    genes.append(gene)
 
-            object_tested = {
-                '_id': mg_tf[0].id,
-                'name': mg_tf[0].name,
-                'synonyms': mg_tf[0].synonyms,
-                'genes': genes,
-                'note': mg_tf[0].note,
-                'activeConformations': active_conformations,
-                'externalCrossReferences': external_cross_references
-            }
-            objects_tested.append(object_tested)
-        else:
-            object_tested = {
-                '_id': None,
-                'name': protein_name,
-                'synonyms': [],
-                'genes': [],
-                'note': None,
-                'activeConformations': [],
-                'externalCrossReferences': [],
-            }
-            objects_tested.append(object_tested)
+                object_tested = {
+                    '_id': mg_tf[0].id,
+                    'name': mg_tf[0].name,
+                    'synonyms': mg_tf[0].synonyms,
+                    'genes': genes,
+                    'note': mg_tf[0].note,
+                    'activeConformations': active_conformations,
+                    'externalCrossReferences': external_cross_references
+                }
+                objects_tested.append(object_tested)
+            else:
+                object_tested = {
+                    '_id': None,
+                    'name': protein_name,
+                    'synonyms': [],
+                    'genes': [],
+                    'note': None,
+                    'activeConformations': [],
+                    'externalCrossReferences': [],
+                }
+                objects_tested.append(object_tested)
+    else:
+        object_tested = {
+            '_id': None,
+            'name': protein_names,
+            'synonyms': [],
+            'genes': [],
+            'note': None,
+            'activeConformations': [],
+            'externalCrossReferences': [],
+        }
+        objects_tested.append(object_tested)
     mg_api.disconnect()
     return objects_tested
 

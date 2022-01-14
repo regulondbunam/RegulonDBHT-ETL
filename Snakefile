@@ -42,7 +42,7 @@ rule ht_extractor:
     shell:
         "python {params.main_path} -ev -out {params.output_dir} -l {params.log_dir}"
 '''
-'''rule schema_loader:
+rule schema_loader:
     params:
         main_path = schema_loader_config["main_path"],
         db = config["db"],
@@ -56,8 +56,8 @@ rule ht_extractor:
     priority: 9
     shell:
         "python {params.main_path} -db {params.db} -u {params.url} -s {params.schemas} -l {params.log} -d"
-'''
-'''rule data_validator:
+
+rule data_validator:
     params:
         main_path = validation_config["main_path"],
         data = validation_config["raw_data"],
@@ -72,7 +72,7 @@ rule ht_extractor:
     priority: 8
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log} -sp"
-'''
+
 rule create_identifiers:
     params:
         main_path = create_identifiers_config["main_path"],
@@ -111,7 +111,7 @@ rule replace_identifiers:
     shell:
         "python {params.main_path} -org {params.organism} -i {params.valid_data} -o {params.replaced_ids} -u {params.url} -v {params.version} -db {params.db} -l {params.log}"        
 
-'''rule re_validate_data:
+rule re_validate_data:
     params:
         main_path = revalidation_config["main_path"],
         data = revalidation_config["persistent_ids"],
@@ -126,7 +126,7 @@ rule replace_identifiers:
     priority: 5
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log}"
-'''
+
 rule data_uploader:
     params:
         main_path = data_upload_config["main_path"],

@@ -202,7 +202,7 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
     sample = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
-        'datasetType': dataset_type.rstrip(),
+        'datasetType': dataset_type,
     }
     return sample
 
@@ -258,7 +258,7 @@ def excel_file_mapping(filename, keyargs):
                 #print('SerieID: ', serie_id)
                 try:
                     serie_db = s_id.split(':')[1]
-                    #print('SerieDB: ', serie_db)
+                    # print('SerieDB: ', serie_db)
                 except IndexError:
                     logging.error(f'Can not find serie_db in {s_id}')
         pmid = row.get(EC.PMID, None)
@@ -271,7 +271,7 @@ def excel_file_mapping(filename, keyargs):
             if isinstance(pubmed_authors, str):
                 pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publication',
+            dataset_dict.setdefault('publications',
                                     {
                                         'authors': pubmed_authors,
                                         'abstract': None,

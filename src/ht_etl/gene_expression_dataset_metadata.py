@@ -211,21 +211,15 @@ def tsv_file_mapping(filename, keyargs):
         # PMID
         pmid = row.get(EC.PMID, None)
         if pmid:
-            try:
-                pmid = int(pmid)
-                dataset_dict.setdefault(
-                    'publications', []).append(utils.get_pubmed_data(pmid, keyargs.get('email')))
-            except:
-                pmids = pmid.split(",")
-                for pmid in pmids:
-                    pmid = int(pmid)
-                    dataset_dict.setdefault(
-                        'publications', []).append(utils.get_pubmed_data(pmid, keyargs.get('email')))
+            print(pmid)
+            dataset_dict.setdefault(
+                'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
             pubmed_authors = row.get(EC.AUTHORS, None)
             if isinstance(pubmed_authors, str):
+                pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publications', []).append(
+            dataset_dict.setdefault('publications',
                                     {
                                         'authors': pubmed_authors,
                                         'abstract': None,
@@ -233,16 +227,33 @@ def tsv_file_mapping(filename, keyargs):
                                         'pmcid': None,
                                         'pmid': None,
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    })
+                                    }
+                                    )
 
         # objectTested
         dataset_dict.setdefault('objectsTested', [])
-        objectsTested = utils.get_object_tested(row.get(EC.PROTEIN_NAME, None),
-                                                    keyargs.get('db'),
-                                                    keyargs.get('url')
-                                                    )
-        if objectsTested["name"] != None:
-            dataset_dict.setdefault('objectsTested', []).append(objectsTested)
+        tf_name = row.get(EC.TF_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_CHIP, None)
+        if not tf_name:
+            tf_name = row.get(EC.PROTEIN_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_TEC, None)
+        if tf_name:
+            tf_name = tf_name.rstrip()
+            if re.findall('([α-ωΑ-Ω])', tf_name):
+                tf_name = row.get(EC.TF_NAME_CHIP, None)
+            if 'Mixed TFs: ' in tf_name:
+                tf_name = tf_name.replace('Mixed TFs: ', '')
+                tf_name = tf_name.split(', ')
+            if isinstance(tf_name, str):
+                tf_name = [tf_name]
+        dataset_dict.setdefault(
+            'objectsTested', utils.get_object_tested(tf_name,
+                                                     keyargs.get('db'),
+                                                     keyargs.get('url')
+                                                     )
+        )
 
         # SourceSerie
         platform_id = row.get(EC.PLATFORM_ID, None)
