@@ -18,6 +18,13 @@ from libs import constants as EC
 
 
 def get_collection_name(collection_path):
+    '''
+    Checks collection path to determine the collection name.
+    Param
+        collection_path, String, Raw collection path.
+    Returns
+        collection_name, String, Final collection name.
+    '''
     collection_name = collection_path
     if 'CHIP-exo' in collection_name or 'ChIP-exo' in collection_name:
         collection_name = EC.CHIP_EXO
@@ -39,16 +46,23 @@ def get_collection_name(collection_path):
 
 
 def get_collection_type(collection_path):
-    collection_name = collection_path
-    if 'CHIP-exo' in collection_name or 'ChIP-exo' in collection_name:
-        collection_name = 'CHIP_EXO_'
-    if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
-        collection_name = ''
-    if 'gSELEX' in collection_name:
-        collection_name = 'GSELEX_'
-    if 'DAP' in collection_name:
-        collection_name = 'DAPS_'
-    return collection_name
+    '''
+    Determines the Strategy which was used to process the collection.
+    Param
+        collection_path, String, Raw collection path.
+    Returns
+        collection_type, String, Final collection type.
+    '''
+    collection_type = collection_path
+    if 'CHIP-exo' in collection_type or 'ChIP-exo' in collection_type:
+        collection_type = 'CHIP_EXO_'
+    if 'CHIP-Seq' in collection_type or 'ChIP-Seq' in collection_type:
+        collection_type = ''
+    if 'gSELEX' in collection_type:
+        collection_type = 'GSELEX_'
+    if 'DAP' in collection_type:
+        collection_type = 'DAPS_'
+    return collection_type
 
 
 def set_json_object(filename, data_list, organism, sub_class_acronym, child_class_acronym):
@@ -139,7 +153,7 @@ def verify_tsv_path(tsv_path):
 
 def verify_csv_path(csv_path):
     '''
-    This function filters TSV files in the path and returns only correctly formatted path.
+    This function filters CSV files in the path and returns only correctly formatted path.
 
     Param
         csv_path, String, raw directory path.
@@ -160,7 +174,7 @@ def verify_csv_path(csv_path):
 
 def validate_directory(data_path):
     '''
-    Verify that the output path directory exists.
+    Verify if the output path directory exists.
 
     Param
         data_path, String, directory path.
@@ -178,10 +192,10 @@ def validate_directory(data_path):
 
 def validate_directories(data_path):
     '''
-    Verify that the output path directory exists.
+    Verify if the output path directories exists.
 
     Param
-        data_path, String, directory path.
+        data_path, String, directories path.
 
     Return
         Rise IOError if not valid directory
@@ -215,8 +229,10 @@ def create_json(objects, filename, output):
     with open(f'{filename}.json', 'w') as json_file:
         json.dump(objects, json_file, indent=4, sort_keys=True)
 
+# TODO: Not used, must be deleted?
 
-def list_to_dict(data):  # TODO: Not used, must be deleted?
+
+def list_to_dict(data):
     '''
     Turns a data List into a directory object.
 
@@ -297,6 +313,7 @@ def get_author_data_frame_tsv(filename: str) -> pandas.DataFrame:
     return dataset_df
 
 
+# TODO: Not used, must be deleted?
 def get_data_frame_tsv_coma(filename: str) -> pandas.DataFrame:
     '''
     Read and convert the TSV file to Panda DataFrame.
@@ -419,6 +436,16 @@ def get_pubmed_data(pmids, email):
 
 
 def format_cross_reference_url(url, object_id):
+    '''
+    Corrects the External Cross References URL removing '~A' characters and adding object_id at the end.
+
+    Param
+        url, String, External Cross References raw URL.
+        object_id, String, External Cross References Object ID.
+
+    Returns
+        formated_url, String, External Cross References final URL.
+    '''
     formated_url = f'{url.replace("~A", "")}{object_id}'
     return formated_url
 
@@ -435,6 +462,7 @@ def get_object_tested(protein_names, database, url):
     Returns
         object_tested, Dict, dictionary with the object tested data.
     '''
+    # TODO: check unique objects
     mg_api.connect(database, url)
     objects_tested = []
     if protein_names:
@@ -654,15 +682,18 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
     return terminators
 
 
+# TODO: Check if this function is working as expected
 def get_sites_ids_by_tf(tf_name, database, url):
     '''
-    [Description]
+    Uses MG API to get the sites IDs by TF name.
 
     Param
-        [Description]
+        tf_name, String, TF name.
+        database, String, RegulonDB Multigenomic database name
+        url, String, URL to RegulonDB Multigenomic database.
 
     Returns
-        [Description]
+        sites_ids, List, List of sites IDs.
     '''
     sites_ids = []
     mg_api.connect(database, url)
@@ -682,6 +713,17 @@ def get_sites_ids_by_tf(tf_name, database, url):
 
 
 def get_tf_sites_abs_pos(tf_id, database, url):
+    '''
+    Gets Regualtory Sites objects with absolutePosition.
+
+    Param
+        tf_id, String, TF ID.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+
+    Returns
+        site, Object, Site object with absolutePosition property.
+    '''
     site = None
     mg_api.connect(database, url)
     try:
@@ -691,6 +733,7 @@ def get_tf_sites_abs_pos(tf_id, database, url):
             'absolutePosition': mg_site.absolute_position,
             'siteObject': mg_site
         }
+        print(site)
     except Exception:
         logging.error(f'Can not find Sites in TF {tf_id}')
     mg_api.disconnect()
@@ -698,6 +741,18 @@ def get_tf_sites_abs_pos(tf_id, database, url):
 
 
 def get_classic_ris(lend, rend, strand, tf_sites):
+    '''
+    Gets Regualtory Interactions on RegulonDB Multigenomic database.
+
+    Param
+        lend, Float, RI's leftEndPosition.
+        rend, Float, RI's rigthEndPosition.
+        strand, Float, RI's strand.
+        tf_sites, List, Sites in the dataset.
+
+    Returns
+        classic_ris, List, RIs found on RegulonDB List.
+    '''
     center_pos = get_center_pos(lend, rend)
     classic_ris = []
     for site in tf_sites:
@@ -717,33 +772,41 @@ def get_classic_ris(lend, rend, strand, tf_sites):
     return classic_ris
 
 
-def find_min_by(list, key_name):
+def get_tu_by_gene_id(gene_id, database, url):
     '''
-    [Description]
+    Gets TU in the RegulonDB Multigenomic database by Gene ID.
 
     Param
-        [Description]
-
+        gene_id, String, Gene ID.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
     Returns
-        [Description]
+        tu, Object, Trasncription Unit object from RegulonDB Multigenomic database.
     '''
-    return min(list, key=lambda d: d.get(key_name, float('inf')))['_id']
-
-
-def get_tu_by_gene_id(gene_id, database, url):
-    tus = None
+    tu = None
     mg_api.connect(database, url)
     try:
-        tus = mg_api.transcription_units.find_by_gene_id(
+        tu = mg_api.transcription_units.find_by_gene_id(
             gene_id)
     except IndexError:
         # logging.error(f'Can not find TU from: {gene_id}')
         pass
     mg_api.disconnect()
-    return tus
+    return tu
 
 
 def get_promoter(lend, rend, database, url):
+    '''
+    Gets Closer Promoter in the RegulonDB Multigenomic database by left_end_position and right_end_position.
+
+    Param
+        lend, Float, dataset leftEndPosition.
+        rend, Float, dataset rigthEndPosition.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+    Returns
+        promoters, List, Closer Promoters to dataset in RegulonDB Multigenomic database.
+    '''
     promoters = []
     mg_api.connect(database, url)
     try:
@@ -774,13 +837,14 @@ def get_promoter(lend, rend, database, url):
 
 def get_genes_by_bnumber(bnumbers, database, url):
     '''
-    [Description]
+    Gets Genes in the RegulonDB Multigenomic database by Gene BNumber.
 
     Param
-        [Description]
-
+        bnumbers, List, Bnumbers String Array.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
     Returns
-        [Description]
+        genes, List, Genes List from RegulonDB Multigenomic database.
     '''
     genes = []
     mg_genes = []
@@ -803,13 +867,14 @@ def get_genes_by_bnumber(bnumbers, database, url):
 
 def get_gene_by_bnumber(bnumber, database, url):
     '''
-    [Description]
+    Gets Gene in the RegulonDB Multigenomic database by Gene BNumber.
 
     Param
-        [Description]
-
+        bnumber, List, Bnumbers String Array.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
     Returns
-        [Description]
+        gene, Dict, Gene object from RegulonDB Multigenomic database.
     '''
     gene_dict = {}
     mg_api.connect(database, url)
@@ -827,6 +892,16 @@ def get_gene_by_bnumber(bnumber, database, url):
 
 
 def find_one_in_dict_list(dict_list, key_name, value):
+    '''
+    Finds dictionary in a dictionary List by certain key.
+
+    Param
+        dict_list, List, Dictionaries List.
+        key_name, String, Key Name to search.
+        value, String, Value to find the dictionary by key name.
+    Returns
+        found_dict, Dict, Dictionary that matches the search.
+    '''
     found_dict = next(
         (item for item in dict_list if item[key_name] == value),
         None
@@ -856,5 +931,13 @@ def verify_json_path(json_path):
 
 
 def read_json_from_path(json_path):
+    '''
+    Opens a JSON file and returns JSON object.
+
+    Param
+        json_path, String, path to JSON.
+    Returns
+        Loaded JSON Object.
+    '''
     json_file = open(json_path)
     return json.load(json_file)

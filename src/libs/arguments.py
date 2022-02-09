@@ -104,15 +104,7 @@ def get_arguments():
         default="0.0.0",
         metavar="0.0.0",
     )
-
-    parser.add_argument(
-        "-srcname",
-        "--source-name",
-        help="Dataset record source name.",
-        choices=["GEO", "SRA", ""],
-        default="GEO",
-        metavar="GEO",
-    )
+    
     parser.add_argument(
         "-dstype",
         "--dataset-type",

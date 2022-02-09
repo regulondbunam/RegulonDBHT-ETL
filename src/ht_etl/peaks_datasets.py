@@ -13,6 +13,16 @@ from libs import utils
 
 
 def get_sites_ids(sites, peak_id):
+    '''
+    Finds the Peaks in the Sites list previously processed.
+
+    Param
+        sites, List, Sites objects list.
+        peak_id, String, Current Peak ID.
+
+    Returns
+        sites_ids, List, Sites ID list
+    '''
     sites_ids = []
     for site in sites:
         if site.get('peakId') == peak_id:

@@ -220,14 +220,14 @@ def tsv_file_mapping(filename, keyargs):
                 pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
             dataset_dict.setdefault('publications',
-                                    {
+                                    [{
                                         'authors': pubmed_authors,
                                         'abstract': None,
                                         'date': row.get(EC.RELEASE_DATE, None),
                                         'pmcid': None,
                                         'pmid': None,
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }
+                                    }]
                                     )
 
         # objectTested
@@ -256,7 +256,7 @@ def tsv_file_mapping(filename, keyargs):
         )
 
         # SourceSerie
-        platform_id = row.get(EC.PLATFORM_ID, None)
+        '''platform_id = row.get(EC.PLATFORM_ID, None)
         if platform_id:
             platform_id = platform_id.replace('\t', '')
         platform_title = row.get(EC.PLATFORM_TITLE, None)
@@ -271,13 +271,77 @@ def tsv_file_mapping(filename, keyargs):
             'platformTitle': platform_title,
             'strategy': row.get(EC.STRATEGY),
             'method': row.get(EC.METHOD_NAME, None),
+        })'''
+        series = row.get(EC.SERIE_ID, None)
+        series_list = []
+        if series:
+            series = (series.replace(' ', '')).split(',')
+            for serie in series:
+                serie_id = None
+                serie_db = None
+                try:
+                    serie_db = serie.split(':')[1]
+                except IndexError:
+                    logging.error(f'Can not find serie_db in {serie}')
+                try:
+                    serie_id = serie.split(':')[0]
+                except IndexError:
+                    logging.error(f'Can not find serie_id in {serie}')
+                serie_obj = {
+                    'sourceId': serie_id,
+                    'sourceName': serie_db,
+                }
+                series_list.append(serie_obj)
+        print(series_list)
+
+        platform = row.get(EC.PLATFORM_ID, None)
+        platform_id = None
+        platform_db = None
+        platform_title = row.get(EC.PLATFORM_TITLE, None)
+        if platform:
+            platform = platform.replace('\t', '')
+            if platform_title:
+                platform_title = platform_title.replace('\t', '').rstrip()
+            try:
+                platform_db = platform.split(':')[1]
+            except IndexError:
+                logging.error(f'Can not find platform_db in {platform}')
+            try:
+                platform_id = platform.split(':')[0]
+            except IndexError:
+                logging.error(f'Can not find platform_id in {platform}')
+            platform_obj = {
+                '_id': platform_id,
+                'source': platform_db,
+                'title': platform_title,
+            }
+        else:
+            platform_obj = platform
+        print(platform_obj)
+        strategy = row.get(EC.STRATEGY, None)
+        if strategy:
+            strategy = strategy.rstrip()
+        method_name = row.get(EC.METHOD_NAME, None)
+        if method_name:
+            method_name = method_name.rstrip()
+        experiment_title = row.get(EC.EXPERIMENT_TITLE, None)
+        if experiment_title:
+            experiment_title = experiment_title.rstrip()
+
+        dataset_dict.setdefault('sourceSerie', {
+            'series': series_list,
+            'platform': platform_obj,
+            'title': experiment_title,
+            'strategy': strategy,
+            'method': method_name,
         })
         # Sample
         dataset_dict.setdefault('sample',
                                 set_sample(
                                     row.get(
                                         EC.GE_SAMPLES_REPLICATES_EXPERIMENT_ID, None),
-                                    None,
+                                    row.get(
+                                        EC.SAMPLES_REPLICATES_CONTROL_ID, None),
                                     row.get(EC.TITLE_FOR_ALL_REPLICATES, None))
                                 )
         # linked dataset?

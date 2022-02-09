@@ -2,6 +2,7 @@
 Dataset record processing.
 '''
 # standard
+from importlib.util import source_hash
 import os
 import logging
 import shutil
@@ -58,9 +59,7 @@ def get_author_data(authors_data_path, filename, dataset_id):
     excel_path = os.path.join(authors_data_path, filename)
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
         raw = utils.get_author_data_frame(excel_path, 0, 0)
-        print(raw)
         author_raw = raw.to_csv(encoding='utf-8')
-        print(author_raw)
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
@@ -216,7 +215,6 @@ def excel_file_mapping(filename, keyargs):
         keyargs.collection_path, String, Path to read de origin files data.
         keyargs.db, String, Database to get some external data.
         keyargs.url, String, URL where database is located.
-        keyargs.source_name, String, Excel record surce ("GEO or ArrayExpress").
         keyargs.dataset_type, String, Excel record type ["TFBINDING", "GENE EXPRESION",
                  "TSS", "TUS", "TTS", "REGULONS"].
         keyargs.release_process_date, String, Date record of program execution.
@@ -245,25 +243,10 @@ def excel_file_mapping(filename, keyargs):
                 f'Not Dataset ID')
             continue
         dataset_id = str(dataset_id).rstrip()
-        # print(dataset_id)
-        serie_ids = row.get(EC.SERIE_ID, None)
-        serie_id = None
-        if serie_ids:
-            serie_ids = serie_ids.split(',')
-            for s_id in serie_ids:
-                serie_id = s_id.split(':')[0]
-                if serie_id:
-                    serie_id = (((row[EC.SERIE_ID]).split(' '))
-                                [0]).replace(';', '').rstrip()
-                #print('SerieID: ', serie_id)
-                try:
-                    serie_db = s_id.split(':')[1]
-                    # print('SerieDB: ', serie_db)
-                except IndexError:
-                    logging.error(f'Can not find serie_db in {s_id}')
+        # publications
         pmid = row.get(EC.PMID, None)
         if pmid:
-            print(pmid)
+            # print(pmid)
             dataset_dict.setdefault(
                 'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
@@ -272,14 +255,14 @@ def excel_file_mapping(filename, keyargs):
                 pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
             dataset_dict.setdefault('publications',
-                                    {
+                                    [{
                                         'authors': pubmed_authors,
                                         'abstract': None,
                                         'date': row.get(EC.RELEASE_DATE, None),
                                         'pmcid': None,
                                         'pmid': None,
                                         'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }
+                                    }]
                                     )
         tf_name = row.get(EC.TF_NAME, None)
         if not tf_name:
@@ -294,7 +277,9 @@ def excel_file_mapping(filename, keyargs):
                 tf_name = row.get(EC.TF_NAME_CHIP, None)
             if 'Mixed TFs: ' in tf_name:
                 tf_name = tf_name.replace('Mixed TFs: ', '')
-                tf_name = tf_name.split(', ')
+                tf_name = tf_name.strip()
+                tf_name = tf_name.split(',')
+                print(tf_name)
             if isinstance(tf_name, str):
                 tf_name = [tf_name]
         dataset_dict.setdefault(
@@ -303,24 +288,67 @@ def excel_file_mapping(filename, keyargs):
                                                      keyargs.get('url')
                                                      )
         )
-        platform_id = row.get(EC.PLATFORM_ID, None)
-        if platform_id:
-            platform_id = platform_id.replace('\t', '').rstrip()
+        # TODO: DATABASE:ID
+        series = row.get(EC.SERIE_ID, None)
+        series_list = []
+        serie_id = None
+        serie_db = None
+        if series:
+            series = (series.replace(' ', '')).split(',')
+            for serie in series:
+                try:
+                    serie_db = serie.split(':')[1]
+                except IndexError:
+                    logging.error(f'Can not find serie_db in {serie}')
+                try:
+                    serie_id = serie.split(':')[0]
+                except IndexError:
+                    logging.error(f'Can not find serie_id in {serie}')
+                serie_obj = {
+                    'sourceId': serie_id,
+                    'sourceName': serie_db,
+                }
+                series_list.append(serie_obj)
+        # print(series_list)
+
+        platform = row.get(EC.PLATFORM_ID, None)
+        platform_id = None
+        platform_db = None
         platform_title = row.get(EC.PLATFORM_TITLE, None)
-        if platform_title:
-            platform_title = platform_title.replace('\t', '').rstrip()
+        if platform:
+            platform = platform.replace('\t', '')
+            if platform_title:
+                platform_title = platform_title.replace('\t', '').rstrip()
+            try:
+                platform_db = platform.split(':')[1]
+            except IndexError:
+                logging.error(f'Can not find platform_db in {platform}')
+            try:
+                platform_id = platform.split(':')[0]
+            except IndexError:
+                logging.error(f'Can not find platform_id in {platform}')
+            platform_obj = {
+                '_id': platform_id,
+                'source': platform_db,
+                'title': platform_title,
+            }
+        else:
+            platform_obj = platform
+        # print(platform_obj)
         strategy = row.get(EC.STRATEGY, None)
         if strategy:
             strategy = strategy.rstrip()
         method_name = row.get(EC.METHOD_NAME, None)
         if method_name:
             method_name = method_name.rstrip()
+        experiment_title = row.get(EC.EXPERIMENT_TITLE, None)
+        if experiment_title:
+            experiment_title = experiment_title.rstrip()
+
         dataset_dict.setdefault('sourceSerie', {
-            'sourceId': serie_id,
-            'sourceName': keyargs.get('source_name'),
-            'titles': tf_name,
-            'platformId': platform_id,
-            'platformTitle': platform_title,
+            'series': series_list,
+            'platform': platform_obj,
+            'title': experiment_title,
             'strategy': strategy,
             'method': method_name,
         })

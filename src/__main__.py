@@ -68,7 +68,6 @@ if __name__ == '__main__':
         'url': args.url,
         'db': args.database,
         'email': args.email,
-        'source_name': args.source_name,
         'dataset_type': args.dataset_type,
         'metadata_sheet': args.sheet,
         'rows_to_skip': int(args.rows_to_skip),
