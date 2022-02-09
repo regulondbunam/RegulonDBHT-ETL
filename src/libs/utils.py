@@ -867,7 +867,7 @@ def get_genes_by_bnumber(bnumbers, database, url):
 
 def get_gene_by_bnumber(bnumber, database, url):
     '''
-    Gets Gene in the RegulonDB Multigenomic database by Gene BNumber.
+    Gets Gene in the RegulonDB Multigenomic database associated to a Gene BNumber.
 
     Param
         bnumber, List, Bnumbers String Array.
@@ -884,6 +884,8 @@ def get_gene_by_bnumber(bnumber, database, url):
         gene_dict.setdefault('name', gene.name)
         gene_dict.setdefault('bnumber', gene.bnumber)
         gene_dict.setdefault('synonyms', gene.synonyms)
+        gene_dict.setdefault('leftEndPosition', gene.left_end_position)
+        gene_dict.setdefault("rightEndPosition", gene.right_end_position)
 
     except IndexError:
         logging.error(f'Can not find Gene bnumbers: {bnumber}')
