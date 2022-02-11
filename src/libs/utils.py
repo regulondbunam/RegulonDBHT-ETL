@@ -683,12 +683,12 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
 
 
 # TODO: Check if this function is working as expected
-def get_sites_ids_by_tf(tf_name, database, url):
+def get_sites_ids_by_tf(tf_names, database, url):
     '''
     Uses MG API to get the sites IDs by TF name.
 
     Param
-        tf_name, String, TF name.
+        tf_names, List, TF names list.
         database, String, RegulonDB Multigenomic database name
         url, String, URL to RegulonDB Multigenomic database.
 
@@ -697,17 +697,19 @@ def get_sites_ids_by_tf(tf_name, database, url):
     '''
     sites_ids = []
     mg_api.connect(database, url)
-    try:
-        mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
-        tf_id = mg_tf[0].id
+    for tf_name in tf_names:
         try:
-            mg_sites = mg_api.regulatory_sites.get_tf_binding_sites(tf_id)
-            for site in mg_sites:
-                sites_ids.append(site.id)
-        except Exception:
-            logging.error(f'Can not find Sites in TF {tf_id}')
-    except IndexError:
-        logging.error(f'Can not find Trasncription Factor {tf_name}')
+            mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
+            tf_id = mg_tf[0].id
+            print(tf_id)
+            try:
+                mg_sites = mg_api.regulatory_sites.get_tf_binding_sites(tf_id)
+                for site in mg_sites:
+                    sites_ids.append(site.id)
+            except Exception:
+                logging.error(f'Can not find Sites in TF {tf_id}')
+        except IndexError:
+            logging.error(f'Can not find Trasncription Factor {tf_name}')
     mg_api.disconnect()
     return sites_ids
 
@@ -733,7 +735,6 @@ def get_tf_sites_abs_pos(tf_id, database, url):
             'absolutePosition': mg_site.absolute_position,
             'siteObject': mg_site
         }
-        print(site)
     except Exception:
         logging.error(f'Can not find Sites in TF {tf_id}')
     mg_api.disconnect()
@@ -759,15 +760,19 @@ def get_classic_ris(lend, rend, strand, tf_sites):
         tf_center = site.get('absolutePosition', None)
         site_object = site.get('siteObject', None)
         if tf_center and site_object:
-            if tf_center == center_pos or tf_center == (center_pos + 30) or tf_center == (center_pos - 30):
+            if tf_center == center_pos or tf_center == (center_pos + EC.PAIR_OF_BASES) or tf_center == (center_pos - EC.PAIR_OF_BASES):
                 classic_ri = {}
                 classic_ri.setdefault('tfbsLeftPosition',
                                       site_object.left_end_position)
                 classic_ri.setdefault('tfbsRightPosition',
                                       site_object.right_end_position)
+                classic_ri.setdefault('relativeGeneDistance', None)
+                classic_ri.setdefault('relativeTSSDistance', None)
                 classic_ri.setdefault('strand', strand)
                 classic_ri.setdefault('sequence',
                                       site_object.sequence)
+                classic_ri.setdefault('evidence', None)
+                classic_ri.setdefault('origin', None)
                 classic_ris.append(classic_ri)
     return classic_ris
 
