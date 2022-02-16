@@ -701,7 +701,6 @@ def get_sites_ids_by_tf(tf_names, database, url):
         try:
             mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
             tf_id = mg_tf[0].id
-            print(tf_id)
             try:
                 mg_sites = mg_api.regulatory_sites.get_tf_binding_sites(tf_id)
                 for site in mg_sites:
@@ -741,7 +740,198 @@ def get_tf_sites_abs_pos(tf_id, database, url):
     return site
 
 
-def get_classic_ris(lend, rend, strand, tf_sites):
+def get_citations(database, url, citations_obj_list):
+    '''
+    Uses Multigenomic API to get the formatted Citations list.
+
+    Param
+        citations_obj_list, List, Citations Object List.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+
+    Returns
+        citations, List, formatted Citations list.
+    '''
+    citations = []
+    citation = {}
+    mg_api.connect(database, url)
+    for citation_obj in citations_obj_list:
+        evidence_id = citation_obj.evidences_id
+        publication_id = citation_obj.publications_id
+        evidence = {}
+        publication = {}
+        try:
+            mg_evidence = mg_api.evidences.find_by_id(evidence_id)
+            evidence.setdefault('id', mg_evidence.id)
+            evidence.setdefault('name', mg_evidence.name)
+            evidence.setdefault('code', mg_evidence.code)
+            evidence.setdefault('type', mg_evidence.type)
+        except Exception:
+            logging.error(f'Can not find Evidence {evidence_id}')
+        try:
+            mg_publication = mg_api.publications.find_by_id(publication_id)
+            publication.setdefault('id', mg_publication.id)
+            publication.setdefault('authors', mg_publication.authors)
+            publication.setdefault('citation', mg_publication.citation)
+            publication.setdefault('pmid', mg_publication.pmid)
+            publication.setdefault('title', mg_publication.title)
+            publication.setdefault('url', mg_publication.url)
+            publication.setdefault('year', mg_publication.year)
+        except Exception:
+            logging.error(f'Can not find Publication {publication_id}')
+        citation = {
+            'evidence': evidence,
+            'publication': publication
+        }
+        citations.append(citation)
+    mg_api.disconnect()
+    return citations
+
+
+def get_tss_distance(database, url, regulated_entity, strand, rend, lend):
+    '''
+    Calculates the distance between the given Regualtory Interaction and the closest Trasncription Start Site.
+
+    Param
+        regulated_entity, Object, Regualtory Interaction regulated entity object.
+        strand, String, Regualtory Site strand forward or reverse ('-', '+').
+        lend, String, Start position in the sequence.
+        rend, String, End position in the sequence.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+
+    Returns
+        distance, Integer, Distance between the given Regualtory Interaction and the closest Trasncription Start Site.
+    '''
+    mg_api.connect(database, url)
+    distance = None
+    reg_entity_type = regulated_entity.type
+    reg_entity_id = regulated_entity.id
+    if reg_entity_type == 'gene':
+        try:
+            mg_tu = mg_api.transcription_units.find_by_gene_id(reg_entity_id)
+            promoter_id = mg_tu[0].promoters_id
+            mg_promoter = mg_api.promoters.find_by_id(promoter_id)
+            tss = mg_promoter.transcription_start_site
+            tss_rend = tss.right_end_position
+            tss_lend = tss.left_end_position
+            if strand == '-':
+                distance = lend - tss_rend
+            if strand == '+':
+                distance = rend - tss_lend
+        except Exception:
+            logging.error(
+                f'Can not find TU from {reg_entity_id}')
+    if reg_entity_type == 'transcriptionUnit':
+        try:
+            mg_tu = mg_api.transcription_units.find_by_id(reg_entity_id)
+            promoter_id = mg_tu.promoters_id
+            mg_promoter = mg_api.promoters.find_by_id(promoter_id)
+            tss = mg_promoter.transcription_start_site
+            tss_rend = tss.right_end_position
+            tss_lend = tss.left_end_position
+            if strand == '-':
+                distance = lend - tss_rend
+            if strand == '+':
+                distance = rend - tss_lend
+        except Exception:
+            logging.error(
+                f'Can not find TU from {reg_entity_id}')
+    if reg_entity_type == 'promoter':
+        try:
+            mg_promoter = mg_api.promoters.find_by_id(reg_entity_id)
+            tss = mg_promoter.transcription_start_site
+            tss_rend = tss.right_end_position
+            tss_lend = tss.left_end_position
+            if strand == '-':
+                distance = lend - tss_rend
+            if strand == '+':
+                distance = rend - tss_lend
+        except Exception:
+            logging.error(
+                f'Can not find Promoter from {reg_entity_id}')
+    if distance:
+        distance = abs(distance)
+    return distance
+
+
+def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
+    '''
+    Calculates the distance between the given Regualtory Interaction and the closest Gene.
+
+    Param
+        regulated_entity, Object, Regualtory Interaction regulated entity object.
+        strand, String, Regualtory Site strand forward or reverse ('-', '+').
+        lend, String, Start position in the sequence.
+        rend, String, End position in the sequence.
+        database, String, Multigenomic database to get external data.
+        url, String, URL where database is located.
+
+    Returns
+        distance, Integer, Distance between the given Regualtory Interaction and the closest Gene.
+    '''
+    mg_api.connect(database, url)
+    distance = None
+    reg_entity_type = regulated_entity.type
+    reg_entity_id = regulated_entity.id
+    print(reg_entity_id, reg_entity_type)
+    if reg_entity_type == 'gene':
+        try:
+            mg_gene = mg_api.genes.find_by_id(reg_entity_id)
+            gene_rend = mg_gene.right_end_position
+            gene_lend = mg_gene.left_end_position
+            if strand == '-':
+                distance = lend - gene_rend
+            if strand == '+':
+                distance = rend - gene_lend
+        except Exception:
+            logging.error(
+                f'Can not find TU from {reg_entity_id}')
+    if reg_entity_type == 'transcriptionUnit':
+        try:
+            mg_tu = mg_api.transcription_units.find_by_id(reg_entity_id)
+            genes_ids = mg_tu.genes_ids
+            temp_gene_distances = []
+            for gene_id in genes_ids:
+                mg_gene = mg_api.genes.find_by_id(gene_id)
+                gene_rend = mg_gene.right_end_position
+                gene_lend = mg_gene.left_end_position
+                if strand == '-':
+                    temp_gene_distances.append(abs(lend - gene_rend))
+                if strand == '+':
+                    temp_gene_distances.append(abs(rend - gene_lend))
+            temp_gene_distances.sort()
+            print(temp_gene_distances)
+            distance = temp_gene_distances[0]
+        except Exception:
+            logging.error(
+                f'Can not find TU from {reg_entity_id}')
+    if reg_entity_type == 'promoter':
+        try:
+            mg_tu = mg_api.transcription_units.find_by_promoter_id(
+                reg_entity_id)
+            genes_ids = mg_tu[0].genes_ids
+            temp_gene_distances = []
+            for gene_id in genes_ids:
+                mg_gene = mg_api.genes.find_by_id(gene_id)
+                gene_rend = mg_gene.right_end_position
+                gene_lend = mg_gene.left_end_position
+                if strand == '-':
+                    temp_gene_distances.append(abs(lend - gene_rend))
+                if strand == '+':
+                    temp_gene_distances.append(abs(rend - gene_lend))
+            temp_gene_distances.sort()
+            print(temp_gene_distances)
+            distance = temp_gene_distances[0]
+        except Exception:
+            logging.error(
+                f'Can not find TU from {reg_entity_id}')
+    if distance:
+        distance = abs(distance)
+    return distance
+
+
+def get_classic_ris(lend, rend, strand, tf_sites, database, url):
     '''
     Gets Regualtory Interactions on RegulonDB Multigenomic database.
 
@@ -762,17 +952,34 @@ def get_classic_ris(lend, rend, strand, tf_sites):
         if tf_center and site_object:
             if tf_center == center_pos or tf_center == (center_pos + EC.PAIR_OF_BASES) or tf_center == (center_pos - EC.PAIR_OF_BASES):
                 classic_ri = {}
+                ri_regulated_entity = {}
+                mg_api.connect(database, url)
+                try:
+                    mg_ri = mg_api.regulatory_interactions.find_by_reg_site(
+                        site_object.id)
+                    classic_ri.setdefault('_id', mg_ri[0].id)
+                    ri_regulated_entity = mg_ri[0].regulated_entity
+                except Exception:
+                    logging.error(
+                        f'Can not find RI from Site {site_object.id}')
+                relative_tss_distance = get_tss_distance(
+                    database, url, ri_regulated_entity, strand, site_object.right_end_position, site_object.left_end_position)
+                classic_ri.setdefault(
+                    'relativeTSSDistance', relative_tss_distance)
+                relative_gene_distance = get_gene_distance(
+                    database, url, ri_regulated_entity, strand, site_object.right_end_position, site_object.left_end_position)
+                classic_ri.setdefault(
+                    'relativeGeneDistance', relative_gene_distance)
                 classic_ri.setdefault('tfbsLeftPosition',
                                       site_object.left_end_position)
                 classic_ri.setdefault('tfbsRightPosition',
                                       site_object.right_end_position)
-                classic_ri.setdefault('relativeGeneDistance', None)
-                classic_ri.setdefault('relativeTSSDistance', None)
                 classic_ri.setdefault('strand', strand)
                 classic_ri.setdefault('sequence',
                                       site_object.sequence)
-                classic_ri.setdefault('evidence', None)
-                classic_ri.setdefault('origin', None)
+                citations = get_citations(database, url, site_object.citations)
+                classic_ri.setdefault('citations', citations)
+                classic_ri.setdefault('origin', 'RegulonDB')
                 classic_ris.append(classic_ri)
     return classic_ris
 

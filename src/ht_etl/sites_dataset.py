@@ -44,7 +44,7 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                         row[1], row[2], database, url, genes_ranges))
                     classic_ris = utils.get_classic_ris(
-                        row[1], row[2], row[5], tf_sites)
+                        row[1], row[2], row[5], tf_sites, database, url)
                     dataset_dict.setdefault('foundRIs', classic_ris)
                     dataset_dict.setdefault('peakId', row[3])
                     dataset_dict.setdefault('score', float(row[4]))

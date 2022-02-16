@@ -414,7 +414,7 @@ def excel_file_mapping(filename, keyargs):
                         tf_name,
                         keyargs.get('db'),
                         keyargs.get('url'),)
-                    print(tf_sites_ids)
+                    # print(tf_sites_ids)
                     tf_sites = []
                     for tf_site_id in tf_sites_ids:
                         tf_site = utils.get_tf_sites_abs_pos(
