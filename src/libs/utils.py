@@ -431,6 +431,7 @@ def get_pubmed_data(pmids, email):
         for identifier in article_identifier:
             if ' [doi]' in identifier:
                 publication.setdefault('doi', identifier.replace(' [doi]', ''))
+        publication = {k: v for k, v in publication.items() if v}
         publications.append(publication)
     return publications
 
@@ -526,6 +527,7 @@ def get_object_tested(protein_names, database, url):
             'activeConformations': [],
             'externalCrossReferences': [],
         }
+        object_tested = {k: v for k, v in object_tested.items() if v}
         objects_tested.append(object_tested)
     mg_api.disconnect()
     return objects_tested
@@ -874,7 +876,6 @@ def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
     distance = None
     reg_entity_type = regulated_entity.type
     reg_entity_id = regulated_entity.id
-    print(reg_entity_id, reg_entity_type)
     if reg_entity_type == 'gene':
         try:
             mg_gene = mg_api.genes.find_by_id(reg_entity_id)
@@ -901,7 +902,6 @@ def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
                 if strand == '+':
                     temp_gene_distances.append(abs(rend - gene_lend))
             temp_gene_distances.sort()
-            print(temp_gene_distances)
             distance = temp_gene_distances[0]
         except Exception:
             logging.error(
@@ -921,7 +921,6 @@ def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
                 if strand == '+':
                     temp_gene_distances.append(abs(rend - gene_lend))
             temp_gene_distances.sort()
-            print(temp_gene_distances)
             distance = temp_gene_distances[0]
         except Exception:
             logging.error(
@@ -931,7 +930,7 @@ def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
     return distance
 
 
-def get_classic_ris(lend, rend, strand, tf_sites, database, url):
+def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
     '''
     Gets Regualtory Interactions on RegulonDB Multigenomic database.
 
@@ -979,7 +978,7 @@ def get_classic_ris(lend, rend, strand, tf_sites, database, url):
                                       site_object.sequence)
                 citations = get_citations(database, url, site_object.citations)
                 classic_ri.setdefault('citations', citations)
-                classic_ri.setdefault('origin', 'RegulonDB')
+                classic_ri.setdefault('origin', origin)
                 classic_ris.append(classic_ri)
     return classic_ris
 

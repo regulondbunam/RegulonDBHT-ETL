@@ -2,7 +2,6 @@
 Dataset record processing.
 '''
 # standard
-from importlib.util import source_hash
 import os
 import logging
 import shutil
@@ -120,6 +119,8 @@ def get_growth_conditions(gc_raw, dataset_id):
         else:
             logging.error(
                 f'There are not valid Growth Conditions for {dataset_id} can not read property')
+    if gc_dict:
+        gc_dict = {k: v for k, v in gc_dict.items() if v}
     return gc_dict
 
 
@@ -162,6 +163,8 @@ def set_sample(experiment_id, control_id, title):
         'controlId': control_ids,
         'title': title,
     }
+    if sample:
+        sample = {k: v for k, v in sample.items() if v}
     return sample
 
 
@@ -198,12 +201,14 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
         for ctrl_id in control_id:
             control_ids.append(ctrl_id.replace('\t', ''))
 
-    sample = {
+    linked_dataset = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
         'datasetType': dataset_type,
     }
-    return sample
+    if linked_dataset:
+        linked_dataset = {k: v for k, v in linked_dataset.items() if v}
+    return linked_dataset
 
 
 def excel_file_mapping(filename, keyargs):
@@ -243,10 +248,9 @@ def excel_file_mapping(filename, keyargs):
                 f'Not Dataset ID')
             continue
         dataset_id = str(dataset_id).rstrip()
-        # publications
+        # Publications
         pmid = row.get(EC.PMID, None)
         if pmid:
-            # print(pmid)
             dataset_dict.setdefault(
                 'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
         else:
@@ -254,16 +258,21 @@ def excel_file_mapping(filename, keyargs):
             if isinstance(pubmed_authors, str):
                 pubmed_authors = pubmed_authors.rstrip()
                 pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publications',
-                                    [{
-                                        'authors': pubmed_authors,
-                                        'abstract': None,
-                                        'date': row.get(EC.RELEASE_DATE, None),
-                                        'pmcid': None,
-                                        'pmid': None,
-                                        'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }]
-                                    )
+            publications = []
+            publication = {
+                'authors': pubmed_authors,
+                'abstract': None,
+                'date': row.get(EC.RELEASE_DATE, None),
+                'pmcid': None,
+                'pmid': None,
+                'title': row.get(EC.EXPERIMENT_TITLE, None)
+            }
+            if publication:
+                publication = {k: v for k, v in publication.items() if v}
+            publications.append(publication)
+            dataset_dict.setdefault('publications', publications)
+
+        # ObjectsTested
         tf_name = row.get(EC.TF_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_CHIP, None)
@@ -287,6 +296,7 @@ def excel_file_mapping(filename, keyargs):
                                                      keyargs.get('url')
                                                      )
         )
+        # SourceSerie
         # TODO: DATABASE:ID
         series = row.get(EC.SERIE_ID, None)
         series_list = []
@@ -307,8 +317,9 @@ def excel_file_mapping(filename, keyargs):
                     'sourceId': serie_id,
                     'sourceName': serie_db,
                 }
+                if serie_obj:
+                    serie_obj = {k: v for k, v in serie_obj.items() if v}
                 series_list.append(serie_obj)
-        # print(series_list)
 
         platform = row.get(EC.PLATFORM_ID, None)
         platform_id = None
@@ -331,9 +342,10 @@ def excel_file_mapping(filename, keyargs):
                 'source': platform_db,
                 'title': platform_title,
             }
+            platform_obj = {k: v for k, v in platform_obj.items() if v}
         else:
             platform_obj = platform
-        # print(platform_obj)
+
         strategy = row.get(EC.STRATEGY, None)
         if strategy:
             strategy = strategy.rstrip()
@@ -344,13 +356,16 @@ def excel_file_mapping(filename, keyargs):
         if experiment_title:
             experiment_title = experiment_title.rstrip()
 
-        dataset_dict.setdefault('sourceSerie', {
+        source_serie_obj = {
             'series': series_list,
             'platform': platform_obj,
             'title': experiment_title,
             'strategy': strategy,
             'method': method_name,
-        })
+        }
+        if source_serie_obj:
+            source_serie_obj = {k: v for k, v in source_serie_obj.items() if v}
+        dataset_dict.setdefault('sourceSerie', source_serie_obj)
         dataset_dict.setdefault('sample',
                                 set_sample(
                                     row.get(
@@ -523,30 +538,33 @@ def excel_file_mapping(filename, keyargs):
         if authors_data.get('authorsData'):
             authors_data_list.append(authors_data)
 
+        summary_obj = {
+            'totalOfPeaks': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+            'totalOfTFBS': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+            'totalOfGenes': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+        }
+        if summary_obj:
+            summary_obj = {k: v for k, v in summary_obj.items() if v}
         dataset_dict.setdefault(
-            'summary', {
-                'totalOfPeaks': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
-                'totalOfTFBS': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
-                'totalOfGenes': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
-            }
+            'summary', summary_obj
         )
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
