@@ -253,24 +253,6 @@ def excel_file_mapping(filename, keyargs):
         if pmid:
             dataset_dict.setdefault(
                 'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
-        else:
-            pubmed_authors = row.get(EC.AUTHORS, None)
-            if isinstance(pubmed_authors, str):
-                pubmed_authors = pubmed_authors.rstrip()
-                pubmed_authors = pubmed_authors.split(',')
-            publications = []
-            publication = {
-                'authors': pubmed_authors,
-                'abstract': None,
-                'date': row.get(EC.RELEASE_DATE, None),
-                'pmcid': None,
-                'pmid': None,
-                'title': row.get(EC.EXPERIMENT_TITLE, None)
-            }
-            if publication:
-                publication = {k: v for k, v in publication.items() if v}
-            publications.append(publication)
-            dataset_dict.setdefault('publications', publications)
 
         # ObjectsTested
         tf_name = row.get(EC.TF_NAME, None)
@@ -280,14 +262,18 @@ def excel_file_mapping(filename, keyargs):
             tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_TEC, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_RDB, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_COMMON_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_SOURCE, None)
         if tf_name:
             tf_name = tf_name.rstrip()
             if re.findall('([α-ωΑ-Ω])', tf_name):
-                tf_name = row.get(EC.TF_NAME_CHIP, None)
-            if 'Mixed TFs: ' in tf_name:
-                tf_name = tf_name.replace('Mixed TFs: ', '')
-                tf_name = tf_name.strip()
-                tf_name = tf_name.split(',')
+                tf_name = row.get(EC.TF_NAME_SOURCE, None)
+            tf_name = tf_name.replace(' ', '')
+            tf_name = tf_name.split(',')
             if isinstance(tf_name, str):
                 tf_name = [tf_name]
         dataset_dict.setdefault(
@@ -297,55 +283,26 @@ def excel_file_mapping(filename, keyargs):
                                                      )
         )
         # SourceSerie
-        # TODO: DATABASE:ID
-        series = row.get(EC.SERIE_ID, None)
         series_list = []
-        serie_id = None
-        serie_db = None
-        if series:
-            series = (series.replace(' ', '')).split(',')
-            for serie in series:
-                try:
-                    serie_db = serie.split(':')[1]
-                except IndexError:
-                    logging.error(f'Can not find serie_db in {serie}')
-                try:
-                    serie_id = serie.split(':')[0]
-                except IndexError:
-                    logging.error(f'Can not find serie_id in {serie}')
-                serie_obj = {
-                    'sourceId': serie_id,
-                    'sourceName': serie_db,
-                }
-                if serie_obj:
-                    serie_obj = {k: v for k, v in serie_obj.items() if v}
-                series_list.append(serie_obj)
+        serie_id = row.get(EC.SERIE_ID, None)
+        serie_db = row.get(EC.SOURCE_DATABASE, None)
+        serie_obj = {
+            'sourceId': serie_id,
+            'sourceName': serie_db,
+        }
+        if serie_obj:
+            serie_obj = {k: v for k, v in serie_obj.items() if v}
+        series_list.append(serie_obj)
 
-        platform = row.get(EC.PLATFORM_ID, None)
-        platform_id = None
-        platform_db = None
+        platform_id = row.get(EC.PLATFORM_ID, None)
         platform_title = row.get(EC.PLATFORM_TITLE, None)
-        if platform:
-            platform = platform.replace('\t', '')
-            if platform_title:
-                platform_title = platform_title.replace('\t', '').rstrip()
-            try:
-                platform_db = platform.split(':')[1]
-            except IndexError:
-                logging.error(f'Can not find platform_db in {platform}')
-            try:
-                platform_id = platform.split(':')[0]
-            except IndexError:
-                logging.error(f'Can not find platform_id in {platform}')
-            platform_obj = {
-                '_id': platform_id,
-                'source': platform_db,
-                'title': platform_title,
-            }
-            platform_obj = {k: v for k, v in platform_obj.items() if v}
-        else:
-            platform_obj = platform
+        platform_obj = {
+            '_id': platform_id,
+            'title': platform_title,
+        }
+        platform_obj = {k: v for k, v in platform_obj.items() if v}
 
+        source_db = row.get(EC.SOURCE_DATABASE, None)
         strategy = row.get(EC.STRATEGY, None)
         if strategy:
             strategy = strategy.rstrip()
@@ -359,6 +316,7 @@ def excel_file_mapping(filename, keyargs):
         source_serie_obj = {
             'series': series_list,
             'platform': platform_obj,
+            'sourceDB': source_db,
             'title': experiment_title,
             'strategy': strategy,
             'method': method_name,
@@ -366,6 +324,7 @@ def excel_file_mapping(filename, keyargs):
         if source_serie_obj:
             source_serie_obj = {k: v for k, v in source_serie_obj.items() if v}
         dataset_dict.setdefault('sourceSerie', source_serie_obj)
+        # Sample
         dataset_dict.setdefault('sample',
                                 set_sample(
                                     row.get(
@@ -385,6 +344,7 @@ def excel_file_mapping(filename, keyargs):
                                         EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None),
                                     linked_dataset_type)
                                 )
+        # LinkedDataset
         ref_genome = row.get(EC.REFERENCE_GENOME, None)
         if ref_genome:
             ref_genome = ref_genome.rstrip()
@@ -412,8 +372,19 @@ def excel_file_mapping(filename, keyargs):
             experiment_condition = experiment_condition.rstrip()
         dataset_dict.setdefault('experimentCondition', experiment_condition)
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
+        dataset_dict.setdefault('cutOff', row.get(EC.CUT_OFF, None))
+        dataset_dict.setdefault('notes', row.get(EC.PUBLIC_NOTES, None))
+
+        external_references = row.get(EC.EXTERNAL_DB_LINK, None)
+        if external_references:
+            dataset_dict.setdefault('externalReferences', utils.get_external_reference(
+                external_references))
 
         datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
+        old_dataset_id = row.get(EC.OLD_DATASET_ID, None)
+        if old_dataset_id:
+            datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{old_dataset_id}'
+        print(datasets_source_path)
         new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
         new_datasets_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
 
@@ -425,11 +396,12 @@ def excel_file_mapping(filename, keyargs):
                         f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
                     shutil.copytree(datasets_source_path, new_datasets_path)
                     bed_path = f'{datasets_source_path}/{dataset_id}'
+                    if old_dataset_id:
+                        bed_path = f'{datasets_source_path}/{old_dataset_id}'
                     tf_sites_ids = utils.get_sites_ids_by_tf(
                         tf_name,
                         keyargs.get('db'),
                         keyargs.get('url'),)
-                    # print(tf_sites_ids)
                     tf_sites = []
                     for tf_site_id in tf_sites_ids:
                         tf_site = utils.get_tf_sites_abs_pos(

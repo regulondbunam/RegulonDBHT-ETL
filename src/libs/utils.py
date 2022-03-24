@@ -406,9 +406,7 @@ def get_pubmed_data(pmids, email):
         return None
     Entrez.email = email
     publications = []
-    if isinstance(pmids, int):
-        pmids = [pmids]
-    if isinstance(pmids, float):
+    if isinstance(pmids, int) or isinstance(pmids, float):
         pmids = [pmids]
     elif isinstance(pmids, str):
         pmids = pmids.replace(' ', '')
@@ -505,6 +503,7 @@ def get_object_tested(protein_names, database, url):
                     'activeConformations': active_conformations,
                     'externalCrossReferences': external_cross_references
                 }
+                object_tested = {k: v for k, v in object_tested.items() if v}
                 objects_tested.append(object_tested)
             else:
                 object_tested = {
@@ -516,19 +515,8 @@ def get_object_tested(protein_names, database, url):
                     'activeConformations': [],
                     'externalCrossReferences': [],
                 }
+                object_tested = {k: v for k, v in object_tested.items() if v}
                 objects_tested.append(object_tested)
-    else:
-        object_tested = {
-            '_id': None,
-            'name': protein_names,
-            'synonyms': [],
-            'genes': [],
-            'note': None,
-            'activeConformations': [],
-            'externalCrossReferences': [],
-        }
-        object_tested = {k: v for k, v in object_tested.items() if v}
-        objects_tested.append(object_tested)
     mg_api.disconnect()
     return objects_tested
 
@@ -684,7 +672,6 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
     return terminators
 
 
-# TODO: Check if this function is working as expected
 def get_sites_ids_by_tf(tf_names, database, url):
     '''
     Uses MG API to get the sites IDs by TF name.
@@ -1154,3 +1141,31 @@ def read_json_from_path(json_path):
     '''
     json_file = open(json_path)
     return json.load(json_file)
+
+
+def get_external_reference(external_ref):
+    '''
+    [Description]
+
+    Param
+        [Description]
+
+    Returns
+        [Description]
+    '''
+    external_references_list = []
+    external_references = [external_ref]
+    for external_reference in external_references:
+        reference_name = external_reference.split(':')[0]
+        reference_url = re.search(
+            "(?P<url>https?://[^\s]+)", external_reference).group("url")
+        external_reference_dict = {
+            'name': reference_name,
+            'url': reference_url,
+            'description': '',
+            'internalComment': '',
+            'note': '',
+        }
+        external_references_list.append(external_reference_dict)
+
+    return external_references_list
