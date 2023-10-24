@@ -18,7 +18,7 @@ from libs import constants as EC
 from ht_etl import nlp_growth_conditions, gene_exp_datasets
 
 
-def open_tsv_file(keyargs):
+def open_tsv_file(keyargs, bnumbers):
     '''
     This function lists and filters all tsv files in the directory path.
 
@@ -33,7 +33,10 @@ def open_tsv_file(keyargs):
 
     if os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.tsv'):
         collection_data.extend(tsv_file_mapping(
-            keyargs.get('datasets_record_path'), keyargs))
+            keyargs.get('datasets_record_path'), keyargs, bnumbers))
+    elif os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.csv'):
+        collection_data.extend(tsv_file_mapping(
+            keyargs.get('datasets_record_path'), keyargs, bnumbers))
     else:
         logging.warning(
             f'{keyargs.get("datasets_record_path")} is not a valid txt file will be ignored')
@@ -157,7 +160,7 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
     return linked_dataset
 
 
-def tsv_file_mapping(filename, keyargs):
+def tsv_file_mapping(filename, keyargs, bnumbers):
     '''
     Reads one by one all the valid XLSX files and returns the corresponding data dictionaries.
 
@@ -256,7 +259,8 @@ def tsv_file_mapping(filename, keyargs):
         }
         if serie_obj:
             serie_obj = {k: v for k, v in serie_obj.items() if v}
-        series_list.append(serie_obj)
+        if serie_obj != {}:
+            series_list.append(serie_obj)
 
         platform_id = row.get(EC.PLATFORM_ID, None)
         platform_db = row.get(EC.SOURCE_DATABASE, None)
@@ -317,22 +321,25 @@ def tsv_file_mapping(filename, keyargs):
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
-        new_dataset_id = f'{dataset_id}'  # {keyargs.get("dataset_type")}_
+        new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
 
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
         # Uniformized
-        '''ge_dict_list = []
-        datasets_source_path = f'{keyargs.get("collection_path")}/{EC.BED_PATHS}/v1.0/{dataset_id}.txt'
+        '''
+        ge_dict_list = []
+        datasets_source_path = f'{keyargs.get("collection_path")}/{EC.BED_PATHS}/{dataset_id}.txt'
         ge_dict_list = gene_exp_datasets.file_mapping(
             datasets_source_path,
-            keyargs
+            keyargs,
+            bnumbers
         )
         collection_data = utils.set_json_object(
             "geneExpression", ge_dict_list, keyargs.get('organism'), 'GED', 'GE')
         utils.create_json(
-            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))'''
+            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))
+        '''
         print(new_dataset_id)
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)

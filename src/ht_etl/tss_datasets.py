@@ -12,7 +12,7 @@ import logging
 from libs import utils
 
 
-def file_mapping(dataset_id, filename, database, url, dataset_type, genes_ranges):
+def file_mapping(dataset_id, filename, database, url, dataset_type, genes_ranges, bnumbers):
     '''
     Reads one by one all the valid TSV files and returns the corresponding data dictionaries.
 

@@ -28,7 +28,7 @@ def file_mapping(keyargs):
     nlp_gc_dict_list = []
     dataset_type = keyargs.get('dataset_type', None)
     geo_nlp_gc_json_path = utils.verify_json_path(os.path.join(
-        keyargs.get("collection_path"), "metadata/srr_htregulondb_full_V4.json"))
+        keyargs.get("collection_path"), "metadata/srr_htregulondb_correct_full.json"))
     if not geo_nlp_gc_json_path:
         return nlp_gc_dict_list
     geo_gc_json = utils.read_json_from_path(geo_nlp_gc_json_path)
@@ -78,7 +78,7 @@ def gc_term_mapper(gc_json, nlp_gc_dict_list, dataset_type):
             gc_term_dict.setdefault('datasetIds', split_combinated_ids(key))
         else:
             gc_term_dict.setdefault(
-                'datasetIds', [f'{key}'])  # {dataset_type}_
+                'datasetIds', [f'{dataset_type}_{key}'])  # {dataset_type}_
         gc_term_dict.setdefault('_id', f'GC_{key}')
         gc_term_dict.setdefault('additionalProperties', [])
         for term in dict['terms']:

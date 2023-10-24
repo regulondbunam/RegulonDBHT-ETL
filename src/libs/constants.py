@@ -1,6 +1,6 @@
 # Start Paths
-BED_PATHS = 'uniformized'
-TSV_PATHS = 'uniformized_data'
+BED_PATHS = 'normalized'
+TSV_PATHS = 'normalized'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
 
@@ -11,8 +11,8 @@ INTERVALS = 200
 PAIR_OF_BASES = 30
 
 # Collections
-CHIP_EXO = 'ChIP-exo-Maze-v1.0'
-CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
+CHIP_EXO = 'ChIP-exo'
+CHIP_SEQ = 'ChIP-Seq'
 TUS = 'TU'
 TSS = 'TSS'
 TTS = 'TTS'
@@ -68,6 +68,8 @@ CUT_OFF = 'cut-off'
 PUBLIC_NOTES = 'Public notes'
 OLD_DATASET_ID = 'Dataset ID Old'
 EXTERNAL_DB_LINK = 'External DB Links'
+REFERENCE_GENOME = 'Reference genome'
+SOURCE_REFERENCE_GENOME = 'Source reference genome'
 # GeneExpression
 GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
 GE_DATASET_ID = "#Dataset-ID"

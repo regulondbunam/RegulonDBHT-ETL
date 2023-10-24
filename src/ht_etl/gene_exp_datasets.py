@@ -12,7 +12,7 @@ import logging
 from libs import utils
 
 
-def file_mapping(filename, keyargs):
+def file_mapping(filename, keyargs, bnumbers):
     '''
     Reads one by one all the valid TXT files and returns the corresponding data dictionaries.
 
@@ -44,8 +44,8 @@ def file_mapping(filename, keyargs):
             dataset_dict.setdefault('tpm', float(row[5]))
             dataset_dict.setdefault('fpkm', float(row[4]))
 
-            dataset_dict.setdefault('gene', utils.get_gene_by_bnumber(
-                row[2], database, url))
+            dataset_dict.setdefault('gene', bnumbers.get(row[2]))
+            # utils.get_gene_by_bnumber(row[2], database, url))
 
             dataset_dict.setdefault(
                 'datasetIds', [f'{keyargs.get("dataset_type")}_{row[1]}'])

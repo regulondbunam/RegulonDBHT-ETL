@@ -6,12 +6,12 @@ import os
 import logging
 import json
 import pandas
-import json
 import re
 
 # third party
 from Bio import Entrez, Medline
 import multigenomic_api as mg_api
+import pymongo
 
 # local
 from libs import constants as EC
@@ -26,21 +26,21 @@ def get_collection_name(collection_path):
         collection_name, String, Final collection name.
     '''
     collection_name = collection_path
-    if 'CHIP-exo' in collection_name or 'ChIP-exo' in collection_name:
+    if 'ChIP-exo' in collection_name:
         collection_name = EC.CHIP_EXO
-    if 'CHIP-Seq' in collection_name or 'ChIP-Seq' in collection_name:
+    if 'ChIP-seq' in collection_name:
         collection_name = EC.CHIP_SEQ
-    if 'TUs' in collection_name:
+    if 'TU' in collection_name:
         collection_name = EC.TUS
     if 'TSS' in collection_name:
         collection_name = EC.TSS
     if 'TTS' in collection_name:
         collection_name = EC.TTS
-    if 'RNA' in collection_name:
+    if 'RNA-seq' in collection_name:
         collection_name = EC.RNA
     if 'gSELEX' in collection_name:
         collection_name = EC.GSELEX
-    if 'DAP' in collection_name:
+    if 'DAP-seq' in collection_name:
         collection_name = EC.DAPS
     return collection_name
 
@@ -54,9 +54,9 @@ def get_collection_type(collection_path):
         collection_type, String, Final collection type.
     '''
     collection_type = collection_path
-    if 'CHIP-exo' in collection_type or 'ChIP-exo' in collection_type:
+    if 'ChIP-exo' in collection_type:
         collection_type = 'CHIP_EXO_'
-    if 'CHIP-Seq' in collection_type or 'ChIP-Seq' in collection_type:
+    if 'ChIP-seq' in collection_type:
         collection_type = ''
     if 'gSELEX' in collection_type:
         collection_type = 'GSELEX_'
@@ -204,15 +204,19 @@ def validate_directories(data_path):
         raise IOError("Please, verify '{}' directory path".format(data_path))
 
 
-def set_log(log_path):
+def set_log(log_path, log_name, log_date):
     '''
     Initializes the execution log to examine any problems that arise during extraction.
 
     Param
         log_path, String, the execution log path.
     '''
+    log_file_name = f'ht_etl_{log_name}_{log_date}.log'
+    log_file_name = log_file_name.replace('/', '')
+    log_file_name = log_file_name.replace('-', '_')
+    print(log_file_name)
     validate_directories(log_path)
-    logging.basicConfig(filename=os.path.join(log_path, 'ht_etl.log'),
+    logging.basicConfig(filename=os.path.join(log_path, log_file_name),
                         format='%(levelname)s - %(asctime)s - %(message)s', filemode='w', level=logging.INFO)
 
 
@@ -412,6 +416,9 @@ def get_pubmed_data(pmids, email):
         pmids = pmids.replace(' ', '')
         pmids = pmids.split(',')
     for pmid in pmids:
+        if isinstance(pmid, float):
+            pmid = int(pmid)
+        # print(pmid)
         handle = Entrez.efetch(db='pubmed', id=pmid,
                                rettype='medline', retmode='text')
         publication = {}
@@ -468,24 +475,34 @@ def get_object_tested(protein_names, database, url):
         for protein_name in protein_names:
             object_tested = {}
             mg_tf = mg_api.transcription_factors.find_by_name(protein_name)
+
+            client = pymongo.MongoClient(url)
+            db = client[database]
+            collection = db['transcriptionFactors']
+            mg_tf = collection.find_one({'abbreviatedName': protein_name})
+            if not mg_tf:
+                print(protein_name, database)
+                mg_tf = collection.find_one({'name': protein_name})
+
             if mg_tf:
+                tf_id = mg_tf.get('_id')
                 active_conformations = []
                 external_cross_references = []
-                for active_conf in mg_tf[0].active_conformations:
-                    active_conformations.append(active_conf.id)
-                for cross_ref in mg_tf[0].external_cross_references:
+                for active_conf in mg_tf.get('activeConformations', []):
+                    active_conformations.append(active_conf.get('_id'))
+                for cross_ref in mg_tf.get('externalCrossReferences', []):
                     mg_cross_ref = mg_api.external_cross_references.find_by_id(
-                        cross_ref.external_cross_references_id)
+                        cross_ref.get('externalCrossReferences_id'))
                     external_cross_references.append(
                         {
-                            'externalCrossReferenceId': cross_ref.external_cross_references_id,
-                            'objectId': cross_ref.object_id,
+                            'externalCrossReferenceId': cross_ref.get('externalCrossReferences_id'),
+                            'objectId': cross_ref.get('objectId'),
                             'externalCrossReferenceName': mg_cross_ref.name,
-                            'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.object_id)
+                            'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.get('objectId'))
                         }
                     )
                 genes = []
-                for product_id in mg_tf[0].products_ids:
+                for product_id in mg_tf.get('products_ids'):
                     mg_product = mg_api.products.find_by_id(product_id)
                     mg_gene = mg_api.genes.find_by_id(mg_product.genes_id)
                     gene = {
@@ -495,11 +512,12 @@ def get_object_tested(protein_names, database, url):
                     genes.append(gene)
 
                 object_tested = {
-                    '_id': mg_tf[0].id,
-                    'name': mg_tf[0].name,
-                    'synonyms': mg_tf[0].synonyms,
+                    '_id': tf_id,
+                    'name': mg_tf.get('name'),
+                    'abbreviatedName': mg_tf.get('abbreviatedName'),
+                    'synonyms': mg_tf.get('synonyms'),
                     'genes': genes,
-                    'note': mg_tf[0].note,
+                    'note': mg_tf.get('note'),
                     'activeConformations': active_conformations,
                     'externalCrossReferences': external_cross_references
                 }
@@ -640,7 +658,6 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
         for terminator in mg_terminators:
             terminator_dict = {}
             terminator_dict.setdefault('_id', terminator.id)
-            terminator_dict.setdefault('name', terminator.name)
             mg_tus = mg_api.transcription_units.find_by_terminator_id(
                 terminator.id)
             tus_dict_list = []
@@ -655,9 +672,9 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
                     promoter.setdefault('name', mg_promoter.name)
                     promoter.setdefault('sequence', mg_promoter.sequence)
                     promoter.setdefault('leftEndPosition',
-                                        mg_promoter.left_end_position)
+                                        mg_promoter.transcription_start_site.left_end_position)
                     promoter.setdefault('rightEndPosition',
-                                        mg_promoter.right_end_position)
+                                        mg_promoter.transcription_start_site.right_end_position)
                     promoter.setdefault('strand', mg_promoter.strand)
 
                     tu_dict.setdefault('promoter', promoter)
@@ -688,8 +705,14 @@ def get_sites_ids_by_tf(tf_names, database, url):
     mg_api.connect(database, url)
     for tf_name in tf_names:
         try:
-            mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
-            tf_id = mg_tf[0].id
+            # TODO: Find by short name
+            #mg_tf = mg_api.transcription_factors.find_by_name(tf_name)
+            #tf_id = mg_tf[0].id
+            client = pymongo.MongoClient(url)
+            db = client[database]
+            collection = db['transcriptionFactors']
+            mg_tf = collection.find_one({'abbreviatedName': tf_name})
+            tf_id = mg_tf.get('_id')
             try:
                 mg_sites = mg_api.regulatory_sites.get_tf_binding_sites(tf_id)
                 for site in mg_sites:
@@ -754,7 +777,11 @@ def get_citations(database, url, citations_obj_list):
             evidence.setdefault('id', mg_evidence.id)
             evidence.setdefault('name', mg_evidence.name)
             evidence.setdefault('code', mg_evidence.code)
+            ev_type = mg_evidence.type
+            if ev_type == []:
+                ev_type = None
             evidence.setdefault('type', mg_evidence.type)
+            evidence = {k: v for k, v in evidence.items() if v}
         except Exception:
             logging.error(f'Can not find Evidence {evidence_id}')
         try:
@@ -766,12 +793,14 @@ def get_citations(database, url, citations_obj_list):
             publication.setdefault('title', mg_publication.title)
             publication.setdefault('url', mg_publication.url)
             publication.setdefault('year', mg_publication.year)
+            publication = {k: v for k, v in publication.items() if v}
         except Exception:
             logging.error(f'Can not find Publication {publication_id}')
         citation = {
             'evidence': evidence,
             'publication': publication
         }
+        citation = {k: v for k, v in citation.items() if v}
         citations.append(citation)
     mg_api.disconnect()
     return citations
@@ -1166,6 +1195,8 @@ def get_external_reference(external_ref):
             'internalComment': '',
             'note': '',
         }
+        external_reference_dict = {k: v for k,
+                                   v in external_reference_dict.items() if v}
         external_references_list.append(external_reference_dict)
 
     return external_references_list

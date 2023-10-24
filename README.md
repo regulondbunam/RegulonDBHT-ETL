@@ -1,61 +1,50 @@
 # RegulonDB HT ETL
 
-# Description
+## Description
 
 This software is used for the extraction and processing of diferent collections of HT Datasets.
 
-
-
-
-# System requirements
+## System requirements
 
 - Software:
   - [Python 2.7](https://www.python.org/)
-  - [Python 3.8](https://www.python.org/) or above
-  - [Snakemake 6.10.0](https://snakemake.readthedocs.io/en/stable/#)
+  - [Python 3.10](https://www.python.org/) or above
+  - [Snakemake 7.14.0](https://snakemake.readthedocs.io/en/stable/#)
   - [Pandas 1.3.4](https://pandas.pydata.org/)
   - [Biopython 1.79](https://biopython.org/docs/1.79/api/Bio.html)
 - Hardware:
   - RAM: 8 GB (minimal recommended)
   - Storage: 5 GB
 
-# Install 
+## Install
 
 [Install guide](INSTALL.md)
 
-
-
-# Quick start
+## Quick start
 
 ```shell
-$ python src/ -h
+python src/ -h
 ```
 
-# Manuals
+## Manuals
 
 - [User Manual](docs/MU)
 - [Operation Manual](docs/MO)
 - [Maintenance Manual](docs/MM)
 
-
-# Project website 
+## Project website
 
 [RegulonDB WebSite](http://regulondb.ccg.unam.mx/)
 
-
-# License
+## License
 
 [MIT](LICENSE)
 
-
-
-# Support contact information
+## Support contact information
 
 [Support contact](http://regulondb.ccg.unam.mx/menu/about_regulondb/contact_us/index.jsp)
 
-
-
-# Software quality checklist
+## Software quality checklist
 
 **Accessibility**
 
