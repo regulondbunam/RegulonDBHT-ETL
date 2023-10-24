@@ -106,14 +106,6 @@ def get_arguments():
     )
 
     parser.add_argument(
-        "-srcname",
-        "--source-name",
-        help="Dataset record source name.",
-        choices=["GEO", "SRA", ""],
-        default="GEO",
-        metavar="GEO",
-    )
-    parser.add_argument(
         "-dstype",
         "--dataset-type",
         help="Dataset record source name.",
@@ -146,22 +138,30 @@ def get_arguments():
         metavar="regulondbmultigenomic",
     )
 
+    parser.add_argument(
+        "-bnum",
+        "--bnumbers",
+        help="Path to get bnumbers from mg database.",
+        metavar="./config/bnumbers.json",
+        default="./config/bnumbers.json",
+    )
+
     # COLLECTIONS ARGUMENTS
 
     parser.add_argument(
         "-sheet",
         "--sheet",
         help="URL to DB server.",
-        default="MetaData Datasets",
-        metavar="MetaData Datasets",
+        default="DATASET",
+        metavar="DATASET",
     )
 
     parser.add_argument(
         "-rows",
         "--rows-to-skip",
         help="URL to DB server.",
-        default=0,
-        metavar=0,
+        default=1,
+        metavar=1,
     )
 
     arguments = parser.parse_args()

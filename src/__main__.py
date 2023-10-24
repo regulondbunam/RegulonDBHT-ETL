@@ -6,9 +6,10 @@ import logging
 import datetime
 import shutil
 import os
+import json
 
 # third party
-
+from docx import Document
 
 # local
 from libs import arguments
@@ -31,6 +32,8 @@ def run(keyargs):
         logging.info(
             f'Reading Datasets from {keyargs.get("datasets_record_path")}')
         datasets_list = []
+        bnumbers_json = open(keyargs.get('bnumbers'))
+        bnumbers_data = json.load(bnumbers_json)
         if keyargs.get('dataset_type') == 'GENE_EXPRESSION':
             gene_exp_out_path = os.path.join(keyargs.get(
                 'output_path'), utils.get_collection_name(keyargs.get("datasets_record_path")))
@@ -39,9 +42,20 @@ def run(keyargs):
                 shutil.rmtree(gene_exp_out_path)
             os.mkdir(gene_exp_out_path)
             datasets_list = gene_expression_dataset_metadata.open_tsv_file(
-                keyargs)
+                keyargs, bnumbers_data)
         else:
-            datasets_list = dataset_metadata.open_excel_file(keyargs)
+            datasets_list = dataset_metadata.open_excel_file(
+                keyargs, bnumbers_data)
+
+        '''readme_file_path = f'{keyargs.get("collection_path")}README.docx'
+        if not os.path.isfile(readme_file_path):
+            readme_file_path = f'{keyargs.get("collection_path")}README.md'
+        elif os.path.isfile(readme_file_path):
+            document = Document(readme_file_path)
+            print(document)
+            for para in document.paragraphs:
+                print(para.text)'''
+
         collection_data = utils.set_json_object(
             "dataset", datasets_list, keyargs.get('organism'), 'MDD', None)
         utils.create_json(collection_data, f'dataset_metadata_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
@@ -55,8 +69,8 @@ if __name__ == '__main__':
     '''
 
     args = arguments.load_arguments()
-
-    utils.set_log(args.log)
+    collection_name = (args.collection_path).replace("../InputData/", "")
+    utils.set_log(args.log, collection_name, datetime.date.today())
 
     keyargs = {
         'collection_path': args.collection_path,
@@ -68,11 +82,11 @@ if __name__ == '__main__':
         'url': args.url,
         'db': args.database,
         'email': args.email,
-        'source_name': args.source_name,
         'dataset_type': args.dataset_type,
         'metadata_sheet': args.sheet,
         'rows_to_skip': int(args.rows_to_skip),
-        'genes_ranges': utils.set_genome_intervals()
+        'genes_ranges': utils.set_genome_intervals(),
+        'bnumbers': args.bnumbers,
     }
     utils.validate_directories(keyargs.get('output_path'))
 

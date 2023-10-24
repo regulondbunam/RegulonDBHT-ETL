@@ -2,7 +2,9 @@
 
 ## Introduction
 
-The Snakemake script for the MCO data upload process was thought to make uploading data to RegulonDB Multigenomic faster and more controlled, due to the modular nature of Snakemake allows the upload process to be carried out from any computer that meets the execution requirements but without the need to configure its _Python_ environment for each of the data load modules.
+This project was created for the extraction and processing of the HT dataset files.
+Since there is too much data to process, the program must be executed for each collection of datasets. To facilitate the process, a Snakemake script was created to be able to extract the data for each collection separately and load the process to the database in a workflow.
+Due to the modular nature of Snakemake, it allows the loading process to be carried out from any computer that meets the execution requirements, but without the need to configure its _Python_ environment for each of the data loading modules.
 
 ## Snakefile run
 

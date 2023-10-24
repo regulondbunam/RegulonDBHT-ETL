@@ -18,7 +18,7 @@ from libs import constants as EC
 from ht_etl import nlp_growth_conditions, gene_exp_datasets
 
 
-def open_tsv_file(keyargs):
+def open_tsv_file(keyargs, bnumbers):
     '''
     This function lists and filters all tsv files in the directory path.
 
@@ -33,7 +33,10 @@ def open_tsv_file(keyargs):
 
     if os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.tsv'):
         collection_data.extend(tsv_file_mapping(
-            keyargs.get('datasets_record_path'), keyargs))
+            keyargs.get('datasets_record_path'), keyargs, bnumbers))
+    elif os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.csv'):
+        collection_data.extend(tsv_file_mapping(
+            keyargs.get('datasets_record_path'), keyargs, bnumbers))
     else:
         logging.warning(
             f'{keyargs.get("datasets_record_path")} is not a valid txt file will be ignored')
@@ -111,6 +114,8 @@ def set_sample(experiment_id, control_id, title):
         'controlId': control_ids,
         'title': title,
     }
+    if sample:
+        sample = {k: v for k, v in sample.items() if v}
     return sample
 
 
@@ -145,15 +150,17 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
         for ctrl_id in control_id:
             control_ids.append(ctrl_id.replace('\t', ''))
 
-    sample = {
+    linked_dataset = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
         'datasetType': dataset_type,
     }
-    return sample
+    if linked_dataset:
+        linked_dataset = {k: v for k, v in linked_dataset.items() if v}
+    return linked_dataset
 
 
-def tsv_file_mapping(filename, keyargs):
+def tsv_file_mapping(filename, keyargs, bnumbers):
     '''
     Reads one by one all the valid XLSX files and returns the corresponding data dictionaries.
 
@@ -202,36 +209,13 @@ def tsv_file_mapping(filename, keyargs):
         if utils.find_one_in_dict_list(filtered_gene_expression, "PASS-FILTER", dataset_id) != None:
             dataset_dict.setdefault("geneExpressionFiltered", True)
 
-        #  Serie
-        serie_id = row.get(EC.SERIE_ID, None)
-        if serie_id:
-            serie_id = (((row.get(EC.SERIE_ID, None)).split(' '))
-                        [0]).replace(';', '')
-
-        # PMID
+        # Publications
         pmid = row.get(EC.PMID, None)
         if pmid:
-            print(pmid)
             dataset_dict.setdefault(
                 'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
-        else:
-            pubmed_authors = row.get(EC.AUTHORS, None)
-            if isinstance(pubmed_authors, str):
-                pubmed_authors = pubmed_authors.rstrip()
-                pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publications',
-                                    {
-                                        'authors': pubmed_authors,
-                                        'abstract': None,
-                                        'date': row.get(EC.RELEASE_DATE, None),
-                                        'pmcid': None,
-                                        'pmid': None,
-                                        'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }
-                                    )
 
-        # objectTested
-        dataset_dict.setdefault('objectsTested', [])
+        # ObjectsTested
         tf_name = row.get(EC.TF_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_CHIP, None)
@@ -239,13 +223,18 @@ def tsv_file_mapping(filename, keyargs):
             tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_TEC, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_RDB, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_COMMON_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_SOURCE, None)
         if tf_name:
             tf_name = tf_name.rstrip()
             if re.findall('([α-ωΑ-Ω])', tf_name):
-                tf_name = row.get(EC.TF_NAME_CHIP, None)
-            if 'Mixed TFs: ' in tf_name:
-                tf_name = tf_name.replace('Mixed TFs: ', '')
-                tf_name = tf_name.split(', ')
+                tf_name = row.get(EC.TF_NAME_SOURCE, None)
+            tf_name = tf_name.replace(' ', '')
+            tf_name = tf_name.split(',')
             if isinstance(tf_name, str):
                 tf_name = [tf_name]
         dataset_dict.setdefault(
@@ -255,32 +244,64 @@ def tsv_file_mapping(filename, keyargs):
                                                      )
         )
 
+        #  Serie
+        serie_id = row.get(EC.SERIE_ID, None)
+        if serie_id:
+            serie_id = (((row.get(EC.SERIE_ID, None)).split(' '))
+                        [0]).replace(';', '')
         # SourceSerie
-        platform_id = row.get(EC.PLATFORM_ID, None)
-        if platform_id:
-            platform_id = platform_id.replace('\t', '')
-        platform_title = row.get(EC.PLATFORM_TITLE, None)
-        if platform_title:
-            platform_title = platform_title.replace('\t', '')
-
-        dataset_dict.setdefault('sourceSerie', {
+        series_list = []
+        serie_id = row.get(EC.SERIE_ID, None)
+        serie_db = row.get(EC.SOURCE_DATABASE, None)
+        serie_obj = {
             'sourceId': serie_id,
-            'sourceName': keyargs.get('source_name'),
-            'titles': row.get(EC.PROTEIN_NAME, None),
-            'platformId': platform_id,
-            'platformTitle': platform_title,
-            'strategy': row.get(EC.STRATEGY),
-            'method': row.get(EC.METHOD_NAME, None),
-        })
+            'sourceName': serie_db,
+        }
+        if serie_obj:
+            serie_obj = {k: v for k, v in serie_obj.items() if v}
+        if serie_obj != {}:
+            series_list.append(serie_obj)
+
+        platform_id = row.get(EC.PLATFORM_ID, None)
+        platform_db = row.get(EC.SOURCE_DATABASE, None)
+        platform_title = row.get(EC.PLATFORM_TITLE, None)
+        platform_obj = {
+            '_id': platform_id,
+            'source': platform_db,
+            'title': platform_title,
+        }
+        platform_obj = {k: v for k, v in platform_obj.items() if v}
+
+        strategy = row.get(EC.STRATEGY, None)
+        if strategy:
+            strategy = strategy.rstrip()
+        method_name = row.get(EC.METHOD_NAME, None)
+        if method_name:
+            method_name = method_name.rstrip()
+        experiment_title = row.get(EC.EXPERIMENT_TITLE, None)
+        if experiment_title:
+            experiment_title = experiment_title.rstrip()
+
+        source_serie_obj = {
+            'series': series_list,
+            'platform': platform_obj,
+            'title': experiment_title,
+            'strategy': strategy,
+            'method': method_name,
+        }
+        if source_serie_obj:
+            source_serie_obj = {k: v for k, v in source_serie_obj.items() if v}
+        dataset_dict.setdefault('sourceSerie', source_serie_obj)
         # Sample
         dataset_dict.setdefault('sample',
                                 set_sample(
                                     row.get(
                                         EC.GE_SAMPLES_REPLICATES_EXPERIMENT_ID, None),
-                                    None,
+                                    row.get(
+                                        EC.SAMPLES_REPLICATES_CONTROL_ID, None),
                                     row.get(EC.TITLE_FOR_ALL_REPLICATES, None))
                                 )
-        # linked dataset?
+        # LinkedDataset
         dataset_dict.setdefault('linkedDataset',
                                 set_linked_dataset(
                                     row.get(
@@ -300,23 +321,26 @@ def tsv_file_mapping(filename, keyargs):
 
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
 
-        new_dataset_id = f'{dataset_id}'  # {keyargs.get("dataset_type")}_
+        new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
 
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
-        # uniformized #TODO: HAPPY 2022!
-        '''ge_dict_list = []
-        datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/v1.0/{dataset_id}.txt'
+        # Uniformized
+        '''
+        ge_dict_list = []
+        datasets_source_path = f'{keyargs.get("collection_path")}/{EC.BED_PATHS}/{dataset_id}.txt'
         ge_dict_list = gene_exp_datasets.file_mapping(
             datasets_source_path,
-            keyargs
+            keyargs,
+            bnumbers
         )
         collection_data = utils.set_json_object(
             "geneExpression", ge_dict_list, keyargs.get('organism'), 'GED', 'GE')
         utils.create_json(
-            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))'''
-
+            collection_data, f'ge_{dataset_id}', os.path.join(keyargs.get('output_path'), utils.get_collection_name(keyargs.get("datasets_record_path"))))
+        '''
+        print(new_dataset_id)
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)
 

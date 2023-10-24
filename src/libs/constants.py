@@ -1,6 +1,6 @@
 # Start Paths
-BED_PATHS = 'uniformized'
-TSV_PATHS = 'uniformized_data'
+BED_PATHS = 'normalized'
+TSV_PATHS = 'normalized'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
 
@@ -8,10 +8,11 @@ METADATA_CATALOG = 'metadata'
 MINIMUM_DISTANCE = 800
 GENOME_LENGTH = 5000000
 INTERVALS = 200
+PAIR_OF_BASES = 30
 
 # Collections
-CHIP_EXO = 'ChIP-exo-Maze-v1.0'
-CHIP_SEQ = 'ChIP-Seq-workflow-v1.0'
+CHIP_EXO = 'ChIP-exo'
+CHIP_SEQ = 'ChIP-Seq'
 TUS = 'TU'
 TSS = 'TSS'
 TTS = 'TTS'
@@ -30,8 +31,12 @@ PROTEIN_NAME = 'Protein Name'
 TF_NAME_TEC = 'TF name in TEC database'
 TF_NAME_CHIP = 'TF Name in proChIPdb'
 TF_NAME = 'TF Name'
+TF_NAME_RDB = 'RegulonDB TF Name'
+TF_COMMON_NAME = 'TF common name'
+TF_NAME_SOURCE = 'TF name from source'
 
 SERIE_ID = 'Serie ID'
+SOURCE_DATABASE = 'Source Database'
 EXPERIMENT_TITLE = 'Experiment Title'
 PLATFORM_ID = 'Platform ID'
 PLATFORM_TITLE = 'Platform Title'
@@ -59,7 +64,12 @@ RIS_PATH = 'RIs path'
 FIVE_ENRICHMENT = "5'_enrichment"
 EXPERIMENT_CONDITION = "Experiment condition"
 ASSEMBLY_GENOME_ID = 'ID Assembly genome'
-
+CUT_OFF = 'cut-off'
+PUBLIC_NOTES = 'Public notes'
+OLD_DATASET_ID = 'Dataset ID Old'
+EXTERNAL_DB_LINK = 'External DB Links'
+REFERENCE_GENOME = 'Reference genome'
+SOURCE_REFERENCE_GENOME = 'Source reference genome'
 # GeneExpression
 GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
 GE_DATASET_ID = "#Dataset-ID"

@@ -9,7 +9,7 @@ replace_identifiers_config = config["replace_identifiers_config"]
 revalidation_config = config["revalidation_config"]
 data_upload_config = config["data_upload_config"]
 
-'''
+
 rule ht_extractor_workflow:
     params:
         compose_file = {ptools_config["compose_file"]}, # -f
@@ -41,7 +41,8 @@ rule ht_extractor:
     priority: 10
     shell:
         "python {params.main_path} -ev -out {params.output_dir} -l {params.log_dir}"
-'''
+
+
 rule schema_loader:
     params:
         main_path = schema_loader_config["main_path"],
@@ -57,10 +58,13 @@ rule schema_loader:
     shell:
         "python {params.main_path} -db {params.db} -u {params.url} -s {params.schemas} -l {params.log} -d"
 
+
+
 rule data_validator:
     params:
         main_path = validation_config["main_path"],
         data = validation_config["raw_data"],
+        #data = data_upload_config["gene_expression"],
         schemas = validation_config["schemas"],
         valid_data = validation_config["verified_data"],
         invalid_data = validation_config["invalid_data"],
@@ -76,7 +80,7 @@ rule data_validator:
 rule create_identifiers:
     params:
         main_path = create_identifiers_config["main_path"],
-        valid_data = validation_config["raw_data"],
+        valid_data = create_identifiers_config["verified_data"],
         log = create_identifiers_config["log_dir"],
         db = config["db"],
         url = config["url"],
@@ -96,7 +100,7 @@ rule create_identifiers:
 rule replace_identifiers:
     params:
         main_path = replace_identifiers_config["main_path"],
-        valid_data = validation_config["raw_data"],
+        valid_data = validation_config["verified_data"],
         replaced_ids = replace_identifiers_config["persistent_ids"],
         log = replace_identifiers_config["log_dir"],
         organism = config["organism"],
@@ -110,6 +114,7 @@ rule replace_identifiers:
     priority: 6
     shell:
         "python {params.main_path} -org {params.organism} -i {params.valid_data} -o {params.replaced_ids} -u {params.url} -v {params.version} -db {params.db} -l {params.log}"        
+
 
 rule re_validate_data:
     params:
@@ -127,11 +132,12 @@ rule re_validate_data:
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log}"
 
+
+
 rule data_uploader:
     params:
         main_path = data_upload_config["main_path"],
-        valid_data = replace_identifiers_config["persistent_ids"],
-        #valid_data = data_upload_config["gene_expression"],
+        valid_data = revalidation_config["verified_persistent_ids"],
         log = data_upload_config["log_dir"],
         db = config["db"],
         url = config["url"]

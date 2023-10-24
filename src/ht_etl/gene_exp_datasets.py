@@ -12,7 +12,7 @@ import logging
 from libs import utils
 
 
-def file_mapping(filename, keyargs):
+def file_mapping(filename, keyargs, bnumbers):
     '''
     Reads one by one all the valid TXT files and returns the corresponding data dictionaries.
 
@@ -22,8 +22,6 @@ def file_mapping(filename, keyargs):
     Returns
         dataset_dict, Dict, a dictionary with the necessary dataset data.
     '''
-    '''filepath = 'uniformized/all_normalized_GEO_data_112921.csv'
-    filename = os.path.join(keyargs.get('collection_path', None), filepath)'''
     database = keyargs.get('db', None)
     url = keyargs.get('url', None)
     dataset_type = keyargs.get('dataset_type', None)
@@ -42,12 +40,12 @@ def file_mapping(filename, keyargs):
             dataset_dict.setdefault('_id', gene_exp_id)
             new_dataset_id = f'{dataset_type}_{row[1]}'
             dataset_dict.setdefault('temporalId', new_dataset_id)
-            dataset_dict.setdefault('count', row[3])
-            dataset_dict.setdefault('tpm', row[5])
-            dataset_dict.setdefault('fpkm', row[4])
+            dataset_dict.setdefault('count', float(row[3]))
+            dataset_dict.setdefault('tpm', float(row[5]))
+            dataset_dict.setdefault('fpkm', float(row[4]))
 
-            dataset_dict.setdefault('gene', utils.get_gene_by_bnumber(
-                row[2], database, url))
+            dataset_dict.setdefault('gene', bnumbers.get(row[2]))
+            # utils.get_gene_by_bnumber(row[2], database, url))
 
             dataset_dict.setdefault(
                 'datasetIds', [f'{keyargs.get("dataset_type")}_{row[1]}'])

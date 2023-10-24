@@ -16,7 +16,7 @@ from libs import constants as EC
 from ht_etl import peaks_datasets, sites_dataset, tu_datasets, tss_datasets, tts_datasets
 
 
-def open_excel_file(keyargs):
+def open_excel_file(keyargs, bnumbers_data):
     '''
     This function lists and filters all XLSX files in the directory path.
 
@@ -31,7 +31,7 @@ def open_excel_file(keyargs):
 
     if os.path.isfile(keyargs.get('datasets_record_path')) and keyargs.get('datasets_record_path').endswith('.xlsx'):
         collection_data.extend(excel_file_mapping(
-            keyargs.get('datasets_record_path'), keyargs))
+            keyargs.get('datasets_record_path'), keyargs, bnumbers_data))
     else:
         logging.warning(
             f'{keyargs.get("datasets_record_path")} is not a valid XLSX file will be ignored')
@@ -50,21 +50,33 @@ def get_author_data(authors_data_path, filename, dataset_id):
     Returns
         authors_raw, String, CSV formated String.
     '''
+    #print('Getting authors data')
     if not filename:
         logging.error(
             f'There is not File Name for {dataset_id} can not read Author\'s files')
         return None
     author_raw = filename
     excel_path = os.path.join(authors_data_path, filename)
+    #print(author_raw, excel_path)
+    # print(os.path.isfile(excel_path))
     if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
+        #print('IS A XLSX')
         raw = utils.get_author_data_frame(excel_path, 0, 0)
-        print(raw)
         author_raw = raw.to_csv(encoding='utf-8')
-        print(author_raw)
         logging.info(
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
     elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
+        #print('IS A TSV')
+        raw = utils.get_author_data_frame_tsv(excel_path)
+        raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
+        author_raw = raw.to_csv(encoding='utf-8', index=True)
+        author_raw = author_raw.replace(',,,,,#', '#')
+        logging.info(
+            f'Reading Author\'s Data files {excel_path}')
+        return author_raw
+    elif os.path.isfile(excel_path) and excel_path.endswith('.txt'):
+        #print('IS A TSV')
         raw = utils.get_author_data_frame_tsv(excel_path)
         raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
         author_raw = raw.to_csv(encoding='utf-8', index=True)
@@ -73,6 +85,9 @@ def get_author_data(authors_data_path, filename, dataset_id):
             f'Reading Author\'s Data files {excel_path}')
         return author_raw
     else:
+        '''print(
+            f'There are not valid Author\'s Data files for {dataset_id} can not read Author\'s files'
+        )'''
         logging.error(
             f'There are not valid Author\'s Data files for {dataset_id} can not read Author\'s files')
         return None
@@ -121,6 +136,8 @@ def get_growth_conditions(gc_raw, dataset_id):
         else:
             logging.error(
                 f'There are not valid Growth Conditions for {dataset_id} can not read property')
+    if gc_dict:
+        gc_dict = {k: v for k, v in gc_dict.items() if v}
     return gc_dict
 
 
@@ -163,6 +180,8 @@ def set_sample(experiment_id, control_id, title):
         'controlId': control_ids,
         'title': title,
     }
+    if sample:
+        sample = {k: v for k, v in sample.items() if v}
     return sample
 
 
@@ -199,15 +218,17 @@ def set_linked_dataset(experiment_id, control_id, dataset_type):
         for ctrl_id in control_id:
             control_ids.append(ctrl_id.replace('\t', ''))
 
-    sample = {
+    linked_dataset = {
         'experimentId': experiment_ids,
         'controlId': control_ids,
         'datasetType': dataset_type,
     }
-    return sample
+    if linked_dataset:
+        linked_dataset = {k: v for k, v in linked_dataset.items() if v}
+    return linked_dataset
 
 
-def excel_file_mapping(filename, keyargs):
+def excel_file_mapping(filename, keyargs, bnumbers_data):
     '''
     Reads one by one all the valid XLSX files and returns the corresponding data dictionaries.
 
@@ -216,7 +237,6 @@ def excel_file_mapping(filename, keyargs):
         keyargs.collection_path, String, Path to read de origin files data.
         keyargs.db, String, Database to get some external data.
         keyargs.url, String, URL where database is located.
-        keyargs.source_name, String, Excel record surce ("GEO or ArrayExpress").
         keyargs.dataset_type, String, Excel record type ["TFBINDING", "GENE EXPRESION",
                  "TSS", "TUS", "TTS", "REGULONS"].
         keyargs.release_process_date, String, Date record of program execution.
@@ -245,42 +265,13 @@ def excel_file_mapping(filename, keyargs):
                 f'Not Dataset ID')
             continue
         dataset_id = str(dataset_id).rstrip()
-        # print(dataset_id)
-        serie_ids = row.get(EC.SERIE_ID, None)
-        serie_id = None
-        if serie_ids:
-            serie_ids = serie_ids.split(',')
-            for s_id in serie_ids:
-                serie_id = s_id.split(':')[0]
-                if serie_id:
-                    serie_id = (((row[EC.SERIE_ID]).split(' '))
-                                [0]).replace(';', '').rstrip()
-                #print('SerieID: ', serie_id)
-                try:
-                    serie_db = s_id.split(':')[1]
-                    # print('SerieDB: ', serie_db)
-                except IndexError:
-                    logging.error(f'Can not find serie_db in {s_id}')
+        # Publications
         pmid = row.get(EC.PMID, None)
         if pmid:
-            print(pmid)
             dataset_dict.setdefault(
                 'publications', utils.get_pubmed_data(pmid, keyargs.get('email')))
-        else:
-            pubmed_authors = row.get(EC.AUTHORS, None)
-            if isinstance(pubmed_authors, str):
-                pubmed_authors = pubmed_authors.rstrip()
-                pubmed_authors = pubmed_authors.split(',')
-            dataset_dict.setdefault('publications',
-                                    {
-                                        'authors': pubmed_authors,
-                                        'abstract': None,
-                                        'date': row.get(EC.RELEASE_DATE, None),
-                                        'pmcid': None,
-                                        'pmid': None,
-                                        'title': row.get(EC.EXPERIMENT_TITLE, None)
-                                    }
-                                    )
+
+        # ObjectsTested
         tf_name = row.get(EC.TF_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_CHIP, None)
@@ -288,13 +279,18 @@ def excel_file_mapping(filename, keyargs):
             tf_name = row.get(EC.PROTEIN_NAME, None)
         if not tf_name:
             tf_name = row.get(EC.TF_NAME_TEC, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_RDB, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_COMMON_NAME, None)
+        if not tf_name:
+            tf_name = row.get(EC.TF_NAME_SOURCE, None)
         if tf_name:
             tf_name = tf_name.rstrip()
             if re.findall('([α-ωΑ-Ω])', tf_name):
-                tf_name = row.get(EC.TF_NAME_CHIP, None)
-            if 'Mixed TFs: ' in tf_name:
-                tf_name = tf_name.replace('Mixed TFs: ', '')
-                tf_name = tf_name.split(', ')
+                tf_name = row.get(EC.TF_NAME_SOURCE, None)
+            tf_name = tf_name.replace(' ', '')
+            tf_name = tf_name.split(',')
             if isinstance(tf_name, str):
                 tf_name = [tf_name]
         dataset_dict.setdefault(
@@ -303,27 +299,50 @@ def excel_file_mapping(filename, keyargs):
                                                      keyargs.get('url')
                                                      )
         )
+        # SourceSerie
+        series_list = []
+        serie_id = row.get(EC.SERIE_ID, None)
+        serie_db = row.get(EC.SOURCE_DATABASE, None)
+        serie_obj = {
+            'sourceId': serie_id,
+            'sourceName': serie_db,
+        }
+        if serie_obj:
+            serie_obj = {k: v for k, v in serie_obj.items() if v}
+        if serie_obj != {}:
+            series_list.append(serie_obj)
+
         platform_id = row.get(EC.PLATFORM_ID, None)
-        if platform_id:
-            platform_id = platform_id.replace('\t', '').rstrip()
         platform_title = row.get(EC.PLATFORM_TITLE, None)
-        if platform_title:
-            platform_title = platform_title.replace('\t', '').rstrip()
+        platform_obj = {
+            '_id': platform_id,
+            'title': platform_title,
+        }
+        platform_obj = {k: v for k, v in platform_obj.items() if v}
+
+        source_db = row.get(EC.SOURCE_DATABASE, None)
         strategy = row.get(EC.STRATEGY, None)
         if strategy:
             strategy = strategy.rstrip()
         method_name = row.get(EC.METHOD_NAME, None)
         if method_name:
             method_name = method_name.rstrip()
-        dataset_dict.setdefault('sourceSerie', {
-            'sourceId': serie_id,
-            'sourceName': keyargs.get('source_name'),
-            'titles': tf_name,
-            'platformId': platform_id,
-            'platformTitle': platform_title,
+        experiment_title = row.get(EC.EXPERIMENT_TITLE, None)
+        if experiment_title:
+            experiment_title = experiment_title.rstrip()
+
+        source_serie_obj = {
+            'series': series_list,
+            'platform': platform_obj,
+            'sourceDB': source_db,
+            'title': experiment_title,
             'strategy': strategy,
             'method': method_name,
-        })
+        }
+        if source_serie_obj:
+            source_serie_obj = {k: v for k, v in source_serie_obj.items() if v}
+        dataset_dict.setdefault('sourceSerie', source_serie_obj)
+        # Sample
         dataset_dict.setdefault('sample',
                                 set_sample(
                                     row.get(
@@ -343,6 +362,7 @@ def excel_file_mapping(filename, keyargs):
                                         EC.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None),
                                     linked_dataset_type)
                                 )
+        # LinkedDataset
         ref_genome = row.get(EC.REFERENCE_GENOME, None)
         if ref_genome:
             ref_genome = ref_genome.rstrip()
@@ -370,8 +390,27 @@ def excel_file_mapping(filename, keyargs):
             experiment_condition = experiment_condition.rstrip()
         dataset_dict.setdefault('experimentCondition', experiment_condition)
         dataset_dict.setdefault('datasetType', keyargs.get('dataset_type'))
+        dataset_dict.setdefault('cutOff', row.get(EC.CUT_OFF, None))
+        dataset_dict.setdefault('notes', row.get(EC.PUBLIC_NOTES, None))
+
+        source_reference_genome = row.get(EC.SOURCE_REFERENCE_GENOME, None)
+        if source_reference_genome:
+            source_reference_genome = source_reference_genome.strip()
+        dataset_dict.setdefault(
+            'sourceReferenceGenome',
+            source_reference_genome
+        )
+
+        external_references = row.get(EC.EXTERNAL_DB_LINK, None)
+        if external_references:
+            dataset_dict.setdefault('externalReferences', utils.get_external_reference(
+                external_references))
 
         datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{dataset_id}'
+        old_dataset_id = row.get(EC.OLD_DATASET_ID, None)
+        if old_dataset_id:
+            datasets_source_path = f'{keyargs.get("collection_path")}{EC.BED_PATHS}/{serie_id}/datasets/{old_dataset_id}'
+        print(datasets_source_path)
         new_dataset_id = f'{keyargs.get("dataset_type")}_{dataset_id}'
         new_datasets_path = f'{keyargs.get("output_dirs_path")}{new_dataset_id}'
 
@@ -383,6 +422,8 @@ def excel_file_mapping(filename, keyargs):
                         f'Coping datasets from {datasets_source_path} \n\t to {new_datasets_path}')
                     shutil.copytree(datasets_source_path, new_datasets_path)
                     bed_path = f'{datasets_source_path}/{dataset_id}'
+                    if old_dataset_id:
+                        bed_path = f'{datasets_source_path}/{old_dataset_id}'
                     tf_sites_ids = utils.get_sites_ids_by_tf(
                         tf_name,
                         keyargs.get('db'),
@@ -433,7 +474,8 @@ def excel_file_mapping(filename, keyargs):
                         f'{bed_path}.tsv',
                         keyargs.get('db'),
                         keyargs.get('url'),
-                        keyargs.get("dataset_type")
+                        keyargs.get("dataset_type"),
+                        bnumbers_data
                     )
                 )
 
@@ -452,7 +494,8 @@ def excel_file_mapping(filename, keyargs):
                         keyargs.get('db'),
                         keyargs.get('url'),
                         keyargs.get("dataset_type"),
-                        keyargs.get('genes_ranges')
+                        keyargs.get('genes_ranges'),
+                        bnumbers_data
                     )
                 )
 
@@ -471,11 +514,11 @@ def excel_file_mapping(filename, keyargs):
                         keyargs.get('db'),
                         keyargs.get('url'),
                         keyargs.get("dataset_type"),
-                        keyargs.get('genes_ranges')
+                        keyargs.get('genes_ranges'),
+                        bnumbers_data
                     )
                 )
 
-        # Author's Files
         if keyargs.get('dataset_type') == 'TFBINDING':
             collection_type = utils.get_collection_type(
                 keyargs.get("collection_path"))
@@ -484,41 +527,54 @@ def excel_file_mapping(filename, keyargs):
         dataset_dict.setdefault('temporalId', new_dataset_id)
         dataset_dict.setdefault('_id', new_dataset_id)
 
+        # Author's Files
         authors_file = row.get(EC.DATASET_FILE_NAME, None)
         if authors_file:
             authors_file = authors_file.rstrip()
-        authors_data = {
-            'authorsData': get_author_data(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', authors_file, dataset_id),
-            '_id': f'AD_{new_dataset_id}',
-            'datasetIds': [new_dataset_id]
-        }
-        if authors_data.get('authorsData'):
-            authors_data_list.append(authors_data)
-
-        dataset_dict.setdefault(
-            'summary', {
-                'totalOfPeaks': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
-                'totalOfTFBS': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
-                'totalOfGenes': {
-                    'inDataset': 0,
-                    'inRDBClassic': 0,
-                    'sharedItems': 0,
-                    'notInRDB': 0,
-                    'notInDataset': 0,
-                },
+        authors_data_string = get_author_data(
+            f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/', authors_file, dataset_id)
+        '''print(f'{keyargs.get("collection_path")}{EC.AUTHORS_PATHS}/',
+              f'"{authors_file}"', dataset_id)'''
+        if authors_data_string:
+            authors_data_string = re.sub(
+                "Unnamed\:\s\d*\,{0,1}", "", authors_data_string)
+            authors_data = {
+                'authorsData': authors_data_string,
+                '_id': f'AD_{new_dataset_id}',
+                'datasetIds': [new_dataset_id]
             }
+            if authors_data.get('authorsData'):
+                authors_data_list.append(authors_data)
+        elif not authors_data_string:
+            print(
+                f'No authors data for dataset:{dataset_id}, author file required: {authors_file}')
+        summary_obj = {
+            'totalOfPeaks': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+            'totalOfTFBS': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+            'totalOfGenes': {
+                'inDataset': 0,
+                'inRDBClassic': 0,
+                'sharedItems': 0,
+                'notInRDB': 0,
+                'notInDataset': 0,
+            },
+        }
+        if summary_obj:
+            summary_obj = {k: v for k, v in summary_obj.items() if v}
+        dataset_dict.setdefault(
+            'summary', summary_obj
         )
         dataset_dict = {k: v for k, v in dataset_dict.items() if v}
         dataset_dict_list.append(dataset_dict)

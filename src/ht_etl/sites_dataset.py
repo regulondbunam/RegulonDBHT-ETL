@@ -44,19 +44,8 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('closestGenes', utils.find_closest_gene(
                         row[1], row[2], database, url, genes_ranges))
                     classic_ris = utils.get_classic_ris(
-                        row[1], row[2], row[5], tf_sites)
-                    dataset_dict.setdefault('foundClassicRIs', classic_ris)
-                    dataset_dict.setdefault('foundDatasetRIs', [])
-                    '''{
-                        'tfbsLeftPosition': None,
-                        'tfbsRightPosition': None,
-                        'transcriptionFactorID': None,
-                        'transcriptionFactorName': None,
-                        'relativeGeneDistance': None,
-                        'relativeTSSDistance': None,
-                        'strand': None,
-                        'sequence': None,
-                    }'''
+                        row[1], row[2], row[5], tf_sites, database, url, 'RegulonDB')
+                    dataset_dict.setdefault('foundRIs', classic_ris)
                     dataset_dict.setdefault('peakId', row[3])
                     dataset_dict.setdefault('score', float(row[4]))
                     dataset_dict.setdefault('strand', row[5])
@@ -65,9 +54,6 @@ def bed_file_mapping(dataset_id, filename, database, url, genes_ranges, sites_di
                     dataset_dict.setdefault('temporalId', site_id)
                     dataset_dict.setdefault(
                         'nameCollection', utils.get_collection_name(collection_path))
-                    '''dataset_dict["transcriptionUnit"] = {
-                        k: v for k, v in dataset_dict["transcriptionUnit"].items() if v
-                    }'''
                     dataset_dict = {k: v for k, v in dataset_dict.items() if v}
                     dataset_dict_list.append(dataset_dict)
                 else:
