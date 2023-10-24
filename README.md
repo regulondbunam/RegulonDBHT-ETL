@@ -1,6 +1,12 @@
-# RegulonDB HT ETL
+<h1 align="center"> RegulonDB HT ETL </h1>
+<p align="center" >
+  <img alt="RegulonDB Logo" style="width:50%;height:25%;" src="https://drive.google.com/uc?export=view&id=1BtKqNvtchMidDMUSyeJZPCnfMb-saaYm"></img>
+</p>
 
-## Description
+[![License](https://img.shields.io/badge/license-MIT-brightgreen?style=plastic)](LICENSE)
+[![RegulonDBVersion](https://img.shields.io/badge/RegulonDB_version-12.0-blue?style=plastic)](https://regulondb.ccg.unam.mx/)
+[![EcocycVersion](https://img.shields.io/badge/last_Ecocyc_version_tested-27.0-red?style=plastic)](https://ecocyc.org/)
+[![Status](https://img.shields.io/badge/release_1.0.0-yellowgreen?style=plastic)](CHANGELOG.md)
 
 This software is used for the extraction and processing of diferent collections of HT Datasets.
 
@@ -34,15 +40,15 @@ python src/ -h
 
 ## Project website
 
-[RegulonDB WebSite](http://regulondb.ccg.unam.mx/)
+[RegulonDB WebSite](https://regulondb.ccg.unam.mx/)
 
 ## License
 
-[MIT](LICENSE)
+RegulonDB Ecocyc Extractor is [Apache 2.0 licensed](LICENSE).
 
 ## Support contact information
 
-[Support contact](http://regulondb.ccg.unam.mx/menu/about_regulondb/contact_us/index.jsp)
+[Support contact](https://regulondb.ccg.unam.mx/menu/about_regulondb/contact_us/index.jsp)
 
 ## Software quality checklist
 
