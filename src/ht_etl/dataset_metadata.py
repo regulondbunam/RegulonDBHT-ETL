@@ -609,7 +609,7 @@ def excel_file_mapping(filename, keyargs, bnumbers_data):
         utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
                           keyargs.get('output_path'))
 
-    if keyargs.get('dataset_type') == 'TFBINDING':
+    if keyargs.get('dataset_type') == 'TFBINDING' or keyargs.get('dataset_type') == 'RNAP_BINDING_SITES':
         collection_data = utils.set_json_object(
             "peaks", peaks_dict_list, keyargs.get('organism'), 'BSD', 'PK')
         utils.create_json(

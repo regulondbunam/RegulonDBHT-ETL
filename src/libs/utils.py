@@ -26,6 +26,8 @@ def get_collection_name(collection_path):
         collection_name, String, Final collection name.
     '''
     collection_name = collection_path
+    if 'ChIP-CHIP' in collection_name:
+        collection_name = EC.CHIP_CHIP
     if 'ChIP-exo' in collection_name:
         collection_name = EC.CHIP_EXO
     if 'ChIP-seq' in collection_name:
@@ -56,6 +58,8 @@ def get_collection_type(collection_path):
     collection_type = collection_path
     if 'ChIP-exo' in collection_type:
         collection_type = 'CHIP_EXO_'
+    if 'ChIP-CHIP' in collection_type:
+        collection_type = 'CHIP_CHIP_'
     if 'ChIP-seq' in collection_type:
         collection_type = ''
     if 'gSELEX' in collection_type:

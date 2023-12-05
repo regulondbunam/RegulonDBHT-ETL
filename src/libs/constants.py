@@ -11,6 +11,7 @@ INTERVALS = 200
 PAIR_OF_BASES = 30
 
 # Collections
+CHIP_CHIP = 'ChIP-CHIP'
 CHIP_EXO = 'ChIP-exo'
 CHIP_SEQ = 'ChIP-Seq'
 TUS = 'TU'
