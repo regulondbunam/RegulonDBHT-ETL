@@ -22,12 +22,17 @@ GSELEX = 'GSELEX'
 DAPS = 'DAPS'
 
 # Metadata Columns
-METADATA_SHEET = 'Binding_dataset_ChIP-seq'
+METADATA_SHEET = 'DATASET'
 ROWS_TO_SKIP = 4
 DATASET_ID = 'Dataset ID'
 PMID = 'PMID'
 PDF_PATH = 'PDF Path'
 AUTHORS = 'Authors'
+REGULONDB_TF_NAME = 'RegulonDB TF Name'
+SOURCE_TF_NAME = 'TF Name from source'
+ORGANISM = 'ORGOANISM'
+
+
 PROTEIN_NAME = 'Protein Name'
 TF_NAME_TEC = 'TF name in TEC database'
 TF_NAME_CHIP = 'TF Name in proChIPdb'

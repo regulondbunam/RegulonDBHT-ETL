@@ -50,6 +50,14 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-col",
+        "--collection-name",
+        help="Collection name.",
+        metavar="ChIP-seq",
+        default="ChIP-seq",
+    )
+
+    parser.add_argument(
         "-au",
         "--author",
         help="Path to read de authors' origin files.",
