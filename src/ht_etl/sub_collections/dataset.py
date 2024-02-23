@@ -1,9 +1,20 @@
-import os
+"""
+Dataset object.
+Build dataset object and special objects for every dataset.
+"""
+# standard
+import logging
+
+# third party
+
+# local
+from src.ht_etl.domain.publications import Publications
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.email = kwargs.get("email", None)
         self.dataset_id = kwargs.get('dataset_id', None)
         self.pmid = kwargs.get('pmid', None)
         self.authors = kwargs.get('authors', None)
@@ -40,27 +51,6 @@ class Dataset(object):
         # Object properties
         self.dataset_dict = kwargs.get('dataset_dict', None)
 
-        self.id = kwargs.get('id', None)
-        self.publications = kwargs.get('publications', None)
-        self.object_tested = kwargs.get('object_tested', None)
-        self.source_serie = kwargs.get('source_serie', None)
-        self.sample = kwargs.get('sample', None)
-        self.linked_dataset = kwargs.get('linked_dataset', None)
-        self.grow_conditions = kwargs.get('grow_conditions', None)
-        self.summary = kwargs.get('summary', None)
-        self.release_data_control = kwargs.get('release_data_control', None)
-        self.external_cross_references = kwargs.get('external_cross_references', None)
-        self.collection_data = kwargs.get('collection_data', None)
-        self.reference_genome = kwargs.get('reference_genome', None)
-        self.temporal_id = kwargs.get('temporal_id', None)
-        self.assembly_genome_id = kwargs.get('assembly_genome_id', None)
-        self.five_prime_enrichment = kwargs.get('five_prime_enrichment', None)
-        self.gene_expression_filtered = kwargs.get('gene_expression_filtered', None)
-        self.experiment_condition = kwargs.get('experiment_condition', None)
-        self.cut_off = kwargs.get('cut_off', None)
-        self.notes = kwargs.get('notes', None)
-        self.source_reference_genome = kwargs.get('source_reference_genome', None)
-
     # Local properties
 
     # Object properties
@@ -70,11 +60,37 @@ class Dataset(object):
 
     @dataset_dict.setter
     def dataset_dict(self, dataset_dict=None):
+        """
+        Set dataset dictionary to build the final result.
+        Gets data from the object and buidl sub collection objects.
+        """
         self._dataset_dict = dataset_dict
         if dataset_dict is None:
+            dataset_publications = Publications(
+                dataset_id=self.dataset_id,
+                pmid=self.pmid,
+                email=self.email
+            )
             dataset_dict = {
                 '_id': self.dataset_id,
-                'pmid': self.pmid,
-                'authors': self.authors
+                'publications': dataset_publications.publications_list,
+                'object_tested': '',
+                'source_serie': '',
+                'sample': '',
+                'linked_dataset': '',
+                'grow_conditions': '',
+                'summary': '',
+                'release_data_control': '',
+                'external_cross_references': '',
+                'collection_data': '',
+                'reference_genome': '',
+                'temporal_id': '',
+                'assembly_genome_id': '',
+                'five_prime_enrichment': '',
+                'gene_expression_filtered': '',
+                'experiment_condition': '',
+                'cut_off': '',
+                'notes': '',
+                'source_reference_genome': '',
             }
             self._dataset_dict = dataset_dict

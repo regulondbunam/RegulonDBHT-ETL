@@ -209,16 +209,17 @@ def validate_directories(data_path):
 
 
 def set_log(log_path, log_name, log_date):
-    '''
+    """
     Initializes the execution log to examine any problems that arise during extraction.
 
-    Param
-        log_path, String, the execution log path.
-    '''
+    Args:
+        log_date: String, the execution date.
+        log_name: String, the name of the log file.
+        log_path: String, the execution log path.
+    """
     log_file_name = f'ht_etl_{log_name}_{log_date}.log'
     log_file_name = log_file_name.replace('/', '')
     log_file_name = log_file_name.replace('-', '_')
-    # print(log_file_name)
     validate_directories(log_path)
     logging.basicConfig(filename=os.path.join(log_path, log_file_name),
                         format='%(levelname)s - %(asctime)s - %(message)s', filemode='w', level=logging.INFO)

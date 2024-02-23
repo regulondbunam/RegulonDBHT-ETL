@@ -1,22 +1,22 @@
-'''
-Dataset record processing.
-'''
+"""
+Datasets metadata collection.
+Build first level from HT Dataset Model.
+"""
 # standard
-import os
+import logging
 
 # third party
 
-
 # local
-from src.libs import file_manager
 from src.libs import constants
-from src.ht_etl.domain.dataset import Dataset
+from src.ht_etl.sub_collections.dataset import Dataset
 
 
 class DatasetsMetadata(object):
     def __init__(self, **kwargs):
         # Params
         self.dataset_type = kwargs.get('dataset_type', None)
+        self.email = kwargs.get('email', None)
 
         # Local properties
         self.dataset_dict = kwargs.get('dataset_dict', None)
@@ -35,9 +35,14 @@ class DatasetsMetadata(object):
 
     @dataset.setter
     def dataset(self, dataset=None):
+        """
+        Gets all values from dataset catalog dict and build a Dataset object.
+        """
         if dataset is None:
-            if self.dataset_dict.get('Dataset ID', None) is not None:
+            if self.dataset_dict.get(constants.DATASET_ID, None) is not None:
+                logging.info(f"Processing Dataset ID: {self.dataset_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    email=self.email,
                     dataset_id=self.dataset_dict.get(constants.DATASET_ID, None),
                     pmid=self.dataset_dict.get(constants.PMID, None),
                     authors=self.dataset_dict.get(constants.AUTHORS, None),
@@ -72,6 +77,8 @@ class DatasetsMetadata(object):
                     expression_growcon_control_ids=self.dataset_dict.get(constants.EXPRESSION_GC_EXPERIMENTAL, None),
                     source_cut_off=self.dataset_dict.get(constants.CUT_OFF, None)
                 )
+            else:
+                logging.warning(f"No Dataset ID provided for {self.dataset_dict.get(constants.PMID, None)}")
 
         self._dataset = dataset
 

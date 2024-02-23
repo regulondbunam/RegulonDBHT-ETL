@@ -13,8 +13,8 @@ import json
 # local
 from libs import arguments
 from libs import utils
-from ht_etl import dataset_metadata, gene_expression_dataset_metadata
 from ht_etl.ht import datasets
+# from ht_etl import dataset_metadata, gene_expression_dataset_metadata
 
 
 def run(**kwargs):
@@ -26,12 +26,14 @@ def run(**kwargs):
         kwargs.output_path, String, Output directory path.
         kwargs.organism, String, Organism name.
     """
-    print(kwargs.get('datasets_record_path', None))
+    print(f"Reading data from {kwargs.get('datasets_record_path', None)}")
+    logging.info(f"Reading data from {kwargs.get('datasets_record_path', None)}")
     datasets_objs = datasets.get_dataset(
         filename=kwargs.get('datasets_record_path', None),
         rows_to_skip=kwargs.get('rows_to_skip', None),
         dataset_type=kwargs.get('dataset_type', None),
-        collection_name=kwargs.get('collection_name', None)
+        collection_name=kwargs.get('collection_name', None),
+        email=kwargs.get('email', None)
     )
 
     for dataset_obj in datasets_objs:
@@ -42,8 +44,8 @@ def run(**kwargs):
         }
         print(dataset_obj_dict)
 
-    exit()
-    if kwargs.get('datasets_record_path') is not None:
+    # exit()
+    """if kwargs.get('datasets_record_path') is not None:
         print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')
         logging.info(
             f'Reading Datasets from {kwargs.get("datasets_record_path")}')
@@ -77,7 +79,7 @@ def run(**kwargs):
             "dataset", datasets_list, kwargs.get('organism'), 'MDD', None)
         utils.create_json(collection_data,
                           f'dataset_metadata_{utils.get_collection_name(kwargs.get("datasets_record_path"))}',
-                          kwargs.get('output_path'))
+                          kwargs.get('output_path'))"""
 
 
 if __name__ == '__main__':
@@ -87,7 +89,6 @@ if __name__ == '__main__':
     """
 
     args = arguments.load_arguments()
-    # collection_name = args.collection_path.replace("../InputData/", "")
     utils.set_log(args.log, args.collection_name, datetime.date.today())
 
     utils.validate_directories(args.output)
@@ -118,4 +119,5 @@ if __name__ == '__main__':
         output_dirs_path=output_dirs_path
     )
 
+    print(f'RegulonDB HT ETL process complete')
     logging.info(f'RegulonDB HT ETL process complete')
