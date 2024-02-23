@@ -9,6 +9,7 @@ import logging
 
 # local
 from src.ht_etl.domain.publications import Publications
+from src.ht_etl.domain.source_serie import SourceSerie
 
 
 class Dataset(object):
@@ -71,26 +72,39 @@ class Dataset(object):
                 pmid=self.pmid,
                 email=self.email
             )
+
+            source_serie = SourceSerie(
+                serie_id=self.serie_id,
+                source_name=self.source_database,
+                platform_id=self.platform_id,
+                platform_title=self.platform_title,
+                title=self.experiment_title,
+                strategy=self.strategy,
+                method=self.method_name,
+                read_type=None,  # TODO: Ask for this property
+                source_db=self.source_database
+            )
+            logging.info(source_serie.source_serie)
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
-                'object_tested': '',
-                'source_serie': '',
+                'objectTested': self.regulondb_tf_name,
+                'sourceSerie': source_serie.source_serie,
                 'sample': '',
-                'linked_dataset': '',
-                'grow_conditions': '',
+                'linkedDataset': '',
+                'growConditionsContrast': '',
                 'summary': '',
-                'release_data_control': '',
-                'external_cross_references': '',
-                'collection_data': '',
-                'reference_genome': '',
-                'temporal_id': '',
-                'assembly_genome_id': '',
-                'five_prime_enrichment': '',
-                'gene_expression_filtered': '',
-                'experiment_condition': '',
-                'cut_off': '',
+                'releaseDataControl': '',
+                'externalCrossReferences': '',
+                'collectionData': '',
+                'referenceGenome': '',
+                'temporalId': '',
+                'assemblyGenomeId': '',
+                'fivePrimeEnrichment': '',
+                'geneExpressionFiltered': '',
+                'experimentCondition': '',
+                'cutOff': '',
                 'notes': '',
-                'source_reference_genome': '',
+                'sourceReferenceGenome': '',
             }
             self._dataset_dict = dataset_dict

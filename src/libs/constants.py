@@ -29,8 +29,8 @@ PMID = 'PMID'
 PDF_PATH = 'PDF Path'
 AUTHORS = 'Authors'
 REGULONDB_TF_NAME = 'RegulonDB TF Name'
-SOURCE_TF_NAME = 'TF Name from source'
-ORGANISM = 'ORGOANISM'
+SOURCE_TF_NAME = 'TF name from source'
+ORGANISM = 'ORGANISM'
 
 
 PROTEIN_NAME = 'Protein Name'
