@@ -28,7 +28,9 @@ def get_dataset(**kwargs):
         dataset = DatasetsMetadata(
             dataset_dict=row,
             dataset_type=kwargs.get('dataset_type', None),
-            email=kwargs.get('email', None)
+            email=kwargs.get('email', None),
+            database=kwargs.get('database', None),
+            url=kwargs.get('url', None)
         )
         yield dataset
 

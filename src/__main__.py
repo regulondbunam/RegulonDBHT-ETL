@@ -33,7 +33,9 @@ def run(**kwargs):
         rows_to_skip=kwargs.get('rows_to_skip', None),
         dataset_type=kwargs.get('dataset_type', None),
         collection_name=kwargs.get('collection_name', None),
-        email=kwargs.get('email', None)
+        email=kwargs.get('email', None),
+        database=kwargs.get('db', None),
+        url=kwargs.get('url', None)
     )
 
     for dataset_obj in datasets_objs:

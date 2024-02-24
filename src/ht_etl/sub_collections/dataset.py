@@ -9,12 +9,15 @@ import logging
 
 # local
 from src.ht_etl.domain.publications import Publications
+from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.database = kwargs.get('database', None)
+        self.url = kwargs.get('url', None)
         self.email = kwargs.get("email", None)
         self.dataset_id = kwargs.get('dataset_id', None)
         self.pmid = kwargs.get('pmid', None)
@@ -72,7 +75,12 @@ class Dataset(object):
                 pmid=self.pmid,
                 email=self.email
             )
-
+            object_tested = ObjectTested(
+                regulondb_tf_name=self.regulondb_tf_name,
+                source_tf_name=self.source_tf_name,
+                database=self.database,
+                url=self.url
+            )
             source_serie = SourceSerie(
                 serie_id=self.serie_id,
                 source_name=self.source_database,
@@ -84,11 +92,11 @@ class Dataset(object):
                 read_type=None,  # TODO: Ask for this property
                 source_db=self.source_database
             )
-            logging.info(source_serie.source_serie)
+            logging.info(object_tested.object_tested)
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
-                'objectTested': self.regulondb_tf_name,
+                'objectTested': object_tested.object_tested,
                 'sourceSerie': source_serie.source_serie,
                 'sample': '',
                 'linkedDataset': '',
