@@ -30,7 +30,8 @@ def get_dataset(**kwargs):
             dataset_type=kwargs.get('dataset_type', None),
             email=kwargs.get('email', None),
             database=kwargs.get('database', None),
-            url=kwargs.get('url', None)
+            url=kwargs.get('url', None),
+            version=kwargs.get('version', None)
         )
         yield dataset
 

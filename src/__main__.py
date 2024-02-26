@@ -35,7 +35,8 @@ def run(**kwargs):
         collection_name=kwargs.get('collection_name', None),
         email=kwargs.get('email', None),
         database=kwargs.get('db', None),
-        url=kwargs.get('url', None)
+        url=kwargs.get('url', None),
+        version=kwargs.get('version', None)
     )
 
     for dataset_obj in datasets_objs:
@@ -121,5 +122,5 @@ if __name__ == '__main__':
         output_dirs_path=output_dirs_path
     )
 
-    print(f'RegulonDB HT ETL process complete')
+    print(f'RegulonDB HT ETL process complete.')
     logging.info(f'RegulonDB HT ETL process complete')

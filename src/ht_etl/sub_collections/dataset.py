@@ -13,11 +13,13 @@ from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
 from src.ht_etl.domain.sample import Sample
 from src.ht_etl.domain.linked_dataset import LinkedDataset
+from src.ht_etl.domain.release_data_control import ReleaseControl
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.version = kwargs.get('version', None),
         self.dataset_type = kwargs.get('dataset_type', None)
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None)
@@ -105,7 +107,9 @@ class Dataset(object):
                 sample_exp_replicate_ctrl=self.samples_replicates_control_ids,
                 dataset_type=self.dataset_type
             )
-            logging.info(linked_dataset.linked_dataset)
+            release_data_control = ReleaseControl(
+                version=self.version
+            )
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
@@ -115,7 +119,7 @@ class Dataset(object):
                 'linkedDataset': linked_dataset.linked_dataset,
                 'growConditionsContrast': '',
                 'summary': '',
-                'releaseDataControl': '',
+                'releaseDataControl': release_data_control,
                 'externalCrossReferences': '',
                 'collectionData': '',
                 'referenceGenome': '',
