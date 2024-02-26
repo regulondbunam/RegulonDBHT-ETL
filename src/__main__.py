@@ -36,7 +36,8 @@ def run(**kwargs):
         email=kwargs.get('email', None),
         database=kwargs.get('db', None),
         url=kwargs.get('url', None),
-        version=kwargs.get('version', None)
+        version=kwargs.get('version', None),
+        collection_source=kwargs.get('collection_source', None)
     )
 
     for dataset_obj in datasets_objs:
@@ -106,6 +107,7 @@ if __name__ == '__main__':
     run(
         collection_name=args.collection_name,
         collection_path=args.collection_path,
+        collection_source=args.collection_source,
         release_process_date=str(datetime.datetime.now()),
         datasets_record_path=args.input,
         output_path=args.output,

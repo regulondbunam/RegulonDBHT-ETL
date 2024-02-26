@@ -14,13 +14,15 @@ from src.ht_etl.domain.source_serie import SourceSerie
 from src.ht_etl.domain.sample import Sample
 from src.ht_etl.domain.linked_dataset import LinkedDataset
 from src.ht_etl.domain.release_data_control import ReleaseControl
+from src.ht_etl.domain.collection_data import CollectionData
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.collection_source = kwargs.get('collection_source', None)
         self.collection_name = kwargs.get('collection_name', None)
-        self.version = kwargs.get('version', None),
+        self.version = kwargs.get('version', None)
         self.dataset_type = kwargs.get('dataset_type', None)
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None)
@@ -114,8 +116,15 @@ class Dataset(object):
             release_data_control = ReleaseControl(
                 version=self.version
             )
-            temporal_id = Dataset.set_temp_id(self.dataset_type, self.collection_name, self.dataset_id)
-            logging.info(f'{temporal_id}')
+            temporal_id = Dataset.set_temp_id(
+                self.dataset_type,
+                self.collection_name,
+                self.dataset_id
+            )
+            collection_data = CollectionData(
+                collection_source= self.collection_source,
+                collection_name=self.collection_name
+            )
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
@@ -127,7 +136,7 @@ class Dataset(object):
                 'summary': '',
                 'releaseDataControl': release_data_control.release_data_control,
                 'externalReferences': '',
-                'collectionData': '',
+                'collectionData': collection_data.collection_data,
                 'geneExpressionFiltered': '',
                 'temporalId': temporal_id,
                 'referenceGenome': self.ref_genome,

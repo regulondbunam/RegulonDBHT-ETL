@@ -32,7 +32,8 @@ def get_dataset(**kwargs):
             database=kwargs.get('database', None),
             url=kwargs.get('url', None),
             version=kwargs.get('version', None),
-            src_collection_name=kwargs.get('collection_name', None)
+            src_collection_name=kwargs.get('collection_name', None),
+            collection_source=kwargs.get('collection_source', None)
         )
         yield dataset
 

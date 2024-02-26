@@ -18,9 +18,10 @@ class DatasetsMetadata(object):
         self.dataset_type = kwargs.get('dataset_type', None)
         self.email = kwargs.get('email', None)
         self.database = kwargs.get('database', None)
-        self.url = kwargs.get('url', None),
+        self.url = kwargs.get('url', None)
         self.version = kwargs.get('version', None)
         self.src_collection_name = kwargs.get('src_collection_name', None)
+        self.collection_source = kwargs.get('collection_source', None)
 
         # Local properties
         self.dataset_dict = kwargs.get('dataset_dict', None)
@@ -46,6 +47,7 @@ class DatasetsMetadata(object):
             if self.dataset_dict.get(constants.DATASET_ID, None) is not None:
                 logging.info(f"Processing Dataset ID: {self.dataset_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    collection_source=self.collection_source,
                     collection_name=self.src_collection_name,
                     version=self.version,
                     dataset_type=self.dataset_type,

@@ -130,6 +130,14 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-collsrc",
+        "--collection-source",
+        help="Collection source name.",
+        default="REGULONDB",
+        metavar="REGULONDB"
+    )
+
+    parser.add_argument(
         "-email",
         "--email",
         help="User email address to connect to PUBMED database.",
