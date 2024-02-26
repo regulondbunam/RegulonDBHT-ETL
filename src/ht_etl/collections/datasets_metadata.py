@@ -44,6 +44,7 @@ class DatasetsMetadata(object):
             if self.dataset_dict.get(constants.DATASET_ID, None) is not None:
                 logging.info(f"Processing Dataset ID: {self.dataset_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    dataset_type=self.dataset_type,
                     database=self.database,
                     url=self.url,
                     email=self.email,

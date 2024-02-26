@@ -12,11 +12,13 @@ from src.ht_etl.domain.publications import Publications
 from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
 from src.ht_etl.domain.sample import Sample
+from src.ht_etl.domain.linked_dataset import LinkedDataset
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.dataset_type = kwargs.get('dataset_type', None)
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None)
         self.email = kwargs.get("email", None)
@@ -98,14 +100,19 @@ class Dataset(object):
                 sample_replicate_ctrl=self.samples_replicates_control_ids,
                 title_for_replicates=self.title_for_all_replicates
             )
-            logging.info(source_serie.source_serie)
+            linked_dataset = LinkedDataset(
+                sample_exp_replicate_exp=self.samples_replicates_exp_ids,
+                sample_exp_replicate_ctrl=self.samples_replicates_control_ids,
+                dataset_type=self.dataset_type
+            )
+            logging.info(linked_dataset.linked_dataset)
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
                 'objectTested': object_tested.object_tested,
                 'sourceSerie': source_serie.source_serie,
                 'sample': sample.sample,
-                'linkedDataset': '',
+                'linkedDataset': linked_dataset.linked_dataset,
                 'growConditionsContrast': '',
                 'summary': '',
                 'releaseDataControl': '',
