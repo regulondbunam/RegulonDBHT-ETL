@@ -19,6 +19,7 @@ from src.ht_etl.domain.release_data_control import ReleaseControl
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.collection_name = kwargs.get('collection_name', None)
         self.version = kwargs.get('version', None),
         self.dataset_type = kwargs.get('dataset_type', None)
         self.database = kwargs.get('database', None)
@@ -44,6 +45,9 @@ class Dataset(object):
         self.grow_conditions_experimental = kwargs.get('grow_conditions_experimental', None)
         self.organism = kwargs.get('organism', None)
         self.src_reference_genome = kwargs.get('src_reference_genome', None)
+        self.ref_genome = kwargs.get('ref_genome', None)
+        self.assembly_genome_id = kwargs.get('assembly_genome_id', None)
+        self.five_prime_enrichment=kwargs.get('five_prime_enrichment', None)
         self.reference_name = kwargs.get('reference_name', None)
         self.dataset_file_name = kwargs.get('dataset_file_name', None)
         self.internal_curation_notes = kwargs.get('internal_curation_notes', None)
@@ -110,6 +114,8 @@ class Dataset(object):
             release_data_control = ReleaseControl(
                 version=self.version
             )
+            temporal_id = Dataset.set_temp_id(self.dataset_type, self.collection_name, self.dataset_id)
+            logging.info(f'{temporal_id}')
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
@@ -119,17 +125,24 @@ class Dataset(object):
                 'linkedDataset': linked_dataset.linked_dataset,
                 'growConditionsContrast': '',
                 'summary': '',
-                'releaseDataControl': release_data_control,
-                'externalCrossReferences': '',
+                'releaseDataControl': release_data_control.release_data_control,
+                'externalReferences': '',
                 'collectionData': '',
-                'referenceGenome': '',
-                'temporalId': '',
-                'assemblyGenomeId': '',
-                'fivePrimeEnrichment': '',
                 'geneExpressionFiltered': '',
-                'experimentCondition': '',
-                'cutOff': '',
-                'notes': '',
-                'sourceReferenceGenome': '',
+                'temporalId': temporal_id,
+                'referenceGenome': self.ref_genome,
+                'assemblyGenomeId': self.assembly_genome_id,
+                'fivePrimeEnrichment': self.five_prime_enrichment,
+                'experimentCondition': self.exp_condition,
+                'cutOff': self.source_cut_off,
+                'notes': self.public_notes,
+                'sourceReferenceGenome': self.src_reference_genome,
             }
             self._dataset_dict = dataset_dict
+
+    # Static methods
+    @staticmethod
+    def set_temp_id(dataset_type, collection_name, dataset_id):
+        collection_type = collection_name.replace('-', '_').upper()
+        temp_id = f"{dataset_type}_{collection_type}_{dataset_id}"
+        return temp_id

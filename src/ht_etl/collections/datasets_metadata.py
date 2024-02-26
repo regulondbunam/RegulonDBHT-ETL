@@ -20,6 +20,7 @@ class DatasetsMetadata(object):
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None),
         self.version = kwargs.get('version', None)
+        self.src_collection_name = kwargs.get('src_collection_name', None)
 
         # Local properties
         self.dataset_dict = kwargs.get('dataset_dict', None)
@@ -45,6 +46,7 @@ class DatasetsMetadata(object):
             if self.dataset_dict.get(constants.DATASET_ID, None) is not None:
                 logging.info(f"Processing Dataset ID: {self.dataset_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    collection_name=self.src_collection_name,
                     version=self.version,
                     dataset_type=self.dataset_type,
                     database=self.database,
@@ -71,6 +73,8 @@ class DatasetsMetadata(object):
                     organism=self.dataset_dict.get(constants.ORGANISM , None),
                     src_reference_genome=self.dataset_dict.get(constants.SOURCE_REFERENCE_GENOME, None),
                     ref_genome=self.dataset_dict.get(constants.REFERENCE_GENOME, None),
+                    assembly_genome_id=self.dataset_dict.get(constants.ASSEMBLY_GENOME_ID, None),
+                    five_prime_enrichment=self.dataset_dict.get(constants.FIVE_ENRICHMENT, None),
                     dataset_file_name=self.dataset_dict.get(constants.DATASET_FILE_NAME, None),
                     internal_curation_notes=self.dataset_dict.get(constants.INTERNAL_CURATION_NOTES, None),
                     curation_notes=self.dataset_dict.get(constants.CURATOR, None),
@@ -82,7 +86,9 @@ class DatasetsMetadata(object):
                     ),
                     expression_growcon_ctrl=self.dataset_dict.get(constants.EXPRESSION_GC_CONTROL, None),
                     expression_growcon_control_ids=self.dataset_dict.get(constants.EXPRESSION_GC_EXPERIMENTAL, None),
-                    source_cut_off=self.dataset_dict.get(constants.CUT_OFF, None)
+                    source_cut_off=self.dataset_dict.get(constants.CUT_OFF, None),
+                    public_notes=self.dataset_dict.get(constants.PUBLIC_NOTES, None),
+                    exp_condition_notes=self.dataset_dict.get(constants.EXPERIMENT_CONDITION, None)
                 )
             else:
                 logging.warning(f"No Dataset ID provided for {self.dataset_dict.get(constants.PMID, None)}")
