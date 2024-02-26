@@ -1,9 +1,8 @@
 """
 Object Tested object.
 """
-import logging
-
 # standard
+import logging
 
 # third party
 import multigenomic_api as mg_api

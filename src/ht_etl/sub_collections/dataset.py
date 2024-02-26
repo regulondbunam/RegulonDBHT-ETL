@@ -11,6 +11,7 @@ import logging
 from src.ht_etl.domain.publications import Publications
 from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
+from src.ht_etl.domain.sample import Sample
 
 
 class Dataset(object):
@@ -92,13 +93,18 @@ class Dataset(object):
                 read_type=None,  # TODO: Ask for this property
                 source_db=self.source_database
             )
-            logging.info(object_tested.object_tested)
+            sample = Sample(
+                sample_replicate_exp=self.samples_replicates_exp_ids,
+                sample_replicate_ctrl=self.samples_replicates_control_ids,
+                title_for_replicates=self.title_for_all_replicates
+            )
+            logging.info(source_serie.source_serie)
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
                 'objectTested': object_tested.object_tested,
                 'sourceSerie': source_serie.source_serie,
-                'sample': '',
+                'sample': sample.sample,
                 'linkedDataset': '',
                 'growConditionsContrast': '',
                 'summary': '',

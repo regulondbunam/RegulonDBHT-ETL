@@ -2,6 +2,7 @@
 Source Serie object.
 """
 # standard
+import logging
 
 # third party
 
@@ -13,15 +14,15 @@ from src.ht_etl.sub_domain.series import Series
 class SourceSerie(object):
     def __init__(self, **kwargs):
         # Params
-        self.serie_id = kwargs.get('', None)
-        self.source_name = kwargs.get('', None)
-        self.platform_id = kwargs.get('', None)
-        self.platform_title = kwargs.get('', None)
-        self.title = kwargs.get('', None)
-        self.strategy = kwargs.get('', None)
-        self.method = kwargs.get('', None)
-        self.read_type = kwargs.get('', None)
-        self.source_db = kwargs.get('', None)
+        self.serie_id = kwargs.get('serie_id', None)
+        self.source_name = kwargs.get('source_name', None)
+        self.platform_id = kwargs.get('platform_id', None)
+        self.platform_title = kwargs.get('platform_title', None)
+        self.title = kwargs.get('title', None)
+        self.strategy = kwargs.get('strategy', None)
+        self.method = kwargs.get('method', None)
+        self.read_type = kwargs.get('read_type', None)
+        self.source_db = kwargs.get('source_db', None)
 
         # Local properties
 
