@@ -14,7 +14,7 @@ import multigenomic_api as mg_api
 import pymongo
 
 # local
-from libs import constants as EC
+from src.libs import constants
 
 
 def get_collection_name(collection_path):
@@ -27,23 +27,23 @@ def get_collection_name(collection_path):
     '''
     collection_name = collection_path
     if 'ChIP-CHIP' in collection_name:
-        collection_name = EC.CHIP_CHIP
+        collection_name = constants.CHIP_CHIP
     if 'ChIP-exo' in collection_name:
-        collection_name = EC.CHIP_EXO
+        collection_name = constants.CHIP_EXO
     if 'ChIP-seq' in collection_name:
-        collection_name = EC.CHIP_SEQ
+        collection_name = constants.CHIP_SEQ
     if 'TU' in collection_name:
-        collection_name = EC.TUS
+        collection_name = constants.TUS
     if 'TSS' in collection_name:
-        collection_name = EC.TSS
+        collection_name = constants.TSS
     if 'TTS' in collection_name:
-        collection_name = EC.TTS
+        collection_name = constants.TTS
     if 'RNA-seq' in collection_name:
-        collection_name = EC.RNA
+        collection_name = constants.RNA
     if 'gSELEX' in collection_name:
-        collection_name = EC.GSELEX
+        collection_name = constants.GSELEX
     if 'DAP-seq' in collection_name:
-        collection_name = EC.DAPS
+        collection_name = constants.DAPS
     return collection_name
 
 
@@ -209,16 +209,17 @@ def validate_directories(data_path):
 
 
 def set_log(log_path, log_name, log_date):
-    '''
+    """
     Initializes the execution log to examine any problems that arise during extraction.
 
-    Param
-        log_path, String, the execution log path.
-    '''
+    Args:
+        log_date: String, the execution date.
+        log_name: String, the name of the log file.
+        log_path: String, the execution log path.
+    """
     log_file_name = f'ht_etl_{log_name}_{log_date}.log'
     log_file_name = log_file_name.replace('/', '')
     log_file_name = log_file_name.replace('-', '_')
-    print(log_file_name)
     validate_directories(log_path)
     logging.basicConfig(filename=os.path.join(log_path, log_file_name),
                         format='%(levelname)s - %(asctime)s - %(message)s', filemode='w', level=logging.INFO)
@@ -237,9 +238,8 @@ def create_json(objects, filename, output):
     with open(f'{filename}.json', 'w') as json_file:
         json.dump(objects, json_file, indent=4, sort_keys=True)
 
+
 # TODO: Not used, must be deleted?
-
-
 def list_to_dict(data):
     '''
     Turns a data List into a directory object.
@@ -353,7 +353,7 @@ def get_json_from_data_frame(data_frame: pandas.DataFrame) -> dict:
 
 
 def get_excel_data(filename: str, load_sheet, rows_to_skip: int) -> dict:
-    '''
+    """
     Process the XLSX file as a DataFrame and return it as a JSON object
 
     Param
@@ -361,7 +361,7 @@ def get_excel_data(filename: str, load_sheet, rows_to_skip: int) -> dict:
 
     Returns
         data_frame_json, Dict, json dictionary with the Excel data.
-    '''
+    """
     data_frame = get_data_frame(filename, load_sheet, rows_to_skip)
     data_frame_json = get_json_from_data_frame(data_frame)
     return data_frame_json
@@ -539,7 +539,7 @@ def get_object_tested(protein_names, database, url):
                 }
                 object_tested = {k: v for k, v in object_tested.items() if v}
                 objects_tested.append(object_tested)
-    mg_api.disconnect()
+    # mg_api.disconnect()
     return objects_tested
 
 
@@ -568,8 +568,8 @@ def set_genome_intervals():
     Returns
         genes_ranges, List, Array of coordinate pairs of the calculated ranges.
     '''
-    genome_length = EC.GENOME_LENGTH
-    intervals = EC.INTERVALS
+    genome_length = constants.GENOME_LENGTH
+    intervals = constants.INTERVALS
     intervals_length = int(genome_length / intervals)
     genes_ranges = []
     for interval in range(intervals):
@@ -592,9 +592,9 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
     Returns
         closest_genes, List, Dict List with the verified closest genes.
     '''
-    minimum_distance = EC.MINIMUM_DISTANCE
-    genome_length = EC.GENOME_LENGTH
-    intervals = EC.INTERVALS
+    minimum_distance = constants.MINIMUM_DISTANCE
+    genome_length = constants.GENOME_LENGTH
+    intervals = constants.INTERVALS
 
     chromosome_center_pos = get_center_pos(int(left_pos), int(right_pos))
 
@@ -969,7 +969,7 @@ def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
         tf_center = site.get('absolutePosition', None)
         site_object = site.get('siteObject', None)
         if tf_center and site_object:
-            if tf_center == center_pos or tf_center == (center_pos + EC.PAIR_OF_BASES) or tf_center == (center_pos - EC.PAIR_OF_BASES):
+            if tf_center == center_pos or tf_center == (center_pos + constants.PAIR_OF_BASES) or tf_center == (center_pos - constants.PAIR_OF_BASES):
                 classic_ri = {}
                 ri_regulated_entity = {}
                 mg_api.connect(database, url)

@@ -8,12 +8,12 @@ import argparse
 
 
 def get_arguments():
-    '''
+    """
     Defines the arguments that the program will support.
 
-    Returns
-        arguments, argparse Object, defined arguments for the execution of the program.
-    '''
+    Returns:
+        arguments: argparse Object, defined arguments for the execution of the program.
+    """
 
     # ARGUMENTS DESCRIPTION
 
@@ -47,6 +47,14 @@ def get_arguments():
         help="Path to read de origin file data.",
         metavar="../InputData/",
         default="../InputData/",
+    )
+
+    parser.add_argument(
+        "-col",
+        "--collection-name",
+        help="Collection name.",
+        metavar="ChIP-seq",
+        default="ChIP-seq",
     )
 
     parser.add_argument(
@@ -114,6 +122,31 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-colltype",
+        "--collection-type",
+        help="Collection type name.",
+        default="CHIP_SEQ",
+        metavar="ChIP_SEQ"
+    )
+
+    parser.add_argument(
+        "-collsrc",
+        "--collection-source",
+        help="Collection source name.",
+        default="REGULONDB",
+        metavar="REGULONDB"
+    )
+
+    parser.add_argument(
+        "-status",
+        "--collection-status",
+        help="Collection status.",
+        choices=["DEPRECATED", "CURRENT"],
+        default="CURRENT",
+        metavar="CURRENT"
+    )
+
+    parser.add_argument(
         "-email",
         "--email",
         help="User email address to connect to PUBMED database.",
@@ -170,12 +203,12 @@ def get_arguments():
 
 
 def load_arguments():
-    '''
+    """
     Load the arguments that the program will support.
 
-    Returns
-        arguments, argparse Object, loaded arguments for the execution of the program.
-    '''
+    Returns:
+        arguments: argparse Object, loaded arguments for the execution of the program.
+    """
 
     arguments = get_arguments()
     return arguments
