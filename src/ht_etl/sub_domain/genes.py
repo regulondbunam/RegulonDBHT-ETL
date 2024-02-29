@@ -46,7 +46,7 @@ class Genes(object):
         Set the Platform dict object
         """
         self._genes = genes
-        if self._genes is None:
+        if self._genes is None and self.mg_genes:
             genes = {
                 '_id': self.mg_genes.get('id'),
                 'name': self.mg_genes.get('name')
@@ -66,6 +66,8 @@ class Genes(object):
         Returns:
             mg_prod: Dict, product object.
         """
+        if not prod_ids:
+            return None
         client = MongoClient(url)
         db = client[database]
         collection = db['products']
@@ -85,7 +87,8 @@ class Genes(object):
         Returns:
             mg_prod: Dict, gene object.
         """
-
+        if not mg_prod:
+            return None
         client = MongoClient(url)
         db = client[database]
         collection = db['genes']

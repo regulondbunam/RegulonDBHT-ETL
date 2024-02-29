@@ -194,7 +194,6 @@ def get_arguments():
         "--rows-to-skip",
         help="URL to DB server.",
         default=1,
-        metavar=1,
     )
 
     arguments = parser.parse_args()

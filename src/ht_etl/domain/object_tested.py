@@ -19,9 +19,9 @@ class ObjectTested(object):
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None)
         # Local properties
-        self.tf_name = kwargs.get('tf_name', None)
-        self.mg_tf_object = ObjectTested.get_mg_tf_object(
-            tf_name=self.tf_name,
+        self.tf_names = kwargs.get('tf_name', [])
+        self.mg_tf_objects = ObjectTested.get_mg_tf_object(
+            tf_names=self.tf_names,
             database=self.database,
             url=self.url
         )
@@ -31,20 +31,19 @@ class ObjectTested(object):
 
     # Local properties
     @property
-    def tf_name(self):
-        return self._tf_name
+    def tf_names(self):
+        return self._tf_names
 
-    @tf_name.setter
-    def tf_name(self, tf_name=None):
+    @tf_names.setter
+    def tf_names(self, tf_names):
         """
         Sets TF Name.
         """
-        self._tf_name = tf_name
-        if tf_name is None:
-            tf_name = self.regulondb_tf_name
-            if tf_name is None:
-                tf_name = self.source_tf_name
-        self._tf_name = tf_name
+        tf_names = self.regulondb_tf_name
+        if tf_names is None:
+            tf_names = self.source_tf_name
+        tf_names = tf_names.replace(' ', '').split(',')
+        self._tf_names = tf_names
 
     # Object properties
     @property
@@ -52,50 +51,69 @@ class ObjectTested(object):
         return self._object_tested
 
     @object_tested.setter
-    def object_tested(self, tf_name=None):
+    def object_tested(self, mg_tf_objects=None):
         """
         Sets Object Tested.
         """
-        if tf_name is None:
-            tf_name = self.tf_name
-            genes = Genes(
-                tf_name=self.tf_name,
-                prod_ids=self.mg_tf_object.products_ids[0],
-                database=self.database,
-                url=self.url
-            )
-            object_tested = {
-                '_id': '',
-                'name': tf_name,
-                'synonyms': self.mg_tf_object.synonyms,
-                'genes': genes.genes,
-                'note': self.mg_tf_object.note,
-                'activeConformations': ObjectTested.get_tf_act_conformations(
-                    self.mg_tf_object.active_conformations
-                 ),
-                'externalCrossReferences': ObjectTested.get_tf_ext_cross_ref(
-                    self.mg_tf_object.external_cross_references
-                )
-            }
-            self._object_tested = object_tested
+        objects_tested = []
+        if mg_tf_objects is None:
+            for mg_tf_object in self.mg_tf_objects:
+                tf_id = None
+                tf_name = None
+                prod_id = None
+                synonyms = None
+                note = None
+                act_conf = None
+                inact_conf = None
+                if mg_tf_object:
+                    tf_id = mg_tf_object.id
+                    tf_name = mg_tf_object.abbreviated_name
+                    prod_id = mg_tf_object.products_ids[0]
+                    synonyms = mg_tf_object.synonyms
+                    note = mg_tf_object.note
+                    act_conf = ObjectTested.get_tf_act_conformations(
+                        mg_tf_object.active_conformations
+                    )
+                    inact_conf = ObjectTested.get_tf_ext_cross_ref(
+                        mg_tf_object.external_cross_references
+                    )
+                    genes = Genes(
+                        tf_name=tf_name,
+                        prod_ids=prod_id,
+                        database=self.database,
+                        url=self.url
+                    )
+                    object_tested = {
+                        '_id': tf_id,
+                        'name': tf_name,
+                        'synonyms': synonyms,
+                        'genes': genes.genes,
+                        'note': note,
+                        'activeConformations': act_conf,
+                        'externalCrossReferences': inact_conf
+                    }
+                    objects_tested.append(object_tested)
+        self._object_tested = objects_tested
 
     # Static methods
     @staticmethod
-    def get_mg_tf_object(tf_name, database, url):
+    def get_mg_tf_object(tf_names, database, url):
         """
         Gets TF object from Multigenomic database.
         Args:
-            tf_name: String, name of TF object.
+            tf_names: List, name of TF object.
             database: String, name of database.
             url: String, URL of MongoDB database.
 
         Returns:
-            mg_tf: multigenomic_api.transcription_factors object
+            mg_tfs: multigenomic_api.transcription_factors object list
         """
+        mg_tfs = []
         mg_api.connect(database, url)
-        mg_tf = mg_api.transcription_factors.find_by_abb_name(tf_name)
+        for tf_name in tf_names:
+            mg_tfs.append(mg_api.transcription_factors.find_by_abb_name(tf_name))
         mg_api.disconnect()
-        return mg_tf
+        return mg_tfs
 
     @staticmethod
     def get_tf_act_conformations(act_conformations):

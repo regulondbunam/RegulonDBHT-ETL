@@ -93,7 +93,8 @@ class DatasetsMetadata(object):
                     expression_growcon_control_ids=self.dataset_dict.get(constants.EXPRESSION_GC_EXPERIMENTAL, None),
                     source_cut_off=self.dataset_dict.get(constants.CUT_OFF, None),
                     public_notes=self.dataset_dict.get(constants.PUBLIC_NOTES, None),
-                    exp_condition_notes=self.dataset_dict.get(constants.EXPERIMENT_CONDITION, None)
+                    exp_condition_notes=self.dataset_dict.get(constants.EXPERIMENT_CONDITION, None),
+                    external_db_links=self.dataset_dict.get(constants.EXTERNAL_DB_LINK, None)
                 )
             else:
                 logging.warning(f"No Dataset ID provided for {self.dataset_dict.get(constants.PMID, None)}")

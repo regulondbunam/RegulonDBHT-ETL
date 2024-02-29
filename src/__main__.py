@@ -108,7 +108,7 @@ if __name__ == '__main__':
     logging.info(f'Initializing RegulonDB HT ETL')
 
     run(
-        collection_name=args.collection_name,
+        collection_name=args.collection_type,
         collection_path=args.collection_path,
         collection_source=args.collection_source,
         release_process_date=str(datetime.datetime.now()),

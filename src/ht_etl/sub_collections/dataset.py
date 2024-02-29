@@ -60,6 +60,7 @@ class Dataset(object):
         self.expression_growcon_experimental = kwargs.get('expression_growcon_experimental', None)
         self.source_cut_off = kwargs.get('source_cut_off', None)
         self.public_notes = kwargs.get('public_notes', None)
+        self.external_db_links = kwargs.get('external_db_links', None)
 
         # Local properties
 
@@ -142,8 +143,8 @@ class Dataset(object):
                 'cutOff': self.source_cut_off,
                 'notes': self.public_notes,
                 'sourceReferenceGenome': self.src_reference_genome,
+                'externalReferences': self.external_db_links,
                 'growConditionsContrast': '',
-                'externalReferences': '',
                 'geneExpressionFiltered': '',
                 'summary': '',
             }
