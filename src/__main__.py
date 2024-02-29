@@ -28,6 +28,7 @@ def run(**kwargs):
     """
     print(f"Reading data from {kwargs.get('datasets_record_path', None)}")
     logging.info(f"Reading data from {kwargs.get('datasets_record_path', None)}")
+
     datasets_objs = datasets.get_dataset(
         filename=kwargs.get('datasets_record_path', None),
         rows_to_skip=kwargs.get('rows_to_skip', None),
@@ -37,14 +38,16 @@ def run(**kwargs):
         database=kwargs.get('db', None),
         url=kwargs.get('url', None),
         version=kwargs.get('version', None),
-        collection_source=kwargs.get('collection_source', None)
+        collection_source=kwargs.get('collection_source', None),
+        collection_path=kwargs.get('collection_path', None),
+        collection_status=kwargs.get('collection_status', None)
     )
 
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
             'dataset': dataset_obj.dataset.dataset_dict,
-            'metadata': dataset_obj.metadata,
-            'collectionName': kwargs.get('collection_name', None)
+            'metadata': dataset_obj.metadata.metadata,
+            'collectionName': dataset_obj.collection_name
         }
         print(dataset_obj_dict)
 
@@ -121,7 +124,8 @@ if __name__ == '__main__':
         rows_to_skip=int(args.rows_to_skip),
         genes_ranges=utils.set_genome_intervals(),
         bnumbers=args.bnumbers,
-        output_dirs_path=output_dirs_path
+        output_dirs_path=output_dirs_path,
+        collection_status=args.collection_status
     )
 
     print(f'RegulonDB HT ETL process complete.')

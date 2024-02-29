@@ -122,7 +122,7 @@ class Dataset(object):
                 self.dataset_id
             )
             collection_data = CollectionData(
-                collection_source= self.collection_source,
+                collection_source=self.collection_source,
                 collection_name=self.collection_name
             )
             dataset_dict = {
@@ -132,12 +132,8 @@ class Dataset(object):
                 'sourceSerie': source_serie.source_serie,
                 'sample': sample.sample,
                 'linkedDataset': linked_dataset.linked_dataset,
-                'growConditionsContrast': '',
-                'summary': '',
                 'releaseDataControl': release_data_control.release_data_control,
-                'externalReferences': '',
                 'collectionData': collection_data.collection_data,
-                'geneExpressionFiltered': '',
                 'temporalId': temporal_id,
                 'referenceGenome': self.ref_genome,
                 'assemblyGenomeId': self.assembly_genome_id,
@@ -146,6 +142,10 @@ class Dataset(object):
                 'cutOff': self.source_cut_off,
                 'notes': self.public_notes,
                 'sourceReferenceGenome': self.src_reference_genome,
+                'growConditionsContrast': '',
+                'externalReferences': '',
+                'geneExpressionFiltered': '',
+                'summary': '',
             }
             self._dataset_dict = dataset_dict
 

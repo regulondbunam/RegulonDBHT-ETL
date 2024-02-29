@@ -10,6 +10,7 @@ import logging
 # local
 from src.libs import constants
 from src.ht_etl.sub_collections.dataset import Dataset
+from src.ht_etl.sub_collections.metadata import Metadata
 
 
 class DatasetsMetadata(object):
@@ -22,14 +23,16 @@ class DatasetsMetadata(object):
         self.version = kwargs.get('version', None)
         self.src_collection_name = kwargs.get('src_collection_name', None)
         self.collection_source = kwargs.get('collection_source', None)
+        self.collection_path = kwargs.get('collection_path', None)
+        self.collection_status = kwargs.get('collection_status', None)
 
         # Local properties
         self.dataset_dict = kwargs.get('dataset_dict', None)
 
         # Object properties
         self.dataset = kwargs.get('dataset', None)
-        self.metadata = kwargs.get('metadata', None)
         self.collection_name = kwargs.get('collection_name', None)
+        self.metadata = kwargs.get('metadata', None)
 
     # Local properties
 
@@ -97,3 +100,31 @@ class DatasetsMetadata(object):
 
         self._dataset = dataset
 
+    @property
+    def collection_name(self):
+        return self._collection_name
+
+    @collection_name.setter
+    def collection_name(self, new_collection_name=None):
+        self._collection_name = new_collection_name
+        if new_collection_name is None:
+            collection_name = self.src_collection_name
+            collection_name = collection_name.replace('-', '_').upper()
+            self._collection_name = collection_name
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, metadata=None):
+        if metadata is None:
+            metadata = Metadata(
+                dataset_type=self.dataset_type,
+                readme_path=self.collection_path,
+                collection_name=self.collection_name,
+                collection_source=self.collection_source,
+                collection_status=self.collection_status,
+                pmid=self.dataset_dict.get(constants.PMID, None)
+            )
+        self._metadata = metadata

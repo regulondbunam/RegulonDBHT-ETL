@@ -138,6 +138,15 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-status",
+        "--collection-status",
+        help="Collection status.",
+        choices=["DEPRECATED", "CURRENT"],
+        default="CURRENT",
+        metavar="CURRENT"
+    )
+
+    parser.add_argument(
         "-email",
         "--email",
         help="User email address to connect to PUBMED database.",
