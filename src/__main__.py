@@ -43,14 +43,27 @@ def run(**kwargs):
         collection_status=kwargs.get('collection_status', None)
     )
 
+    dataset_list = []
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
             'dataset': dataset_obj.dataset.dataset_dict,
             'metadata': dataset_obj.metadata.metadata,
             'collectionName': dataset_obj.collection_name
         }
+        dataset_list.append(dataset_obj_dict)
         print(dataset_obj_dict)
 
+    collection_data = utils.set_json_object(
+        filename="dataset",
+        data_list=dataset_list,
+        organism=kwargs.get('organism'),
+        sub_class_acronym='MDD',
+        child_class_acronym=None
+    )
+    utils.create_json(
+        objects=collection_data,
+        filename=f'dataset_metadata_{kwargs.get("collection_name")}',
+        output=kwargs.get('output_path'))
     # exit()
     """if kwargs.get('datasets_record_path') is not None:
         print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')

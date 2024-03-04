@@ -1,6 +1,6 @@
-'''
+"""
 Some functions that help to HT process.
-'''
+"""
 # standard
 import os
 import logging
@@ -70,17 +70,19 @@ def get_collection_type(collection_path):
 
 
 def set_json_object(filename, data_list, organism, sub_class_acronym, child_class_acronym):
-    '''
-    Sets the JSON output format of the collection..
+    """
+    Sets the JSON output format of the collection.
 
-    Param
-        filename, String, the the output file name.
-        data_list, List, the list with the collection data.
-        organism, String, the organism name.
+    Args:
+        filename: String, the output file name.
+        sub_class_acronym: String, the subclass acronym.
+        child_class_acronym: String, the class child acronym.
+        data_list: List, the list with the collection data.
+        organism: String, the organism name.
 
-    Returns
-        json_object, Dict, the dictionary with the final JSON file format
-    '''
+    Returns:
+        json_object: Dict, the dictionary with the final JSON file format
+    """
     json_object = {
         'collectionName': filename,
         'collectionData': data_list,
@@ -226,15 +228,16 @@ def set_log(log_path, log_name, log_date):
 
 
 def create_json(objects, filename, output):
-    '''
+    """
     Create and write the JSON file with the results.
 
-    Param
-        objects, Object, a Python serializable object that you want to convert to JSON format.
-        filename, String, JSON file name.
-        output, String, output path.
-    '''
+    Args:
+        objects: Object, a Python serializable object that you want to convert to JSON format.
+        filename: String, JSON file name.
+        output: String, output path.
+    """
     filename = os.path.join(output, filename)
+    logging.info(f'Writing JSON file {filename}')
     with open(f'{filename}.json', 'w') as json_file:
         json.dump(objects, json_file, indent=4, sort_keys=True)
 
