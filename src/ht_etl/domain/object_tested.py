@@ -58,13 +58,6 @@ class ObjectTested(object):
         objects_tested = []
         if mg_tf_objects is None:
             for mg_tf_object in self.mg_tf_objects:
-                tf_id = None
-                tf_name = None
-                prod_id = None
-                synonyms = None
-                note = None
-                act_conf = None
-                inact_conf = None
                 if mg_tf_object:
                     tf_id = mg_tf_object.id
                     tf_name = mg_tf_object.abbreviated_name
@@ -74,7 +67,7 @@ class ObjectTested(object):
                     act_conf = ObjectTested.get_tf_act_conformations(
                         mg_tf_object.active_conformations
                     )
-                    inact_conf = ObjectTested.get_tf_ext_cross_ref(
+                    external_cross_ref = ObjectTested.get_tf_ext_cross_ref(
                         mg_tf_object.external_cross_references
                     )
                     genes = Genes(
@@ -90,7 +83,7 @@ class ObjectTested(object):
                         'genes': genes.genes,
                         'note': note,
                         'activeConformations': act_conf,
-                        'externalCrossReferences': inact_conf
+                        'externalCrossReferences': external_cross_ref
                     }
                     objects_tested.append(object_tested)
         self._object_tested = objects_tested
@@ -111,7 +104,9 @@ class ObjectTested(object):
         mg_tfs = []
         mg_api.connect(database, url)
         for tf_name in tf_names:
-            mg_tfs.append(mg_api.transcription_factors.find_by_abb_name(tf_name))
+            mg_tf = mg_api.transcription_factors.find_by_abb_name(tf_name)
+            if mg_tf:
+                mg_tfs.append(mg_tf)
         mg_api.disconnect()
         return mg_tfs
 
