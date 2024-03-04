@@ -54,7 +54,7 @@ class Sample(object):
         """
         sample_replicates = []
         if not sample_replicate_ids:
-            logging.warning('No sample_replicate_ids provided')
+            # logging.warning('No sample_replicate_ids provided')
             return sample_replicates
         sample_replicate_ids = sample_replicate_ids.replace('\t', '')
         sample_replicate_ids = sample_replicate_ids.split('] [')

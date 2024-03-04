@@ -15,6 +15,7 @@ from src.ht_etl.domain.sample import Sample
 from src.ht_etl.domain.linked_dataset import LinkedDataset
 from src.ht_etl.domain.release_data_control import ReleaseControl
 from src.ht_etl.domain.collection_data import CollectionData
+from src.ht_etl.domain.external_references import ExternalReference
 
 
 class Dataset(object):
@@ -126,6 +127,9 @@ class Dataset(object):
                 collection_source=self.collection_source,
                 collection_name=self.collection_name
             )
+            external_references = ExternalReference(
+                urls=self.external_db_links,
+            )
             dataset_dict = {
                 '_id': self.dataset_id,
                 'publications': dataset_publications.publications_list,
@@ -143,7 +147,7 @@ class Dataset(object):
                 'cutOff': self.source_cut_off,
                 'notes': self.public_notes,
                 'sourceReferenceGenome': self.src_reference_genome,
-                'externalReferences': self.external_db_links,
+                'externalReferences': external_references.external_references,
                 'growConditionsContrast': '',
                 'geneExpressionFiltered': '',
                 'summary': '',
