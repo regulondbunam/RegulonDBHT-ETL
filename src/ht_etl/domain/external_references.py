@@ -35,9 +35,18 @@ class ExternalReference(object):
         if self.urls:
             urls = self.urls.replace(' ', '')
             for url in urls.split(','):
+                url_data = url.split('|')
+                try:
+                    name = url_data[0]
+                except IndexError:
+                    name = ''
+                try:
+                    link = url_data[2]
+                except IndexError:
+                    link = ''
                 external_reference = {
-                    'name': self.name,
-                    'url': url,
+                    'name': name,
+                    'url': link,
                     'description': self.description,
                     'note': self.note
                 }
