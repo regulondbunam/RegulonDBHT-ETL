@@ -60,6 +60,6 @@ class Sample(object):
         sample_replicate_ids = sample_replicate_ids.split('] [')
         for sample_replicate_id in sample_replicate_ids:
             sample_replicate_id = sample_replicate_id.replace('[', '').replace(']', '')
-            # sample_replicate_id = sample_replicate_id.split(',')
+            sample_replicate_id = sample_replicate_id.replace(', ', ',').replace('  ', ',').replace(' ', ',').split(',')
             sample_replicates.append(sample_replicate_id)
         return sample_replicates

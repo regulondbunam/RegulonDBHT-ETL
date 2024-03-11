@@ -63,7 +63,8 @@ def run(**kwargs):
     utils.create_json(
         objects=collection_data,
         filename=f'dataset_metadata_{kwargs.get("collection_name")}',
-        output=kwargs.get('output_path'))
+        output=kwargs.get('output_path')
+    )
     # exit()
     """if kwargs.get('datasets_record_path') is not None:
         print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')
