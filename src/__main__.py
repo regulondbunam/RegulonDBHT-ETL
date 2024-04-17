@@ -1,12 +1,11 @@
-'''
+"""
     RegulonDB HT ETL.
-'''
+"""
 # standard
 import logging
 import datetime
 import shutil
 import os
-import json
 
 # third party
 
@@ -46,8 +45,8 @@ def run(**kwargs):
     dataset_list = []
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
-            'dataset': dataset_obj.dataset.dataset_dict,
-            'metadata': dataset_obj.metadata.metadata,
+            'dataset': dataset_obj.dataset,
+            'metadata': dataset_obj.metadata,
             'collectionName': dataset_obj.collection_name
         }
         dataset_list.append(dataset_obj_dict)

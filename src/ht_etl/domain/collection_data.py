@@ -18,26 +18,21 @@ class CollectionData(object):
         # Local properties
 
         # Object properties
-        self.collection_data = kwargs.get('collection_data', None)
+        self.collection_name_upper = kwargs.get('collection_name_upper', None)
 
     # Local properties
 
     # Object properties
     @property
-    def collection_data(self):
-        return self._collection_data
+    def collection_name_upper(self):
+        return self._collection_name_upper
 
-    @collection_data.setter
-    def collection_data(self, collection_data):
+    @collection_name_upper.setter
+    def collection_name_upper(self, collection_name_upper=None):
         """
-        Sets Collection Data dict object.
+        Parse the collection name to upper case and replace - with _.
         """
-        self._collection_data = collection_data
-        if collection_data is None:
-            collection_name = self.collection_name.replace('-', '_').upper()
-            collection_data = {
-                'type': collection_name,
-                'source': self.collection_source
-            }
-            collection_data = {k: v for k, v in collection_data.items() if v}
-        self._collection_data = collection_data
+        self._collection_name_upper = collection_name_upper
+        if collection_name_upper is None:
+            collection_name_upper = self.collection_name.replace('-', '_').upper()
+            self._collection_name_upper = collection_name_upper

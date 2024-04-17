@@ -18,27 +18,39 @@ class Sample(object):
         # Local properties
 
         # Object properties
-        self.sample = kwargs.get('sample', None)
+        self.control_id = kwargs.get('control_id', None)
+        self.experiment_id = kwargs.get('experiment_id', None)
 
     # Local properties
 
     # Object properties
     @property
-    def sample(self):
-        return self._sample
+    def control_id(self):
+        return self._control_id
 
-    @sample.setter
-    def sample(self, sample=None):
-        if sample is None:
+    @control_id.setter
+    def control_id(self, control_id=None):
+        """
+        Sets the control id.
+        """
+        self._control_id = control_id
+        if control_id is None:
             control_id = Sample.sample_replicate_ids(self.sample_replicate_ctrl)
+            self._control_id = control_id
+
+    @property
+    def experiment_id(self):
+        return self._experiment_id
+
+    @experiment_id.setter
+    def experiment_id(self, experiment_id=None):
+        """
+        Sets the experiment id.
+        """
+        self._experiment_id = experiment_id
+        if experiment_id is None:
             experiment_id = Sample.sample_replicate_ids(self.sample_replicate_exp)
-            sample = {
-                'controlId': control_id,
-                'experimentId': experiment_id,
-                'title': self.title_for_replicates,
-                'ssrId': ''  # TODO: ask for this property
-            }
-        self._sample = sample
+            self._experiment_id = experiment_id
 
     # Static methods
     @staticmethod
@@ -54,7 +66,7 @@ class Sample(object):
         """
         sample_replicates = []
         if not sample_replicate_ids:
-            # logging.warning('No sample_replicate_ids provided')
+            logging.warning('No sample_replicate_ids provided')
             return sample_replicates
         sample_replicate_ids = sample_replicate_ids.replace('\t', '')
         sample_replicate_ids = sample_replicate_ids.split('] [')

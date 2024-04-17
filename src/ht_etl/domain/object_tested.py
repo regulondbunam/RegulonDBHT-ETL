@@ -27,7 +27,7 @@ class ObjectTested(object):
         )
 
         # Object properties
-        self.object_tested = kwargs.get('object_tested', None)
+        self.objects_tested = kwargs.get('objects_tested', None)
 
     # Local properties
     @property
@@ -35,7 +35,7 @@ class ObjectTested(object):
         return self._tf_names
 
     @tf_names.setter
-    def tf_names(self, tf_names):
+    def tf_names(self, tf_names=None):
         """
         Sets TF Name.
         """
@@ -47,11 +47,11 @@ class ObjectTested(object):
 
     # Object properties
     @property
-    def object_tested(self):
-        return self._object_tested
+    def objects_tested(self):
+        return self._objects_tested
 
-    @object_tested.setter
-    def object_tested(self, mg_tf_objects=None):
+    @objects_tested.setter
+    def objects_tested(self, mg_tf_objects=None):
         """
         Sets Object Tested.
         """
@@ -86,7 +86,7 @@ class ObjectTested(object):
                         'externalCrossReferences': external_cross_ref
                     }
                     objects_tested.append(object_tested)
-        self._object_tested = objects_tested
+        self._objects_tested = objects_tested
 
     # Static methods
     @staticmethod

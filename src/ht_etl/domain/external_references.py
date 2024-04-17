@@ -31,6 +31,9 @@ class ExternalReference(object):
 
     @external_references.setter
     def external_references(self, external_references):
+        """
+        Set external references.
+        """
         external_references = []
         if self.urls:
             urls = self.urls.replace(' ', '')

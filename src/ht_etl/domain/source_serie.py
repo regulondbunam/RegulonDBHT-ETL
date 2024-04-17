@@ -27,39 +27,46 @@ class SourceSerie(object):
         # Local properties
 
         # Object properties
-        self.source_serie = kwargs.get('publications_list', None)
+        self.source_series = kwargs.get('source_series', None)
+        self.platform = kwargs.get('platform', None)
 
     # Local properties
 
     # Object properties
     @property
-    def source_serie(self):
-        return self._source_serie
+    def source_series(self):
+        return self._source_series
 
-    @source_serie.setter
-    def source_serie(self, source_serie):
+    @source_series.setter
+    def source_series(self, source_series=None):
         """
-        Sets Source Serie dict object.
+        Sets the source series.
         """
-        self._source_serie = source_serie
-        if source_serie is None:
-            source_serie = Series(
+        self._source_series = source_series
+        if source_series is None:
+            source_series = Series(
                 source_id=self.serie_id,
                 source_name=self.source_name
             )
+            self.source_series = source_series.series
+
+    @property
+    def platform(self):
+        return self._platform
+
+    @platform.setter
+    def platform(self, platform=None):
+        """
+        Sets the platform.
+        """
+        self._platform = platform
+        if platform is None:
             platform = Platform(
                 platform_id=self.platform_id,
                 platform_title=self.platform_title
             )
-            source_serie = {
-                'series': [source_serie.series],
-                'platform': platform.platform,
-                'title': self.title,
-                'strategy': self.strategy,
-                'method': self.method,
-                'readType': self.read_type,
-                'sourceDB': self.source_db
+            platform_dict = {
+                '_id': platform.id,
+                'title': platform.title
             }
-
-            source_serie = {k: v for k, v in source_serie.items() if v}
-            self._source_serie = source_serie
+            self._platform = platform_dict

@@ -17,20 +17,18 @@ class ReleaseControl(object):
         # Local properties
 
         # Object properties
-        self.release_data_control = kwargs.get('release_data_control', None)
+        self.release_date = kwargs.get('release_date', None)
 
     # Local properties
 
     # Object properties
     @property
-    def release_data_control(self):
-        return self._release_data_control
+    def release_date(self):
+        return self._release_date
 
-    @release_data_control.setter
-    def release_data_control(self, release_data_control=None):
-        if release_data_control is None:
-            release_data_control = {
-                'date': datetime.datetime.today().strftime("%d/%m/%Y"),
-                'version': self.version
-            }
-        self._release_data_control = release_data_control
+    @release_date.setter
+    def release_date(self, release_date=None):
+        self._release_date = release_date
+        if self._release_date is None:
+            release_date = datetime.datetime.today().strftime("%d/%m/%Y")
+            self._release_date = release_date

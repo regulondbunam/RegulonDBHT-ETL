@@ -8,6 +8,7 @@ Calls for Datasets class and returns a constructor with all datasets objects.
 
 
 # local
+
 def get_dataset(**kwargs):
     """
     Returns a constructor with all datasets.
@@ -26,7 +27,7 @@ def get_dataset(**kwargs):
 
     for row in dataset_rows:
         dataset = DatasetsMetadata(
-            dataset_dict=row,
+            dataset_source_dict=row,
             dataset_type=kwargs.get('dataset_type', None),
             email=kwargs.get('email', None),
             database=kwargs.get('database', None),

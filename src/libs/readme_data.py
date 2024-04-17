@@ -29,6 +29,9 @@ class ReadmeData(object):
 
     @readme_txt.setter
     def readme_txt(self, txt=None):
+        """
+        Sets README text.
+        """
         if txt is None:
             path = os.path.join(self.path, 'README.md')
             if not os.path.isfile(path):

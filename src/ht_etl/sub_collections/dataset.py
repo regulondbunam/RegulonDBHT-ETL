@@ -66,34 +66,75 @@ class Dataset(object):
         # Local properties
 
         # Object properties
-        self.dataset_dict = kwargs.get('dataset_dict', None)
+        self.dataset_publications = kwargs.get('dataset_publications', None)
+        self.objects_tested = kwargs.get('objects_tested', None)
+        self.source_serie = kwargs.get('source_serie', None)
+        self.sample = kwargs.get('sample', None)
+        self.linked_dataset = kwargs.get('linked_dataset', None)
+        self.release_data_control = kwargs.get('release_data_control', None)
+        self.collection_data = kwargs.get('collection_data', None)
+        self.temporal_id = Dataset.set_temp_id(
+            self.dataset_type,
+            self.collection_name,
+            self.dataset_id
+        )
+        self.external_references = kwargs.get('external_references', None)
+        self.grow_conditions_contrast = kwargs.get('grow_conditions_contrast', None)
+        self.gene_expression_filtered = kwargs.get('gene_expression_filtered', None)
+        self.summary = kwargs.get('summary', None)
 
     # Local properties
 
     # Object properties
-    @property
-    def dataset_dict(self):
-        return self._dataset_dict
 
-    @dataset_dict.setter
-    def dataset_dict(self, dataset_dict=None):
+    @property
+    def dataset_publications(self):
+        return self._dataset_publications
+
+    @dataset_publications.setter
+    def dataset_publications(self, dataset_publications=None):
         """
-        Set dataset dictionary to build the final result.
-        Gets data from the object and buidl sub collection objects.
+        Sets dataset publications
         """
-        self._dataset_dict = dataset_dict
-        if dataset_dict is None:
+        self._dataset_publications = dataset_publications
+        if dataset_publications is None:
             dataset_publications = Publications(
                 dataset_id=self.dataset_id,
                 pmid=self.pmid,
                 email=self.email
             )
-            object_tested = ObjectTested(
+            self._dataset_publications = dataset_publications.publications_list
+
+    @property
+    def objects_tested(self):
+        return self._objects_tested
+
+    @objects_tested.setter
+    def objects_tested(self, objects_tested=None):
+        """
+        Sets objects tested
+        """
+        self._objects_tested = objects_tested
+        if objects_tested is None:
+            objects_tested = ObjectTested(
                 regulondb_tf_name=self.regulondb_tf_name,
                 source_tf_name=self.source_tf_name,
                 database=self.database,
                 url=self.url
             )
+            self._objects_tested = objects_tested.objects_tested
+
+    @property
+    def source_serie(self):
+        return self._source_serie
+
+    @source_serie.setter
+    def source_serie(self, source_serie=None):
+        """
+        Sets source serie
+        """
+        self._source_serie = source_serie
+        if source_serie is None:
             source_serie = SourceSerie(
                 serie_id=self.serie_id,
                 source_name=self.source_database,
@@ -105,58 +146,176 @@ class Dataset(object):
                 read_type=None,  # TODO: Ask for this property
                 source_db=self.source_database
             )
+            source_serie_dict = {
+                'series': source_serie.source_series,
+                'platform': source_serie.platform,
+                'title': source_serie.title,
+                'strategy': source_serie.strategy,
+                'method': source_serie.method,
+                'readType': source_serie.read_type,
+                'sourceDB': source_serie.source_db
+            }
+            source_serie_dict = {k: v for k, v in source_serie_dict.items() if v}
+            self._source_serie = source_serie_dict
+
+    @property
+    def sample(self):
+        return self._sample
+
+    @sample.setter
+    def sample(self, sample=None):
+        """
+        Sets sample.
+        """
+        self._sample = sample
+        if sample is None:
             sample = Sample(
                 sample_replicate_exp=self.samples_replicates_exp_ids,
                 sample_replicate_ctrl=self.samples_replicates_control_ids,
                 title_for_replicates=self.title_for_all_replicates
             )
+            sample_dict = {
+                'controlId': sample.control_id,
+                'experimentId': sample.experiment_id,
+                'title': sample.title_for_replicates,
+                'ssrId': ''  # TODO: ask for this property
+            }
+            self._sample = sample_dict
+
+    @property
+    def linked_dataset(self):
+        return self._linked_dataset
+
+    @linked_dataset.setter
+    def linked_dataset(self, linked_dataset=None):
+        """
+        Sets linked dataset.
+        """
+        self._linked_dataset = linked_dataset
+        if linked_dataset is None:
             linked_dataset = LinkedDataset(
                 sample_exp_replicate_exp=self.samples_replicates_exp_ids,
                 sample_exp_replicate_ctrl=self.samples_replicates_control_ids,
                 dataset_type=self.dataset_type
             )
+            linked_dataset_dict = {
+                'controlId': linked_dataset.control_id,
+                'experimentId': linked_dataset.experiment_id,
+                'datasetType': linked_dataset.dataset_type,
+            }
+            self._linked_dataset = linked_dataset_dict
+
+    @property
+    def release_data_control(self):
+        return self._release_data_control
+
+    @release_data_control.setter
+    def release_data_control(self, release_data_control=None):
+        """
+        Sets release data control.
+        """
+        self._release_data_control = release_data_control
+        if release_data_control is None:
             release_data_control = ReleaseControl(
                 version=self.version
             )
-            temporal_id = Dataset.set_temp_id(
-                self.dataset_type,
-                self.collection_name,
-                self.dataset_id
-            )
+            release_data_control_dict = {
+                'date': release_data_control.release_date,
+                'version': release_data_control.version
+            }
+            self._release_data_control = release_data_control_dict
+
+    @property
+    def collection_data(self):
+        return self._collection_data
+
+    @collection_data.setter
+    def collection_data(self, collection_data=None):
+        """
+        Sets collection data.
+        """
+        self._collection_data = collection_data
+        if collection_data is None:
             collection_data = CollectionData(
                 collection_source=self.collection_source,
                 collection_name=self.collection_name
             )
+            collection_data_dict = {
+                'type': collection_data.collection_name_upper,
+                'source': collection_data.collection_source
+            }
+            collection_data_dict = {k: v for k, v in collection_data_dict.items() if v}
+            self._collection_data = collection_data_dict
+
+    @property
+    def external_references(self):
+        return self._external_references
+
+    @external_references.setter
+    def external_references(self, external_references=None):
+        """
+        Sets external references.
+        """
+        self._external_references = external_references
+        if external_references is None:
             external_references = ExternalReference(
                 urls=self.external_db_links,
             )
-            dataset_dict = {
-                '_id': self.dataset_id,
-                'publications': dataset_publications.publications_list,
-                'objectTested': object_tested.object_tested,
-                'sourceSerie': source_serie.source_serie,
-                'sample': sample.sample,
-                'linkedDataset': linked_dataset.linked_dataset,
-                'releaseDataControl': release_data_control.release_data_control,
-                'collectionData': collection_data.collection_data,
-                'temporalId': temporal_id,
-                'referenceGenome': self.ref_genome,
-                'assemblyGenomeId': self.assembly_genome_id,
-                'fivePrimeEnrichment': self.five_prime_enrichment,
-                'experimentCondition': self.exp_condition,
-                'cutOff': self.source_cut_off,
-                'notes': self.public_notes,
-                'sourceReferenceGenome': self.src_reference_genome,
-                'externalReferences': external_references.external_references,
-                'growConditionsContrast': '',
-                'geneExpressionFiltered': '',
-                'summary': '',
-            }
-            self._dataset_dict = dataset_dict
+            self._external_references = external_references.external_references
+
+    @property
+    def grow_conditions_contrast(self):
+        return self._grow_conditions_contrast
+
+    @grow_conditions_contrast.setter
+    def grow_conditions_contrast(self, grow_conditions_contrast=None):
+        """
+        Sets grow conditions contrast.
+        """
+        if grow_conditions_contrast is None:
+            self._grow_conditions_contrast = grow_conditions_contrast
+
+    @property
+    def gene_expression_filtered(self):
+        return self._gene_expression_filtered
+
+    @gene_expression_filtered.setter
+    def gene_expression_filtered(self, gene_expression_filtered=None):
+        """
+        Sets gene expression filtered.
+        """
+        if gene_expression_filtered is None:
+            self._gene_expression_filtered = gene_expression_filtered
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @summary.setter
+    def summary(self, summary=None):
+        """
+        Sets summary and starts uniformized data processing.
+        """
+        if summary is None:
+            self._summary = summary
+            # TODO: Could i start uniformized extractions?
 
     # Static methods
     @staticmethod
     def set_temp_id(dataset_type, collection_name, dataset_id):
-        collection_type = collection_name.replace('-', '_').upper()
-        temp_id = f"{dataset_type}_{collection_type}_{dataset_id}"
+        """
+        Generates temporary dataset id.
+
+        Args:
+            dataset_type: String, dataset type.
+            collection_name: String, collection name.
+            dataset_id: String, source dataset id.
+
+        Returns:
+            temp_id: String, Temp dataset id.
+        """
+        temp_id = ''
+        if collection_name is not None:
+            collection_type = collection_name.replace('-', '_').upper()
+            temp_id = f"{dataset_type}_{collection_type}_{dataset_id}"
         return temp_id

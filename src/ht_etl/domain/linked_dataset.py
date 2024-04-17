@@ -18,26 +18,39 @@ class LinkedDataset(object):
         # Local properties
 
         # Object properties
-        self.linked_dataset = kwargs.get('linked_dataset', None)
+        self.control_id = kwargs.get('control_id', None)
+        self.experiment_id = kwargs.get('experiment_id', None)
 
     # Local properties
 
     # Object properties
     @property
-    def linked_dataset(self):
-        return self._linked_dataset
+    def control_id(self):
+        return self._control_id
 
-    @linked_dataset.setter
-    def linked_dataset(self, linked_dataset=None):
-        if linked_dataset is None:
+    @control_id.setter
+    def control_id(self, control_id=None):
+        """
+        Sets the control id.
+        """
+        self._control_id = control_id
+        if control_id is None:
             control_id = LinkedDataset.sample_replicate_ids(self.sample_replicate_ctrl)
+            self._control_id = control_id
+
+    @property
+    def experiment_id(self):
+        return self._experiment_id
+
+    @experiment_id.setter
+    def experiment_id(self, experiment_id=None):
+        """
+        Sets the experiment id.
+        """
+        self._experiment_id = experiment_id
+        if experiment_id is None:
             experiment_id = LinkedDataset.sample_replicate_ids(self.sample_replicate_exp)
-            linked_dataset = {
-                'controlId': control_id,
-                'experimentId': experiment_id,
-                'datasetType': self.dataset_type,
-            }
-        self._linked_dataset = linked_dataset
+            self._experiment_id = experiment_id
 
     # Static methods
     @staticmethod

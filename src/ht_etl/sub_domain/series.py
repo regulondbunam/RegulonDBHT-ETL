@@ -33,10 +33,11 @@ class Series(object):
         """
         Set the Series dict object
         """
-        self._series = series
-        if self._series is None:
+        series_list = []
+        if series is None:
             series = {
                 'sourceId': self.source_id,
                 'sourceName': self.source_name
             }
-            self._series = series
+            series_list.append(series)
+        self._series = series_list
