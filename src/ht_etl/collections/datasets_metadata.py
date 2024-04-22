@@ -25,9 +25,10 @@ class DatasetsMetadata(object):
         self.collection_source = kwargs.get('collection_source', None)
         self.collection_path = kwargs.get('collection_path', None)
         self.collection_status = kwargs.get('collection_status', None)
+        self.dataset_source_dict = kwargs.get('dataset_source_dict', None)
 
         # Local properties
-        self.dataset_source_dict = kwargs.get('dataset_source_dict', None)
+        self.authors_data = kwargs.get('authors_data', None)
 
         # Object properties
         self.dataset = kwargs.get('dataset', None)
@@ -48,8 +49,10 @@ class DatasetsMetadata(object):
         """
         if dataset is None:
             if self.dataset_source_dict.get(constants.DATASET_ID, None) is not None:
+                print(f"\tProcessing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 logging.info(f"Processing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    collection_path=self.collection_path,
                     collection_source=self.collection_source,
                     collection_name=self.src_collection_name,
                     version=self.version,
@@ -75,7 +78,7 @@ class DatasetsMetadata(object):
                     title_for_all_replicates=self.dataset_source_dict.get(constants.TITLE_FOR_ALL_REPLICATES, None),
                     experiment_condition=self.dataset_source_dict.get(constants.EXPERIMENT_CONDITION, None),
                     grow_conditions_exp_ids=self.dataset_source_dict.get(constants.GC_EXPERIMENTAL, None),
-                    organism=self.dataset_source_dict.get(constants.ORGANISM , None),
+                    organism=self.dataset_source_dict.get(constants.ORGANISM, None),
                     src_reference_genome=self.dataset_source_dict.get(constants.SOURCE_REFERENCE_GENOME, None),
                     ref_genome=self.dataset_source_dict.get(constants.REFERENCE_GENOME, None),
                     assembly_genome_id=self.dataset_source_dict.get(constants.ASSEMBLY_GENOME_ID, None),
@@ -119,6 +122,11 @@ class DatasetsMetadata(object):
                     'summary': dataset.summary,
                 }
                 self._dataset = dataset_dict
+                self.authors_data = {
+                    'id': dataset.authors_data.id,
+                    'datasetIds': dataset.authors_data.dataset_ids,
+                    'authorsData': dataset.authors_data.data,
+                }
             else:
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
 

@@ -621,7 +621,11 @@ def excel_file_mapping(filename, keyargs, bnumbers_data):
             collection_data, f'tf_binding_{utils.get_collection_name(keyargs.get("datasets_record_path"))}', keyargs.get('output_path'))
 
         collection_data = utils.set_json_object(
-            "authorsData", authors_data_list, keyargs.get('organism'), 'BSD', 'AD')
+            "authorsData",
+            authors_data_list,
+            keyargs.get('organism'),
+            'BSD',
+            'AD')
         utils.create_json(collection_data, f'authors_data_{utils.get_collection_name(keyargs.get("datasets_record_path"))}',
                           keyargs.get('output_path'))
 

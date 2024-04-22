@@ -16,11 +16,13 @@ from src.ht_etl.domain.linked_dataset import LinkedDataset
 from src.ht_etl.domain.release_data_control import ReleaseControl
 from src.ht_etl.domain.collection_data import CollectionData
 from src.ht_etl.domain.external_references import ExternalReference
+from src.ht_etl.domain.authors_data import AuthorsData
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.collection_path = kwargs.get('collection_path', None)
         self.collection_source = kwargs.get('collection_source', None)
         self.collection_name = kwargs.get('collection_name', None)
         self.version = kwargs.get('version', None)
@@ -64,6 +66,7 @@ class Dataset(object):
         self.external_db_links = kwargs.get('external_db_links', None)
 
         # Local properties
+        self.authors_data = kwargs.get('authors_data', None)
 
         # Object properties
         self.dataset_publications = kwargs.get('dataset_publications', None)
@@ -84,6 +87,19 @@ class Dataset(object):
         self.summary = kwargs.get('summary', None)
 
     # Local properties
+    @property
+    def authors_data(self):
+        return self._authors_data
+
+    @authors_data.setter
+    def authors_data(self, authors_data=None):
+        self._authors_data = authors_data
+        if self._authors_data is None:
+            self._authors_data = AuthorsData(
+                authors_data_path=self.collection_path,
+                file_name=self.dataset_file_name,
+                dataset_id=self.dataset_id
+            )
 
     # Object properties
 

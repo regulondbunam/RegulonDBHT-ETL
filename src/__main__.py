@@ -43,6 +43,7 @@ def run(**kwargs):
     )
 
     dataset_list = []
+    authors_data_list = []
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
             'dataset': dataset_obj.dataset,
@@ -50,7 +51,7 @@ def run(**kwargs):
             'collectionName': dataset_obj.collection_name
         }
         dataset_list.append(dataset_obj_dict)
-        print(dataset_obj_dict)
+        authors_data_list.append(dataset_obj.authors_data)
 
     collection_data = utils.set_json_object(
         filename="dataset",
@@ -59,9 +60,21 @@ def run(**kwargs):
         sub_class_acronym='MDD',
         child_class_acronym=None
     )
+    authors_data = utils.set_json_object(
+        filename="authorsData",
+        data_list=authors_data_list,
+        organism=kwargs.get('organism'),
+        sub_class_acronym='BSD',
+        child_class_acronym='AD'
+    )
     utils.create_json(
         objects=collection_data,
         filename=f'dataset_metadata_{kwargs.get("collection_name")}',
+        output=kwargs.get('output_path')
+    )
+    utils.create_json(
+        objects=authors_data,
+        filename=f'authors_data_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
     # exit()
