@@ -5,7 +5,6 @@ Object Tested object.
 import logging
 
 # third party
-import multigenomic_api as mg_api
 
 # local
 from src.ht_etl.sub_domain.genes import Genes
@@ -14,6 +13,7 @@ from src.ht_etl.sub_domain.genes import Genes
 class ObjectTested(object):
     def __init__(self, **kwargs):
         # Params
+        self.mg_api = kwargs.get('mg_api')
         self.regulondb_tf_name = kwargs.get('regulondb_tf_name', None)
         self.source_tf_name = kwargs.get('source_tf_name', None)
         self.database = kwargs.get('database', None)
@@ -23,7 +23,8 @@ class ObjectTested(object):
         self.mg_tf_objects = ObjectTested.get_mg_tf_object(
             tf_names=self.tf_names,
             database=self.database,
-            url=self.url
+            url=self.url,
+            mg_api=self.mg_api
         )
 
         # Object properties
@@ -90,7 +91,7 @@ class ObjectTested(object):
 
     # Static methods
     @staticmethod
-    def get_mg_tf_object(tf_names, database, url):
+    def get_mg_tf_object(tf_names, database, url, mg_api):
         """
         Gets TF object from Multigenomic database.
         Args:
@@ -102,12 +103,13 @@ class ObjectTested(object):
             mg_tfs: multigenomic_api.transcription_factors object list
         """
         mg_tfs = []
-        mg_api.connect(database, url)
-        for tf_name in tf_names:
-            mg_tf = mg_api.transcription_factors.find_by_abb_name(tf_name)
-            if mg_tf:
-                mg_tfs.append(mg_tf)
-        mg_api.disconnect()
+        try:
+            for tf_name in tf_names:
+                mg_tf = mg_api.transcription_factors.find_by_abb_name(tf_name)
+                if mg_tf:
+                    mg_tfs.append(mg_tf)
+        except Exception as e:
+            mg_tfs = []
         return mg_tfs
 
     @staticmethod

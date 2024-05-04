@@ -10,7 +10,6 @@ import re
 
 # third party
 from Bio import Entrez, Medline
-import multigenomic_api as mg_api
 import pymongo
 
 # local
@@ -581,20 +580,19 @@ def set_genome_intervals():
     return genes_ranges
 
 
-def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
-    '''
-    Calculates the center center position of the chromosome.
+def find_closest_gene(left_pos, right_pos, genes_ranges, mg_api):
+    """
+    Calculates the center position of the chromosome.
 
-    Param
-        left_pos, String, Start position in the sequence (it's converted to Integer).
-        right_pos, String, End position in the sequence (it's converted to Integer).
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
-        genes_ranges, List, Array of coordinate pairs of the calculated ranges.
+    Args:
+        left_pos: String, Start position in the sequence (it's converted to Integer).
+        right_pos: String, End position in the sequence (it's converted to Integer).
+        genes_ranges: List, Array of coordinate pairs of the calculated ranges.
+        mg_api: API, Multigenomic database connection.
 
-    Returns
-        closest_genes, List, Dict List with the verified closest genes.
-    '''
+    Returns:
+        closest_genes: List, Dict List with the verified closest genes.
+    """
     minimum_distance = constants.MINIMUM_DISTANCE
     genome_length = constants.GENOME_LENGTH
     intervals = constants.INTERVALS
@@ -603,8 +601,6 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
 
     found_genes_interval = genes_ranges[int(
         (chromosome_center_pos * intervals) / genome_length)]
-
-    mg_api.connect(database, url)
 
     mg_genes = mg_api.genes.get_closest_genes_to_central_position(
         (found_genes_interval[0] - minimum_distance), (found_genes_interval[1] + minimum_distance), chromosome_center_pos, minimum_distance)
@@ -638,7 +634,7 @@ def find_closest_gene(left_pos, right_pos, database, url, genes_ranges):
             distance = chromosome_center_pos - float(gene_right_pos)
             closest_genes.append(
                 {'_id': gene.id, 'name': gene.name, 'distanceTo': abs(distance), 'productName': gene_product_name, 'transcriptionUnits': tus_dict_list})
-    mg_api.disconnect()
+
     return closest_genes
 
 
@@ -759,21 +755,18 @@ def get_tf_sites_abs_pos(tf_id, database, url):
     return site
 
 
-def get_citations(database, url, citations_obj_list):
-    '''
+def get_citations(mg_api, citations_obj_list):
+    """
     Uses Multigenomic API to get the formatted Citations list.
 
-    Param
-        citations_obj_list, List, Citations Object List.
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
+    Args:
+        citations_obj_list: List, Citations Object List.
+        mg_api: API, Multigenomic database connection.
 
     Returns
         citations, List, formatted Citations list.
-    '''
+    """
     citations = []
-    citation = {}
-    mg_api.connect(database, url)
     for citation_obj in citations_obj_list:
         evidence_id = citation_obj.evidences_id
         publication_id = citation_obj.publications_id
@@ -813,22 +806,20 @@ def get_citations(database, url, citations_obj_list):
     return citations
 
 
-def get_tss_distance(database, url, regulated_entity, strand, rend, lend):
-    '''
-    Calculates the distance between the given Regualtory Interaction and the closest Trasncription Start Site.
+def get_tss_distance(mg_api, regulated_entity, strand, rend, lend):
+    """
+    Calculates the distance between the given Regulatory Interaction and the closest Trasncription Start Site.
 
-    Param
-        regulated_entity, Object, Regualtory Interaction regulated entity object.
-        strand, String, Regualtory Site strand forward or reverse ('-', '+').
-        lend, String, Start position in the sequence.
-        rend, String, End position in the sequence.
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
+    Args:
+        regulated_entity: Object, Regulatory Interaction regulated entity object.
+        strand: String, Regulatory Site strand forward or reverse ('-', '+').
+        lend: String, Start position in the sequence.
+        rend: String, End position in the sequence.
+        mg_api: API, Multigenomic database connection.
 
     Returns
         distance, Integer, Distance between the given Regualtory Interaction and the closest Trasncription Start Site.
-    '''
-    mg_api.connect(database, url)
+    """
     distance = None
     reg_entity_type = regulated_entity.type
     reg_entity_id = regulated_entity.id
@@ -880,22 +871,20 @@ def get_tss_distance(database, url, regulated_entity, strand, rend, lend):
     return distance
 
 
-def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
-    '''
-    Calculates the distance between the given Regualtory Interaction and the closest Gene.
+def get_gene_distance(mg_api, regulated_entity, strand, rend, lend):
+    """
+    Calculates the distance between the given Regulatory Interaction and the closest Gene.
 
-    Param
-        regulated_entity, Object, Regualtory Interaction regulated entity object.
-        strand, String, Regualtory Site strand forward or reverse ('-', '+').
-        lend, String, Start position in the sequence.
-        rend, String, End position in the sequence.
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
+    Args:
+        regulated_entity: Object, Regulatory Interaction regulated entity object.
+        strand: String, Regulatory Site strand forward or reverse ('-', '+').
+        lend: String, Start position in the sequence.
+        rend: String, End position in the sequence.
+        mg_api: API, Multigenomic database connection.
 
-    Returns
-        distance, Integer, Distance between the given Regualtory Interaction and the closest Gene.
-    '''
-    mg_api.connect(database, url)
+    Returns:
+        distance: Integer, Distance between the given Regualtory Interaction and the closest Gene.
+    """
     distance = None
     reg_entity_type = regulated_entity.type
     reg_entity_id = regulated_entity.id
@@ -953,19 +942,21 @@ def get_gene_distance(database, url, regulated_entity, strand, rend, lend):
     return distance
 
 
-def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
-    '''
-    Gets Regualtory Interactions on RegulonDB Multigenomic database.
+def get_classic_ris(lend, rend, strand, tf_sites, mg_api, origin):
+    """
+    Gets Regulatory Interactions on RegulonDB Multigenomic database.
 
-    Param
-        lend, Float, RI's leftEndPosition.
-        rend, Float, RI's rigthEndPosition.
-        strand, Float, RI's strand.
-        tf_sites, List, Sites in the dataset.
+    Args:
+        lend: Float, RI's leftEndPosition.
+        rend: Float, RI's rightEndPosition.
+        strand: Float, RI's strand.
+        tf_sites: List, Sites in the dataset.
+        mg_api: API, Multigenomic database connection.
+        origin: String, Origin of the dataset.
 
-    Returns
-        classic_ris, List, RIs found on RegulonDB List.
-    '''
+    Returns:
+        classic_ris: List, RIs found on RegulonDB List.
+    """
     center_pos = get_center_pos(lend, rend)
     classic_ris = []
     for site in tf_sites:
@@ -975,7 +966,6 @@ def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
             if tf_center == center_pos or tf_center == (center_pos + constants.PAIR_OF_BASES) or tf_center == (center_pos - constants.PAIR_OF_BASES):
                 classic_ri = {}
                 ri_regulated_entity = {}
-                mg_api.connect(database, url)
                 try:
                     mg_ri = mg_api.regulatory_interactions.find_by_reg_site(
                         site_object.id)
@@ -985,11 +975,21 @@ def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
                     logging.error(
                         f'Can not find RI from Site {site_object.id}')
                 relative_tss_distance = get_tss_distance(
-                    database, url, ri_regulated_entity, strand, site_object.right_end_position, site_object.left_end_position)
+                    mg_api=mg_api,
+                    regulated_entity=ri_regulated_entity,
+                    strand=strand,
+                    rend=site_object.right_end_position,
+                    lend=site_object.left_end_position
+                )
                 classic_ri.setdefault(
                     'relativeTSSDistance', relative_tss_distance)
                 relative_gene_distance = get_gene_distance(
-                    database, url, ri_regulated_entity, strand, site_object.right_end_position, site_object.left_end_position)
+                    mg_api=mg_api,
+                    regulated_entity=ri_regulated_entity,
+                    strand=strand,
+                    rend=site_object.right_end_position,
+                    lend=site_object.left_end_position
+                )
                 classic_ri.setdefault(
                     'relativeGeneDistance', relative_gene_distance)
                 classic_ri.setdefault('tfbsLeftPosition',
@@ -999,7 +999,10 @@ def get_classic_ris(lend, rend, strand, tf_sites, database, url, origin):
                 classic_ri.setdefault('strand', strand)
                 classic_ri.setdefault('sequence',
                                       site_object.sequence)
-                citations = get_citations(database, url, site_object.citations)
+                citations = get_citations(
+                    mg_api=mg_api,
+                    citations_obj_list=site_object.citations
+                )
                 classic_ri.setdefault('citations', citations)
                 classic_ri.setdefault('origin', origin)
                 classic_ris.append(classic_ri)

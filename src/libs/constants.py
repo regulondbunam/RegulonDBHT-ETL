@@ -3,6 +3,7 @@ BED_PATHS = 'normalized'
 TSV_PATHS = 'normalized'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
+UNIFORMIZED = 'uniformized_data'
 
 # Closest Genes
 MINIMUM_DISTANCE = 800
@@ -74,8 +75,11 @@ CUT_OFF = 'cut-off'
 PUBLIC_NOTES = 'Public notes'
 OLD_DATASET_ID = 'Dataset ID Old'
 EXTERNAL_DB_LINK = 'External DB Links'
-REFERENCE_GENOME = 'Reference genome'
 SOURCE_REFERENCE_GENOME = 'Source reference genome'
 # GeneExpression
 GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
 GE_DATASET_ID = "#Dataset-ID"
+
+# Dataset types
+TFBINDING = 'TFBINDING'
+PEAKS = 'PEAKS'

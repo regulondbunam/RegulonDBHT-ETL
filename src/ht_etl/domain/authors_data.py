@@ -78,7 +78,7 @@ class AuthorsData(object):
         Returns
             authors_raw, String, CSV formatted String.
         """
-        authors_data_path = os.path.join(authors_data_path,constants.AUTHORS_PATHS)
+        authors_data_path = os.path.join(authors_data_path, constants.AUTHORS_PATHS)
         if not file_name:
             logging.error(f'There is not File Name for {dataset_id} can not read Author\'s files')
             return None
@@ -86,7 +86,11 @@ class AuthorsData(object):
         print(f'\t\tGetting authors data form: {excel_path}')
         logging.info(f'Getting authors data form: {excel_path}')
         if os.path.isfile(excel_path) and excel_path.endswith('.xlsx'):
-            raw = utils.get_author_data_frame(str(excel_path), 0, 0)
+            raw = utils.get_author_data_frame(
+                filename=str(excel_path),
+                load_sheet=0,
+                rows_to_skip=0
+            )
             author_raw = raw.to_csv(encoding='utf-8')
             logging.info(
                 f'Reading Author\'s Data files {excel_path}')

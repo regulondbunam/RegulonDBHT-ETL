@@ -8,11 +8,13 @@ import shutil
 import os
 
 # third party
+import multigenomic_api as mg_api
 
 # local
 from libs import arguments
 from libs import utils
 from ht_etl.ht import datasets
+from libs import constants
 # from ht_etl import dataset_metadata, gene_expression_dataset_metadata
 
 
@@ -25,10 +27,12 @@ def run(**kwargs):
         kwargs.output_path, String, Output directory path.
         kwargs.organism, String, Organism name.
     """
+    # print(kwargs.get('genes_ranges'))
     print(f"Reading data from {kwargs.get('datasets_record_path', None)}")
     logging.info(f"Reading data from {kwargs.get('datasets_record_path', None)}")
 
     datasets_objs = datasets.get_dataset(
+        mg_api=mg_api,
         filename=kwargs.get('datasets_record_path', None),
         rows_to_skip=kwargs.get('rows_to_skip', None),
         dataset_type=kwargs.get('dataset_type', None),
@@ -39,11 +43,13 @@ def run(**kwargs):
         version=kwargs.get('version', None),
         collection_source=kwargs.get('collection_source', None),
         collection_path=kwargs.get('collection_path', None),
-        collection_status=kwargs.get('collection_status', None)
+        collection_status=kwargs.get('collection_status', None),
+        genes_ranges=kwargs.get('genes_ranges', None)
     )
 
     dataset_list = []
     authors_data_list = []
+    tfbinding_data_list = []
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
             'dataset': dataset_obj.dataset,
@@ -52,6 +58,7 @@ def run(**kwargs):
         }
         dataset_list.append(dataset_obj_dict)
         authors_data_list.append(dataset_obj.authors_data)
+        tfbinding_data_list.append(dataset_obj.sites)
 
     collection_data = utils.set_json_object(
         filename="dataset",
@@ -60,6 +67,12 @@ def run(**kwargs):
         sub_class_acronym='MDD',
         child_class_acronym=None
     )
+    utils.create_json(
+        objects=collection_data,
+        filename=f'dataset_metadata_{kwargs.get("collection_name")}',
+        output=kwargs.get('output_path')
+    )
+
     authors_data = utils.set_json_object(
         filename="authorsData",
         data_list=authors_data_list,
@@ -68,16 +81,26 @@ def run(**kwargs):
         child_class_acronym='AD'
     )
     utils.create_json(
-        objects=collection_data,
-        filename=f'dataset_metadata_{kwargs.get("collection_name")}',
-        output=kwargs.get('output_path')
-    )
-    utils.create_json(
         objects=authors_data,
         filename=f'authors_data_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
-    # exit()
+
+    if kwargs.get('dataset_type', None) == constants.TFBINDING:
+        tfbinding_data = utils.set_json_object(
+            filename="tfbindingData",
+            data_list=tfbinding_data_list,
+            organism=kwargs.get('organism'),
+            sub_class_acronym='BSD',
+            child_class_acronym='BS'
+        )
+        utils.create_json(
+            objects=tfbinding_data,
+            filename=f'tfbinding_data_{kwargs.get("collection_name")}',
+            output=kwargs.get('output_path')
+        )
+
+            # exit()
     """if kwargs.get('datasets_record_path') is not None:
         print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')
         logging.info(
@@ -122,6 +145,9 @@ if __name__ == '__main__':
     """
 
     args = arguments.load_arguments()
+
+    mg_api.connect(args.database, args.url)
+
     utils.set_log(args.log, args.collection_name, datetime.date.today())
 
     utils.validate_directories(args.output)

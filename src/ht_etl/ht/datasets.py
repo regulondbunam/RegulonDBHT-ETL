@@ -27,6 +27,7 @@ def get_dataset(**kwargs):
 
     for row in dataset_rows:
         dataset = DatasetsMetadata(
+            mg_api=kwargs.get('mg_api', None),
             dataset_source_dict=row,
             dataset_type=kwargs.get('dataset_type', None),
             email=kwargs.get('email', None),
@@ -36,7 +37,8 @@ def get_dataset(**kwargs):
             src_collection_name=kwargs.get('collection_name', None),
             collection_source=kwargs.get('collection_source', None),
             collection_path=kwargs.get('collection_path', None),
-            collection_status=kwargs.get('collection_status', None)
+            collection_status=kwargs.get('collection_status', None),
+            genes_ranges=kwargs.get('genes_ranges', None)
         )
         yield dataset
 

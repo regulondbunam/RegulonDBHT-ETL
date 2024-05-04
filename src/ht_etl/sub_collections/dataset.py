@@ -3,7 +3,6 @@ Dataset object.
 Build dataset object and special objects for every dataset.
 """
 # standard
-import logging
 
 # third party
 
@@ -17,11 +16,14 @@ from src.ht_etl.domain.release_data_control import ReleaseControl
 from src.ht_etl.domain.collection_data import CollectionData
 from src.ht_etl.domain.external_references import ExternalReference
 from src.ht_etl.domain.authors_data import AuthorsData
+from src.ht_etl.domain.uniform_data import UniformizedData
 
 
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.mg_api = kwargs.get('mg_api')
+        self.genes_ranges = kwargs.get("genes_ranges", None)
         self.collection_path = kwargs.get('collection_path', None)
         self.collection_source = kwargs.get('collection_source', None)
         self.collection_name = kwargs.get('collection_name', None)
@@ -31,6 +33,7 @@ class Dataset(object):
         self.url = kwargs.get('url', None)
         self.email = kwargs.get("email", None)
         self.dataset_id = kwargs.get('dataset_id', None)
+        self.old_dataset_id = kwargs.get('old_dataset_id', None)
         self.pmid = kwargs.get('pmid', None)
         self.authors = kwargs.get('authors', None)
         self.regulondb_tf_name = kwargs.get('regulondb_tf_name', None)
@@ -66,7 +69,6 @@ class Dataset(object):
         self.external_db_links = kwargs.get('external_db_links', None)
 
         # Local properties
-        self.authors_data = kwargs.get('authors_data', None)
 
         # Object properties
         self.dataset_publications = kwargs.get('dataset_publications', None)
@@ -86,6 +88,10 @@ class Dataset(object):
         self.gene_expression_filtered = kwargs.get('gene_expression_filtered', None)
         self.summary = kwargs.get('summary', None)
 
+        # Uniformized data
+        self.authors_data = kwargs.get('authors_data', None)
+        self.uniformized_data = kwargs.get('uniformized_data', None)
+
     # Local properties
     @property
     def authors_data(self):
@@ -95,11 +101,35 @@ class Dataset(object):
     def authors_data(self, authors_data=None):
         self._authors_data = authors_data
         if self._authors_data is None:
-            self._authors_data = AuthorsData(
+            authors_data = AuthorsData(
                 authors_data_path=self.collection_path,
                 file_name=self.dataset_file_name,
                 dataset_id=self.dataset_id
             )
+            self._authors_data = authors_data
+
+    @property
+    def uniformized_data(self):
+        return self._uniformized_data
+
+    @uniformized_data.setter
+    def uniformized_data(self, uniformized_data=None):
+        self._uniformized_data = uniformized_data
+        if self._uniformized_data is None:
+            uniformized_data = UniformizedData(
+                tf_site_id=self.dataset_id,
+                collection_name=self.collection_name,
+                mg_api=self.mg_api,
+                collection_path=self.collection_path,
+                serie_id=self.serie_id,
+                type=self.dataset_type,
+                genes_ranges=self.genes_ranges,
+                old_dataset_id=self.old_dataset_id,
+                database=self.database,
+                url=self.url
+            )
+            sites = uniformized_data.sites.sites_list
+            self._uniformized_data = uniformized_data
 
     # Object properties
 
@@ -133,6 +163,7 @@ class Dataset(object):
         self._objects_tested = objects_tested
         if objects_tested is None:
             objects_tested = ObjectTested(
+                mg_api=self.mg_api,
                 regulondb_tf_name=self.regulondb_tf_name,
                 source_tf_name=self.source_tf_name,
                 database=self.database,

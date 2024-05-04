@@ -16,6 +16,8 @@ from src.ht_etl.sub_collections.metadata import Metadata
 class DatasetsMetadata(object):
     def __init__(self, **kwargs):
         # Params
+        self.mg_api = kwargs.get('mg_api')
+        self.genes_ranges = kwargs.get("genes_ranges", None)
         self.dataset_type = kwargs.get('dataset_type', None)
         self.email = kwargs.get('email', None)
         self.database = kwargs.get('database', None)
@@ -29,6 +31,11 @@ class DatasetsMetadata(object):
 
         # Local properties
         self.authors_data = kwargs.get('authors_data', None)
+        self.sites = kwargs.get('sites', None)
+        self.peaks = kwargs.get('peaks', None)
+        self.tus = kwargs.get('tu', None)
+        self.tss = kwargs.get('tss', None)
+        self.tts = kwargs.get('tts', None)
 
         # Object properties
         self.dataset = kwargs.get('dataset', None)
@@ -52,6 +59,8 @@ class DatasetsMetadata(object):
                 print(f"\tProcessing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 logging.info(f"Processing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    mg_api=self.mg_api,
+                    genes_ranges=self.genes_ranges,
                     collection_path=self.collection_path,
                     collection_source=self.collection_source,
                     collection_name=self.src_collection_name,
@@ -61,6 +70,7 @@ class DatasetsMetadata(object):
                     url=self.url,
                     email=self.email,
                     dataset_id=self.dataset_source_dict.get(constants.DATASET_ID, None),
+                    old_dataset_id=self.dataset_source_dict.get(constants.OLD_DATASET_ID, None),
                     pmid=self.dataset_source_dict.get(constants.PMID, None),
                     authors=self.dataset_source_dict.get(constants.AUTHORS, None),
                     regulondb_tf_name=self.dataset_source_dict.get(constants.REGULONDB_TF_NAME, None),
@@ -127,6 +137,8 @@ class DatasetsMetadata(object):
                     'datasetIds': dataset.authors_data.dataset_ids,
                     'authorsData': dataset.authors_data.data,
                 }
+                if self.dataset_type == constants.TFBINDING:
+                    self.sites = dataset.uniformized_data.sites.sites_list
             else:
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
 
