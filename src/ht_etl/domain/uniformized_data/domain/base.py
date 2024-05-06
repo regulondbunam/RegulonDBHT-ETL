@@ -20,6 +20,8 @@ class Base(object):
         self.mg_api = kwargs.get('mg_api')
         self.data_row = kwargs.get('data_row', [])
         self.genes_ranges = kwargs.get('genes_ranges', [])
+        self.type = kwargs.get('type', None)
+        self.dataset_id = kwargs.get('dataset_id', None)
 
         # Local properties
 
@@ -84,7 +86,7 @@ class Base(object):
     def left_pos(self, left_pos=None):
         if left_pos is None:
             if isinstance(self.data_row, dict):
-                left_pos = self.data_row.get("left_pos", None)
+                left_pos = self.data_row.get("start", None)
             if isinstance(self.data_row, list):
                 left_pos = f'{self.data_row[1]}'
             self._left_pos = left_pos
@@ -97,7 +99,7 @@ class Base(object):
     def right_pos(self, right_pos=None):
         if right_pos is None:
             if isinstance(self.data_row, dict):
-                right_pos = self.data_row.get("right_pos", None)
+                right_pos = self.data_row.get("stop", None)
             if isinstance(self.data_row, list):
                 right_pos = f'{self.data_row[2]}'
             self._right_pos = right_pos
@@ -122,13 +124,14 @@ class Base(object):
     @closest_genes.setter
     def closest_genes(self, closest_genes=None):
         if closest_genes is None:
-            try:
-                closest_genes = utils.find_closest_gene(
-                    left_pos=self.data_row[1],
-                    right_pos=self.data_row[2],
-                    genes_ranges=self.genes_ranges,
-                    mg_api=self.mg_api
-                )
-            except mongo_errors.InvalidOperation:
-                closest_genes = None
-            self._closest_genes = closest_genes
+            if self.type == constants.TFBINDING:
+                try:
+                    closest_genes = utils.find_closest_gene(
+                        left_pos=self.left_pos,
+                        right_pos=self.right_pos,
+                        genes_ranges=self.genes_ranges,
+                        mg_api=self.mg_api
+                    )
+                except mongo_errors.InvalidOperation:
+                    closest_genes = None
+        self._closest_genes = closest_genes

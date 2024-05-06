@@ -27,6 +27,7 @@ def get_dataset(**kwargs):
 
     for row in dataset_rows:
         dataset = DatasetsMetadata(
+            bnumbers=kwargs.get('bnumbers', None),
             mg_api=kwargs.get('mg_api', None),
             dataset_source_dict=row,
             dataset_type=kwargs.get('dataset_type', None),

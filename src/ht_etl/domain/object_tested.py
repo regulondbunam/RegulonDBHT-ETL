@@ -43,7 +43,8 @@ class ObjectTested(object):
         tf_names = self.regulondb_tf_name
         if tf_names is None:
             tf_names = self.source_tf_name
-        tf_names = tf_names.replace(' ', '').split(',')
+        if tf_names:
+            tf_names = tf_names.replace(' ', '').split(',')
         self._tf_names = tf_names
 
     # Object properties

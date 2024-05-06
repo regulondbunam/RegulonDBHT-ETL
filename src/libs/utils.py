@@ -296,15 +296,15 @@ def get_author_data_frame(filename: str, load_sheet, rows_to_skip: int) -> panda
 
 
 def get_data_frame_tsv(filename: str) -> pandas.DataFrame:
-    '''
+    """
     Read and convert the TSV file to Panda DataFrame.
 
-    Param
-        filename, String, full tsv file path.
+    Args:
+        filename: String, full tsv file path.
 
-    Returns
-        dataset_df, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
-    '''
+    Returns:
+        dataset_df: pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    """
     dataset_df = pandas.read_csv(filename, sep='\t', header=0, index_col=False)
     return dataset_df
 
@@ -339,15 +339,15 @@ def get_data_frame_tsv_coma(filename: str) -> pandas.DataFrame:
 
 
 def get_json_from_data_frame(data_frame: pandas.DataFrame) -> dict:
-    '''
+    """
     Converts DataFrame into JSON format.
 
-    Param
-        data_frame, pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
+    Args:
+        data_frame: pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
 
-    Returns
-        json_dict, Dict, JSON string converted  to a dictionary.
-    '''
+    Returns:
+        json_dict: Dict, JSON string converted  to a dictionary.
+    """
     string_json = data_frame.to_json(orient='records')
     string_json = re.sub(r'\([0-9]\)\s*', '', string_json)
     json_dict = json.loads(string_json)

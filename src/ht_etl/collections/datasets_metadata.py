@@ -16,6 +16,7 @@ from src.ht_etl.sub_collections.metadata import Metadata
 class DatasetsMetadata(object):
     def __init__(self, **kwargs):
         # Params
+        self.bnumbers = kwargs.get("bnumbers", None)
         self.mg_api = kwargs.get('mg_api')
         self.genes_ranges = kwargs.get("genes_ranges", None)
         self.dataset_type = kwargs.get('dataset_type', None)
@@ -59,6 +60,7 @@ class DatasetsMetadata(object):
                 print(f"\tProcessing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 logging.info(f"Processing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
                 dataset = Dataset(
+                    bnumbers=self.bnumbers,
                     mg_api=self.mg_api,
                     genes_ranges=self.genes_ranges,
                     collection_path=self.collection_path,
@@ -140,7 +142,10 @@ class DatasetsMetadata(object):
                 if self.dataset_type == constants.TFBINDING:
                     self.sites = dataset.uniformized_data.sites.sites_list
                     self.peaks = dataset.uniformized_data.peaks.peaks_list
+                if self.dataset_type == constants.TUS:
+                    self.tus = dataset.uniformized_data.tus.tus_list
             else:
+                self._dataset = {}
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
 
     @property

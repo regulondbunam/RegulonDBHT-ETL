@@ -24,7 +24,7 @@ class Base(object):
         self.url = kwargs.get('url', None)
         self.collection_path = kwargs.get('collection_path', None)
         self.genes_ranges = kwargs.get("genes_ranges", None)
-        self.tf_site_id = kwargs.get("tf_site_id", None)
+        self.dataset_id = kwargs.get("dataset_id", None)
         self.serie_id = kwargs.get("serie_id", None)
         self.type = kwargs.get("type", '')
         self.sub_type = kwargs.get("sub_type", '')
@@ -52,10 +52,10 @@ class Base(object):
         if uniform_dataset_path is None:
             uniform_paths = os.path.join(self.collection_path, constants.UNIFORMIZED)
             ds_id = self.old_dataset_id
-            if ds_id is None:
-                ds_id = self.tf_site_id
-            if ds_id and self.serie_id:
-                if self.type == constants.TFBINDING:
+            if self.type == constants.TFBINDING:
+                if ds_id is None:
+                    ds_id = self.dataset_id
+                if ds_id and self.serie_id:
                     print(
                         str(uniform_paths),
                         self.serie_id,
@@ -78,6 +78,13 @@ class Base(object):
                         ds_id,
                         f'{ds_id}_peaks.bed'
                     )
+            if self.type == constants.TUS:
+                if ds_id is None:
+                    ds_id = self.dataset_id
+                uniform_path = os.path.join(
+                    str(uniform_paths),
+                    f'{ds_id}.tsv'
+                )
             self._uniform_dataset_path = uniform_path
 
     # Object properties
@@ -105,7 +112,13 @@ class Base(object):
             uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
             if ds_sub_type == constants.PEAKS:
                 uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
-
         else:
-            pass  # dataset_df = pandas.read_csv(datasets_path, sep='\t', header=0, index_col=False)
+            try:
+                print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
+                logging.info(f'Getting uniformized data from: {datasets_path}')
+                dataset_df = utils.get_data_frame_tsv(datasets_path)
+                uniform_datasets_dict = utils.get_json_from_data_frame(dataset_df)
+            except FileNotFoundError:
+                logging.error(f"Dataset path {datasets_path} not found.")
+
         return uniform_datasets_dict

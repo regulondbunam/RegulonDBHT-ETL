@@ -22,6 +22,7 @@ from src.ht_etl.domain.uniform_data import UniformizedData
 class Dataset(object):
     def __init__(self, **kwargs):
         # Params
+        self.bnumbers = kwargs.get("bnumbers", None)
         self.mg_api = kwargs.get('mg_api')
         self.genes_ranges = kwargs.get("genes_ranges", None)
         self.collection_path = kwargs.get('collection_path', None)
@@ -117,7 +118,8 @@ class Dataset(object):
         self._uniformized_data = uniformized_data
         if self._uniformized_data is None:
             uniformized_data = UniformizedData(
-                tf_site_id=self.dataset_id,
+                bnumbers=self.bnumbers,
+                dataset_id=self.dataset_id,
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,
                 collection_path=self.collection_path,
