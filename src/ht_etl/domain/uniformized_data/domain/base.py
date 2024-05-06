@@ -26,14 +26,14 @@ class Base(object):
         # Local properties
 
         # Object properties
-        self.temporal_id = kwargs.get("temporal_id", None)
-        self.id = kwargs.get("id", None)
         self.dataset_ids = kwargs.get("dataset_ids", None)
         self.chromosome = kwargs.get("chromosome", None)
         self.left_pos = kwargs.get("left_pos", None)
         self.right_pos = kwargs.get("right_pos", None)
         self.strand = kwargs.get("strand", None)
         self.closest_genes = kwargs.get("closest_genes", None)
+        self.temporal_id = kwargs.get("temporal_id", None)
+        self.id = kwargs.get("id", None)
 
     # Local properties
 
@@ -46,14 +46,21 @@ class Base(object):
     def temporal_id(self, temporal_id=None):
         if temporal_id is None:
             if isinstance(self.data_row, dict):
-                temporal_id = self.data_row.get("site_id", None)
+                temporal_id = (
+                    f'[{self.type}_'
+                    f'{self.dataset_id},'
+                    f'{self.left_pos},'
+                    f'{self.right_pos},'
+                    f'{self.strand}]'
+                )
             if isinstance(self.data_row, list):
-                temporal_id = (f'[{self.data_row[1]},'
-                               f'{self.data_row[2]},'
-                               f'{self.data_row[4]},'
-                               f'{self.data_row[5]},'
-                               f'{self.data_row[6]}]'
-                               )
+                temporal_id = (
+                    f'[{self.data_row[1]},'
+                    f'{self.data_row[2]},'
+                    f'{self.data_row[4]},'
+                    f'{self.data_row[5]},'
+                    f'{self.data_row[6]}]'
+               )
             self._temporal_id = temporal_id
 
     @property
@@ -124,7 +131,7 @@ class Base(object):
     @closest_genes.setter
     def closest_genes(self, closest_genes=None):
         if closest_genes is None:
-            if self.type == constants.TFBINDING:
+            if self.type == constants.TFBINDING or self.type == constants.TSS:
                 try:
                     closest_genes = utils.find_closest_gene(
                         left_pos=self.left_pos,

@@ -55,7 +55,8 @@ def run(**kwargs):
     authors_data_list = []
     tfbinding_data_list = []
     peaks_data_list = []
-    tus_data_list= []
+    tus_data_list = []
+    tss_data_list = []
 
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
@@ -70,6 +71,8 @@ def run(**kwargs):
             peaks_data_list.extend(dataset_obj.peaks)
         if kwargs.get('dataset_type', None) == constants.TUS:
             tus_data_list.append(dataset_obj.tus)
+        if kwargs.get('dataset_type', None) == constants.TSS:
+            tss_data_list.append(dataset_obj.tss)
 
     collection_data = utils.set_json_object(
         filename="dataset",
@@ -134,6 +137,20 @@ def run(**kwargs):
         utils.create_json(
             objects=tus_data,
             filename=f'tus_data_{kwargs.get("collection_name")}',
+            output=kwargs.get('output_path')
+        )
+
+    if kwargs.get('dataset_type', None) == constants.TSS:
+        tss_data = utils.set_json_object(
+            filename="tssData",
+            data_list=tss_data_list,
+            organism=kwargs.get('organism'),
+            sub_class_acronym='TUD',
+            child_class_acronym='TU'
+        )
+        utils.create_json(
+            objects=tss_data,
+            filename=f'tss_data_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 

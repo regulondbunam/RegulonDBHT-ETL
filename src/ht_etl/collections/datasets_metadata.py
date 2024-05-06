@@ -144,6 +144,8 @@ class DatasetsMetadata(object):
                     self.peaks = dataset.uniformized_data.peaks.peaks_list
                 if self.dataset_type == constants.TUS:
                     self.tus = dataset.uniformized_data.tus.tus_list
+                if self.dataset_type == constants.TSS:
+                    self.tss = dataset.uniformized_data.tss.tss_list
             else:
                 self._dataset = {}
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")

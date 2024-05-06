@@ -29,16 +29,6 @@ class TU(Base):
 
     # Object properties
     @property
-    def temporal_id(self):
-        return self._temporal_id
-
-    @temporal_id.setter
-    def temporal_id(self, temporal_id=None):
-        if temporal_id is None:
-            temporal_id = f'{self.type}_{self.dataset_id}'
-        self._temporal_id = temporal_id
-
-    @property
     def length(self):
         return self._length
 

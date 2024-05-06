@@ -1032,20 +1032,18 @@ def get_tu_by_gene_id(gene_id, database, url):
     return tu
 
 
-def get_promoter(lend, rend, database, url):
-    '''
+def get_promoter(lend, rend, mg_api):
+    """
     Gets Closer Promoter in the RegulonDB Multigenomic database by left_end_position and right_end_position.
 
     Param
         lend, Float, dataset leftEndPosition.
         rend, Float, dataset rigthEndPosition.
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
+        mg_api: API, Multigenomic database connection.
     Returns
         promoters, List, Closer Promoters to dataset in RegulonDB Multigenomic database.
-    '''
+    """
     promoters = []
-    mg_api.connect(database, url)
     try:
         promoters_objects = mg_api.promoters.get_closer_promoters(
             (lend - 5), (rend + 5))
@@ -1061,14 +1059,13 @@ def get_promoter(lend, rend, database, url):
                 '_id': promoter_obj.id,
                 'name': promoter_obj.name,
                 'strand': promoter_obj.strand,
-                'pos+1': promoter_obj.pos1,
+                'pos_1': promoter_obj.pos1,
                 'sigma': sigma_factor_name,
                 'confidenceLevel': promoter_obj.confidence_level,
             }
             promoters.append(promoter)
     except IndexError:
         logging.error(f'Can not find Promoter from: {lend}, {rend}')
-    mg_api.disconnect()
     return promoters
 
 

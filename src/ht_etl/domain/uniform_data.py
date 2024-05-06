@@ -11,6 +11,7 @@ from src.libs import constants
 from src.ht_etl.domain.uniformized_data.sites import Sites
 from src.ht_etl.domain.uniformized_data.peaks import Peaks
 from src.ht_etl.domain.uniformized_data.tus import TUs
+from src.ht_etl.domain.uniformized_data.tss import TSSs
 
 
 class UniformizedData(object):
@@ -43,8 +44,6 @@ class UniformizedData(object):
 
         # TSS
         self.tss = kwargs.get("tss", None)
-        self.pos_1 = kwargs.get("pos_1", None)
-        self.promoters = kwargs.get("promoters", None)
 
         # TTS
         self.terminator = kwargs.get("terminator", None)
@@ -112,5 +111,25 @@ class UniformizedData(object):
                 old_dataset_id=self.old_dataset_id,
             )
         self._tus = tus
+
+    @property
+    def tss(self):
+        return self._tss
+
+    @tss.setter
+    def tss(self, tss=None):
+        self._tss = tss
+        if tss is None and self.type == constants.TSS:
+            tss = TSSs(
+                genes_ranges=self.genes_ranges,
+                type=self.type,
+                dataset_id=self.dataset_id,
+                mg_api=self.mg_api,
+                sub_type=constants.PEAKS,
+                collection_path=self.collection_path,
+                serie_id=self.serie_id,
+                old_dataset_id=self.old_dataset_id,
+            )
+        self._tss = tss
 
     # Static methods
