@@ -50,6 +50,7 @@ def run(**kwargs):
     dataset_list = []
     authors_data_list = []
     tfbinding_data_list = []
+    peaks_data_list = []
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
             'dataset': dataset_obj.dataset,
@@ -58,7 +59,9 @@ def run(**kwargs):
         }
         dataset_list.append(dataset_obj_dict)
         authors_data_list.append(dataset_obj.authors_data)
-        tfbinding_data_list.append(dataset_obj.sites)
+        if kwargs.get('dataset_type', None) == constants.TFBINDING:
+            tfbinding_data_list.extend(dataset_obj.sites)
+            peaks_data_list.extend(dataset_obj.peaks)
 
     collection_data = utils.set_json_object(
         filename="dataset",
@@ -99,8 +102,19 @@ def run(**kwargs):
             filename=f'tfbinding_data_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
+        peaks_data = utils.set_json_object(
+            filename="peaksData",
+            data_list=peaks_data_list,
+            organism=kwargs.get('organism'),
+            sub_class_acronym='BSD',
+            child_class_acronym='PK'
+        )
+        utils.create_json(
+            objects=peaks_data,
+            filename=f'peaks_data_{kwargs.get("collection_name")}',
+            output=kwargs.get('output_path')
+        )
 
-            # exit()
     """if kwargs.get('datasets_record_path') is not None:
         print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')
         logging.info(

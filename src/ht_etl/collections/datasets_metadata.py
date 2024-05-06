@@ -139,6 +139,7 @@ class DatasetsMetadata(object):
                 }
                 if self.dataset_type == constants.TFBINDING:
                     self.sites = dataset.uniformized_data.sites.sites_list
+                    self.peaks = dataset.uniformized_data.peaks.peaks_list
             else:
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
 

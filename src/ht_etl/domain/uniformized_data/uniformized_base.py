@@ -51,22 +51,33 @@ class Base(object):
         uniform_path = ''
         if uniform_dataset_path is None:
             uniform_paths = os.path.join(self.collection_path, constants.UNIFORMIZED)
-            if self.type == constants.TFBINDING:
-                uniform_path = os.path.join(
-                    str(uniform_paths),
-                    self.serie_id,
-                    'datasets',
-                    self.old_dataset_id,
-                    f'{self.old_dataset_id}_sites.bed'
-                )
-            if self.sub_type == constants.PEAKS:
-                uniform_path = os.path.join(
-                    str(uniform_paths),
-                    self.serie_id,
-                    'datasets',
-                    self.old_dataset_id,
-                    f'{self.old_dataset_id}_peaks.bed'
-                )
+            ds_id = self.old_dataset_id
+            if ds_id is None:
+                ds_id = self.tf_site_id
+            if ds_id and self.serie_id:
+                if self.type == constants.TFBINDING:
+                    print(
+                        str(uniform_paths),
+                        self.serie_id,
+                        'datasets',
+                        ds_id,
+                        f'{ds_id}_sites.bed'
+                    )
+                    uniform_path = os.path.join(
+                        str(uniform_paths),
+                        self.serie_id,
+                        'datasets',
+                        ds_id,
+                        f'{ds_id}_sites.bed'
+                    )
+                if self.sub_type == constants.PEAKS:
+                    uniform_path = os.path.join(
+                        str(uniform_paths),
+                        self.serie_id,
+                        'datasets',
+                        ds_id,
+                        f'{ds_id}_peaks.bed'
+                    )
             self._uniform_dataset_path = uniform_path
 
     # Object properties

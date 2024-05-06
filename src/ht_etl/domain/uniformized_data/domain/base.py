@@ -4,12 +4,9 @@ Build uniformized properties for different uniform data types.
 """
 # standard
 import logging
-import os
-import pandas
 
 # third party
-import multigenomic_api as mg_api
-import pymongo
+import pymongo.errors as mongo_errors
 
 # local
 from src.libs import utils
@@ -22,8 +19,6 @@ class Base(object):
         # Params
         self.mg_api = kwargs.get('mg_api')
         self.data_row = kwargs.get('data_row', [])
-        self.database = kwargs.get('database', None)
-        self.url = kwargs.get('url', None)
         self.genes_ranges = kwargs.get('genes_ranges', [])
 
         # Local properties
@@ -127,13 +122,6 @@ class Base(object):
     @closest_genes.setter
     def closest_genes(self, closest_genes=None):
         if closest_genes is None:
-            datos = {
-                'left': self.data_row[1],
-                'right': self.data_row[2],
-                'db': self.database,
-                'url': self.url,
-                'ranges': self.genes_ranges
-            }
             try:
                 closest_genes = utils.find_closest_gene(
                     left_pos=self.data_row[1],
@@ -141,6 +129,6 @@ class Base(object):
                     genes_ranges=self.genes_ranges,
                     mg_api=self.mg_api
                 )
-            except pymongo.errors.InvalidOperation:
+            except mongo_errors.InvalidOperation:
                 closest_genes = None
             self._closest_genes = closest_genes

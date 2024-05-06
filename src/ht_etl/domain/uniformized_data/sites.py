@@ -7,7 +7,7 @@ import os.path
 # standard
 
 # third party
-import multigenomic_api as mg_api
+
 # local
 from src.ht_etl.domain.uniformized_data.uniformized_base import Base
 from src.ht_etl.domain.uniformized_data.domain.site import Site
@@ -18,13 +18,8 @@ class Sites(Base):
     def __init__(self, **kwargs):
         super(Sites, self).__init__(**kwargs)
         # Params
-        # print('\t\t\t\tTFB', self.uniform_dataset_dict)
+
         # Local properties
-        # self.found_ris = kwargs.get("found_ris", None)
-        # self.peak_id = kwargs.get("peak_id", None)
-        # self.score = kwargs.get("score", None)
-        # self.sequence = kwargs.get("sequence", None)
-        # self.name_collection = kwargs.get("name_collection", None)
 
         # Object properties
         self.sites_list = kwargs.get("sites_list", None)
@@ -50,7 +45,7 @@ class Sites(Base):
                 genes_ranges=self.genes_ranges
             )
             site_dict = {
-                'id': site_obj.id,
+                '_id': site_obj.id,
                 'chromosome': site_obj.chromosome,
                 'chrLeftPosition': site_obj.left_pos,
                 'chrRightPosition': site_obj.right_pos,

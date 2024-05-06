@@ -31,22 +31,10 @@ class UniformizedData(object):
         # Local properties
 
         # Object properties
-        self.id = kwargs.get("id", None)
-        self.dataset_id = kwargs.get("dataset_id", None)
-        self.dataset_ids = kwargs.get("dataset_ids", None)
-        self.temporal_id = kwargs.get("temporal_id", None)
-        self.chromosome = kwargs.get("chromosome", None)
-        self.left_pos = kwargs.get("left_pos", None)
-        self.right_pos = kwargs.get("right_pos", None)
-        self.strand = kwargs.get("strand", None)
-        self.closest_genes = kwargs.get("closest_genes", None)
 
         # TF Binding
         self.sites = kwargs.get("sites", None)
         self.peaks = kwargs.get("peaks", None)
-
-        # Peaks
-        self.site_ids = kwargs.get("site_ids", None)
 
         # TUs
         self.name = kwargs.get("name", None)
@@ -77,8 +65,6 @@ class UniformizedData(object):
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,
                 genes_ranges=self.genes_ranges,
-                database=self.database,
-                url=self.url,
                 type=self.type,
                 collection_path=self.collection_path,
                 serie_id=self.serie_id,
@@ -95,6 +81,10 @@ class UniformizedData(object):
         self._peaks = peaks
         if peaks is None:
             peaks = Peaks(
+                sites_list=self.sites.sites_list,
+                collection_name=self.collection_name,
+                mg_api=self.mg_api,
+                genes_ranges=self.genes_ranges,
                 type=self.type,
                 sub_type=constants.PEAKS,
                 collection_path=self.collection_path,
@@ -102,6 +92,7 @@ class UniformizedData(object):
                 old_dataset_id=self.old_dataset_id,
             )
             self._peaks = peaks
+
     # Object properties
 
     # Static methods

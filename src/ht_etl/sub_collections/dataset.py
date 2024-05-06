@@ -128,7 +128,6 @@ class Dataset(object):
                 database=self.database,
                 url=self.url
             )
-            sites = uniformized_data.sites.sites_list
             self._uniformized_data = uniformized_data
 
     # Object properties

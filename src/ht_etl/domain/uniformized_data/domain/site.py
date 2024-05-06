@@ -2,15 +2,13 @@
 TF Binding Site object.
 Build uniformized data object.
 """
-import os.path
-
 # standard
 
 # third party
 
 # local
-from src.ht_etl.domain.uniformized_data.domain.base import Base
 from src.libs import utils
+from src.ht_etl.domain.uniformized_data.domain.base import Base
 
 
 class Site(Base):
