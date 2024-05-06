@@ -146,6 +146,8 @@ class DatasetsMetadata(object):
                     self.tus = dataset.uniformized_data.tus.tus_list
                 if self.dataset_type == constants.TSS:
                     self.tss = dataset.uniformized_data.tss.tss_list
+                if self.dataset_type == constants.TTS:
+                    self.tts = dataset.uniformized_data.tts.tts_list
             else:
                 self._dataset = {}
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")

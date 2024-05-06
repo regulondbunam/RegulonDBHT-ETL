@@ -131,7 +131,11 @@ class Base(object):
     @closest_genes.setter
     def closest_genes(self, closest_genes=None):
         if closest_genes is None:
-            if self.type == constants.TFBINDING or self.type == constants.TSS:
+            if (
+                self.type == constants.TFBINDING
+                or self.type == constants.TSS
+                or self.type == constants.TTS
+            ):
                 try:
                     closest_genes = utils.find_closest_gene(
                         left_pos=self.left_pos,

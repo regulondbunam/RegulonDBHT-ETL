@@ -92,6 +92,13 @@ class Base(object):
                     str(uniform_paths),
                     f'{ds_id}.tsv'
                 )
+            if self.type == constants.TTS:
+                if ds_id is None:
+                    ds_id = self.dataset_id
+                uniform_path = os.path.join(
+                    str(uniform_paths),
+                    f'{ds_id}.tsv'
+                )
             self._uniform_dataset_path = uniform_path
 
     # Object properties

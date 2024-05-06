@@ -12,6 +12,7 @@ from src.ht_etl.domain.uniformized_data.sites import Sites
 from src.ht_etl.domain.uniformized_data.peaks import Peaks
 from src.ht_etl.domain.uniformized_data.tus import TUs
 from src.ht_etl.domain.uniformized_data.tss import TSSs
+from src.ht_etl.domain.uniformized_data.tts import TTSs
 
 
 class UniformizedData(object):
@@ -46,7 +47,7 @@ class UniformizedData(object):
         self.tss = kwargs.get("tss", None)
 
         # TTS
-        self.terminator = kwargs.get("terminator", None)
+        self.tts = kwargs.get("tts", None)
 
     # Local properties
 
@@ -105,7 +106,6 @@ class UniformizedData(object):
                 type=self.type,
                 dataset_id=self.dataset_id,
                 mg_api=self.mg_api,
-                sub_type=constants.PEAKS,
                 collection_path=self.collection_path,
                 serie_id=self.serie_id,
                 old_dataset_id=self.old_dataset_id,
@@ -125,11 +125,29 @@ class UniformizedData(object):
                 type=self.type,
                 dataset_id=self.dataset_id,
                 mg_api=self.mg_api,
-                sub_type=constants.PEAKS,
                 collection_path=self.collection_path,
                 serie_id=self.serie_id,
                 old_dataset_id=self.old_dataset_id,
             )
         self._tss = tss
+
+    @property
+    def tts(self):
+        return self._tts
+
+    @tts.setter
+    def tts(self, tts=None):
+        self._tts = tts
+        if tts is None and self.type == constants.TTS:
+            tts = TTSs(
+                genes_ranges=self.genes_ranges,
+                type=self.type,
+                dataset_id=self.dataset_id,
+                mg_api=self.mg_api,
+                collection_path=self.collection_path,
+                serie_id=self.serie_id,
+                old_dataset_id=self.old_dataset_id,
+            )
+        self._tts = tts
 
     # Static methods

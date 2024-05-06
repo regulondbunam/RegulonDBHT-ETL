@@ -638,22 +638,19 @@ def find_closest_gene(left_pos, right_pos, genes_ranges, mg_api):
     return closest_genes
 
 
-def find_terminators(left_pos, right_pos, tts_id, database, url):
-    '''
-    Calculates the center center position of the chromosome.
+def find_terminators(left_pos, right_pos, tts_id, mg_api):
+    """
+    Calculates the center position of the chromosome.
 
-    Param
-        left_pos, String, Start position in the sequence (it's converted to Integer).
-        right_pos, String, End position in the sequence (it's converted to Integer).
-        database, String, Multigenomic database to get external data.
-        url, String, URL where database is located.
-        genes_ranges, List, Array of coordinate pairs of the calculated ranges.
+    Args:
+        left_pos: String, Start position in the sequence (it's converted to Integer).
+        right_pos: String, End position in the sequence (it's converted to Integer).
+        mg_api: API, Multigenomic database connection.
+        tts_id: String, TTS-ID.
 
-    Returns
-        closest_genes, List, Dict List with the verified closest genes.
-    '''
-    mg_api.connect(database, url)
-
+    Returns:
+        closest_genes: List, Dict List with the verified closest genes.
+    """
     terminators = []
     try:
         mg_terminators = mg_api.terminators.get_closer_terminators(
@@ -688,7 +685,6 @@ def find_terminators(left_pos, right_pos, tts_id, database, url):
             terminators.append(terminator_dict)
     except Exception:
         logging.error(f'Can not find Terminator Name in Gene {tts_id}')
-    mg_api.disconnect()
     return terminators
 
 
