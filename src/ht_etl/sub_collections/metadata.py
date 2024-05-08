@@ -48,6 +48,7 @@ class Metadata(object):
                 pmids = [pmid]
             elif isinstance(pmid, str):
                 pmids = pmid.replace(' ', '')
+                pmids = pmids.replace(';', ',')
                 pmids = pmids.split(',')
             pmids = [int(pmid) for pmid in pmids]
             self._pmids = pmids

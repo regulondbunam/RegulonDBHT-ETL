@@ -56,13 +56,6 @@ class Base(object):
                 if ds_id is None:
                     ds_id = self.dataset_id
                 if ds_id and self.serie_id:
-                    print(
-                        str(uniform_paths),
-                        self.serie_id,
-                        'datasets',
-                        ds_id,
-                        f'{ds_id}_sites.bed'
-                    )
                     uniform_path = os.path.join(
                         str(uniform_paths),
                         self.serie_id,
@@ -70,7 +63,7 @@ class Base(object):
                         ds_id,
                         f'{ds_id}_sites.bed'
                     )
-                if self.sub_type == constants.PEAKS:
+                if self.sub_type == constants.PEAKS and ds_id:
                     uniform_path = os.path.join(
                         str(uniform_paths),
                         self.serie_id,

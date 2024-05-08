@@ -462,7 +462,7 @@ def format_cross_reference_url(url, object_id):
     return formated_url
 
 
-def get_object_tested(protein_names, database, url):
+def get_object_tested(protein_names, mg_api):
     '''
     Gets TF data from the RegulonDBMultigenomic database and returns the object tested dictionary.
 

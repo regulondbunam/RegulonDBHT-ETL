@@ -86,7 +86,7 @@ def run(**kwargs):
     )
     utils.create_json(
         objects=collection_data,
-        filename=f'dataset_metadata_{kwargs.get("collection_name")}',
+        filename=f'dataset_metadata_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
 
@@ -99,7 +99,7 @@ def run(**kwargs):
     )
     utils.create_json(
         objects=authors_data,
-        filename=f'authors_data_{kwargs.get("collection_name")}',
+        filename=f'authors_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
 
@@ -113,7 +113,7 @@ def run(**kwargs):
         )
         utils.create_json(
             objects=tfbinding_data,
-            filename=f'tfbinding_data_{kwargs.get("collection_name")}',
+            filename=f'tfbinding_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
         peaks_data = utils.set_json_object(
@@ -125,7 +125,7 @@ def run(**kwargs):
         )
         utils.create_json(
             objects=peaks_data,
-            filename=f'peaks_data_{kwargs.get("collection_name")}',
+            filename=f'peaks_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
@@ -139,7 +139,7 @@ def run(**kwargs):
         )
         utils.create_json(
             objects=tus_data,
-            filename=f'tus_data_{kwargs.get("collection_name")}',
+            filename=f'tus_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
@@ -153,7 +153,7 @@ def run(**kwargs):
         )
         utils.create_json(
             objects=tss_data,
-            filename=f'tss_data_{kwargs.get("collection_name")}',
+            filename=f'tss_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
@@ -167,7 +167,7 @@ def run(**kwargs):
         )
         utils.create_json(
             objects=tts_data,
-            filename=f'tts_data_{kwargs.get("collection_name")}',
+            filename=f'tts_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
