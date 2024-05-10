@@ -8,7 +8,9 @@ Build uniformized data object.
 
 # local
 from src.libs import utils
+from src.libs import constants
 from src.ht_etl.domain.uniformized_data.domain.base import Base
+from src.ht_etl.domain.uniformized_data.domain.sub_domain.ri import RegulatoryInteraction
 
 
 class Site(Base):
@@ -16,7 +18,7 @@ class Site(Base):
     def __init__(self, **kwargs):
         super(Site, self).__init__(**kwargs)
         # Params
-        self.sites_list = kwargs.get('sites_list', [])
+        self.tf_sites = kwargs.get('tf_sites', [])
         # Local properties
 
         # Object properties
@@ -36,14 +38,38 @@ class Site(Base):
     @found_ris.setter
     def found_ris(self, found_ris=None):
         if found_ris is None:
-            found_ris = utils.get_classic_ris(
-                lend=self.data_row[1],
-                rend=self.data_row[2],
-                strand=self.data_row[5],
-                tf_sites=self.sites_list,
-                mg_api=self.mg_api,
-                origin='RegulonDB'
+            found_ris = []
+            center_pos = utils.get_center_pos(
+                left_pos=self.data_row[1],
+                right_pos=self.data_row[2]
             )
+            for tf_site in self.tf_sites:
+                tf_center = tf_site.absolute_position
+                if (
+                    tf_center == center_pos
+                    or tf_center == (center_pos + constants.PAIR_OF_BASES)
+                    or tf_center == (center_pos - constants.PAIR_OF_BASES)
+                ):
+                    found_ri_obj = RegulatoryInteraction(
+                        lend=self.data_row[1],
+                        rend=self.data_row[2],
+                        strand=self.data_row[5],
+                        tf_site=tf_site,
+                        mg_api=self.mg_api,
+                        origin='RegulonDB'
+                    )
+                    found_ri_dict = {
+                        "_id": found_ri_obj.id,
+                        "citations": found_ri_obj.citations,
+                        "origin": found_ri_obj.origin,
+                        "relativeGeneDistance": found_ri_obj.relative_gene_distance,
+                        "relativeTSSDistance": found_ri_obj.relative_tss_distance,
+                        "sequence": found_ri_obj.sequence,
+                        "strand": found_ri_obj.strand,
+                        "tfbsLeftPosition": found_ri_obj.lend,
+                        "tfbsRightPosition": found_ri_obj.rend
+                    }
+                    found_ris.append(found_ri_dict)
         self._found_ris = found_ris
 
     @property

@@ -9,6 +9,7 @@ Build uniformized data object.
 # local
 from src.libs import utils
 from src.ht_etl.domain.uniformized_data.domain.base import Base
+from src.ht_etl.domain.uniformized_data.domain.sub_domain.promoter import Promoter
 
 
 class TSS(Base):
@@ -44,9 +45,10 @@ class TSS(Base):
     @promoters.setter
     def promoters(self, promoters=None):
         if promoters is None:
-            promoters = utils.get_promoter(
+            promoter_objs = Promoter(
                 lend=self.left_pos,
                 rend=self.right_pos,
                 mg_api=self.mg_api
             )
+            promoters = promoter_objs.promoter_list
         self._promoters = promoters

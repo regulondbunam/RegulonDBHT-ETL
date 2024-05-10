@@ -14,9 +14,9 @@ import multigenomic_api as mg_api
 # local
 from libs import arguments
 from libs import utils
+from libs import file_manager
 from ht_etl.ht import datasets
 from libs import constants
-# from ht_etl import dataset_metadata, gene_expression_dataset_metadata
 
 
 def run(**kwargs):
@@ -77,95 +77,95 @@ def run(**kwargs):
         if kwargs.get('dataset_type', None) == constants.TTS:
             tts_data_list.append(dataset_obj.tts)
 
-    collection_data = utils.set_json_object(
+    collection_data = file_manager.set_json_object(
         filename="dataset",
         data_list=dataset_list,
         organism=kwargs.get('organism'),
         sub_class_acronym='MDD',
         child_class_acronym=None
     )
-    utils.create_json(
+    file_manager.create_json(
         objects=collection_data,
         filename=f'dataset_metadata_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
 
-    authors_data = utils.set_json_object(
+    authors_data = file_manager.set_json_object(
         filename="authorsData",
         data_list=authors_data_list,
         organism=kwargs.get('organism'),
         sub_class_acronym='BSD',
         child_class_acronym='AD'
     )
-    utils.create_json(
+    file_manager.create_json(
         objects=authors_data,
         filename=f'authors_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
         output=kwargs.get('output_path')
     )
 
     if kwargs.get('dataset_type', None) == constants.TFBINDING:
-        tfbinding_data = utils.set_json_object(
+        tfbinding_data = file_manager.set_json_object(
             filename="tfbindingData",
             data_list=tfbinding_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='BSD',
             child_class_acronym='BS'
         )
-        utils.create_json(
+        file_manager.create_json(
             objects=tfbinding_data,
             filename=f'tfbinding_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
-        peaks_data = utils.set_json_object(
+        peaks_data = file_manager.set_json_object(
             filename="peaksData",
             data_list=peaks_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='BSD',
             child_class_acronym='PK'
         )
-        utils.create_json(
+        file_manager.create_json(
             objects=peaks_data,
             filename=f'peaks_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
     if kwargs.get('dataset_type', None) == constants.TUS:
-        tus_data = utils.set_json_object(
+        tus_data = file_manager.set_json_object(
             filename="tusData",
             data_list=tus_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='TUD',
             child_class_acronym='TU'
         )
-        utils.create_json(
+        file_manager.create_json(
             objects=tus_data,
             filename=f'tus_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
     if kwargs.get('dataset_type', None) == constants.TSS:
-        tss_data = utils.set_json_object(
+        tss_data = file_manager.set_json_object(
             filename="tssData",
             data_list=tss_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='TUD',
             child_class_acronym='TU'
         )
-        utils.create_json(
+        file_manager.create_json(
             objects=tss_data,
             filename=f'tss_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
         )
 
     if kwargs.get('dataset_type', None) == constants.TTS:
-        tts_data = utils.set_json_object(
+        tts_data = file_manager.set_json_object(
             filename="ttsData",
             data_list=tts_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='TUD',
             child_class_acronym='TU'
         )
-        utils.create_json(
+        file_manager.create_json(
             objects=tts_data,
             filename=f'tts_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
             output=kwargs.get('output_path')
@@ -201,9 +201,9 @@ def run(**kwargs):
             for para in document.paragraphs:
                 print(para.text)'''
 
-        collection_data = utils.set_json_object(
+        collection_data = file_manager.set_json_object(
             "dataset", datasets_list, kwargs.get('organism'), 'MDD', None)
-        utils.create_json(collection_data,
+        file_manager.create_json(collection_data,
                           f'dataset_metadata_{utils.get_collection_name(kwargs.get("datasets_record_path"))}',
                           kwargs.get('output_path'))"""
 
@@ -218,9 +218,9 @@ if __name__ == '__main__':
 
     mg_api.connect(args.database, args.url)
 
-    utils.set_log(args.log, args.collection_name, datetime.date.today())
+    file_manager.set_log(args.log, args.collection_name, datetime.date.today())
 
-    utils.validate_directories(args.output)
+    file_manager.validate_directories(args.output)
 
     output_dirs_path = f'{args.output}{args.collection_path.replace("../InputData/", "")}'
     if os.path.isdir(output_dirs_path):

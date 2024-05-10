@@ -10,7 +10,7 @@ import pandas
 # third party
 
 # local
-from src.libs import utils
+from src.libs import file_manager
 from src.libs import constants
 
 
@@ -123,8 +123,8 @@ class Base(object):
             try:
                 print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
                 logging.info(f'Getting uniformized data from: {datasets_path}')
-                dataset_df = utils.get_data_frame_tsv(datasets_path)
-                uniform_datasets_dict = utils.get_json_from_data_frame(dataset_df)
+                dataset_df = file_manager.get_data_frame_tsv(datasets_path)
+                uniform_datasets_dict = file_manager.get_json_from_data_frame(dataset_df)
             except FileNotFoundError:
                 logging.error(f"Dataset path {datasets_path} not found.")
 

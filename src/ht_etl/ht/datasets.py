@@ -57,9 +57,22 @@ def dataset_dict(filename, rows_to_skip):
     """
     from src.libs.constants import METADATA_SHEET
     from src.libs import file_manager
-    data_dict = file_manager.get_excel_data(
-        filename,
-        METADATA_SHEET,
-        rows_to_skip
-    )
+    data_dict = {}
+    if filename.endswith('.xlsx'):
+        data_dict = file_manager.get_excel_data(
+            filename,
+            METADATA_SHEET,
+            rows_to_skip
+        )
+    if filename.endswith('.csv'):
+        data_dict = file_manager.get_excel_data(
+            filename,
+            METADATA_SHEET,
+            rows_to_skip
+        )
+    if filename.endswith('.tsv'):
+        file_data_frame = file_manager.get_data_frame_tsv(
+            filename=filename
+        )
+        data_dict = file_manager.get_json_from_data_frame(file_data_frame)
     return data_dict

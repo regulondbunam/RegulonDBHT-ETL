@@ -11,6 +11,7 @@ import os.path
 # local
 from src.ht_etl.domain.uniformized_data.uniformized_base import Base
 from src.ht_etl.domain.uniformized_data.domain.site import Site
+from src.libs import utils
 
 
 class Sites(Base):
@@ -18,6 +19,7 @@ class Sites(Base):
     def __init__(self, **kwargs):
         super(Sites, self).__init__(**kwargs)
         # Params
+        self.tf_name = kwargs.get('tf_name', None)
 
         # Local properties
 
@@ -34,9 +36,13 @@ class Sites(Base):
     @sites_list.setter
     def sites_list(self, sites_list=None):
         sites_list = []
+        tf_sites = utils.get_tf_sites(
+            self.tf_name,
+            self.mg_api
+        )
         for site_data in self.uniform_dataset_dict.get('uniform_datasets', []):
             site_obj = Site(
-                sites_list=sites_list,
+                tf_sites=tf_sites,
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,
                 data_row=site_data,
@@ -55,7 +61,7 @@ class Sites(Base):
                 'score': site_obj.score,
                 'strand': site_obj.strand,
                 'sequence': site_obj.sequence,
-                'datasetIds': self.tf_site_id,
+                'datasetIds': [self.dataset_id],
                 'temporalId': site_obj.temporal_id,
                 'nameCollection': site_obj.collection_name
             }

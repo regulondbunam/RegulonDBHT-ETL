@@ -118,6 +118,7 @@ class Dataset(object):
         self._uniformized_data = uniformized_data
         if self._uniformized_data is None:
             uniformized_data = UniformizedData(
+                tf_name=self.regulondb_tf_name,
                 bnumbers=self.bnumbers,
                 dataset_id=self.dataset_id,
                 collection_name=self.collection_name,

@@ -145,4 +145,16 @@ class ObjectTested(object):
                 'objectId': external_cross_ref.object_id
             }
             external_cross_refs_list.append(external_cross_refs_dict)
+            # TODO: This block was in previous HT Extractor version, maybe can be important for the frontend.
+            # mg_cross_ref = mg_api.external_cross_references.find_by_id(
+            #     cross_ref.get('externalCrossReferences_id'))
+            # external_cross_references.append(
+            #     {
+            #         'externalCrossReferenceId': cross_ref.get('externalCrossReferences_id'),
+            #         'objectId': cross_ref.get('objectId'),
+            #         'externalCrossReferenceName': mg_cross_ref.name,
+            #         'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.get('objectId'))
+            #     }
+            # )
+
         return external_cross_refs_list

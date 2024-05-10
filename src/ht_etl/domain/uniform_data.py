@@ -19,6 +19,7 @@ class UniformizedData(object):
 
     def __init__(self, **kwargs):
         # Params
+        self.tf_name = kwargs.get('tf_name', None)
         self.bnumbers = kwargs.get("bnumbers", None)
         self.collection_name = kwargs.get('collection_name')
         self.mg_api = kwargs.get('mg_api')
@@ -61,6 +62,7 @@ class UniformizedData(object):
         self._sites = sites
         if sites is None and self.type == constants.TFBINDING:
             sites = Sites(
+                tf_name=self.tf_name,
                 dataset_id=self.dataset_id,
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,
