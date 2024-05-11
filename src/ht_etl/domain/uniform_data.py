@@ -162,7 +162,7 @@ class UniformizedData(object):
 
     @gene_expression.setter
     def gene_expression(self, gene_expression=None):
-        if gene_expression is None:
+        if gene_expression is None and self.type == constants.RNA:
             gene_expression = GeneExpressions(
                 bnumbers=self.bnumbers,
                 type=self.type,

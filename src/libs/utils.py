@@ -379,19 +379,19 @@ def get_gene_distance(mg_api, regulated_entity, strand, rend, lend):
     return distance
 
 
-"""def find_one_in_dict_list(dict_list, key_name, value):
-    '''
+def find_one_in_dict_list(dict_list, key_name, value):
+    """
     Finds dictionary in a dictionary List by certain key.
 
-    Param
-        dict_list, List, Dictionaries List.
-        key_name, String, Key Name to search.
-        value, String, Value to find the dictionary by key name.
-    Returns
-        found_dict, Dict, Dictionary that matches the search.
-    '''
+    Args:
+        dict_list: List, Dictionaries List.
+        key_name: String, Key Name to search.
+        value: String, Value to find the dictionary by key name.
+    Returns:
+        found_dict: Dict, Dictionary that matches the search.
+    """
     found_dict = next(
         (item for item in dict_list if item[key_name] == value),
         None
     )
-    return found_dict"""
+    return found_dict

@@ -86,8 +86,8 @@ class Dataset(object):
             self.dataset_id
         )
         self.external_references = kwargs.get('external_references', None)
-        self.grow_conditions_contrast = kwargs.get('grow_conditions_contrast', None)
         self.gene_expression_filtered = kwargs.get('gene_expression_filtered', None)
+        self.grow_conditions_contrast = kwargs.get('grow_conditions_contrast', None)
         self.summary = kwargs.get('summary', None)
 
         # Uniformized data
@@ -338,19 +338,6 @@ class Dataset(object):
         """
         if gene_expression_filtered is None:
             self._gene_expression_filtered = gene_expression_filtered
-
-    @property
-    def summary(self):
-        return self._summary
-
-    @summary.setter
-    def summary(self, summary=None):
-        """
-        Sets summary and starts uniformized data processing.
-        """
-        if summary is None:
-            self._summary = summary
-            # TODO: Could i start uniformized extractions?
 
     # Static methods
     @staticmethod

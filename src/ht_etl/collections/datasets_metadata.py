@@ -11,6 +11,7 @@ import logging
 from src.libs import constants
 from src.ht_etl.sub_collections.dataset import Dataset
 from src.ht_etl.sub_collections.metadata import Metadata
+from src.ht_etl.domain.summary import Summary
 
 
 class DatasetsMetadata(object):
@@ -152,8 +153,6 @@ class DatasetsMetadata(object):
                     'geneExpressionFiltered': dataset.gene_expression_filtered,
                     'summary': dataset.summary,
                 }
-                dataset_dict = {k: v for k, v in dataset_dict.items() if v}
-                self._dataset = dataset_dict
                 if dataset.authors_data.data:
                     self.authors_data = {
                         'id': dataset.authors_data.id,
@@ -171,6 +170,10 @@ class DatasetsMetadata(object):
                     self.tts = dataset.uniformized_data.tts.tts_list
                 if self.dataset_type == constants.RNA:
                     self.gene_expressions = dataset.uniformized_data.gene_expression.genex_list
+                summary = DatasetsMetadata.set_summary(peaks_list=self.peaks, sites_list=self.sites,)
+                dataset_dict.update({'summary': summary})
+                dataset_dict = {k: v for k, v in dataset_dict.items() if v}
+                self._dataset = dataset_dict
             else:
                 self._dataset = {}
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
@@ -212,3 +215,19 @@ class DatasetsMetadata(object):
             }
             metadata_dict = {k: v for k, v in metadata_dict.items() if v}
             self._metadata = metadata_dict
+
+    # Static methods
+    @staticmethod
+    def set_summary(peaks_list=None, sites_list=None, genes_list=None):
+        summary = Summary(
+            peaks=peaks_list,
+            sites=sites_list,
+            genes=genes_list  # TODO: ask for this property
+        )
+        summary_dict = {
+            'totalOfPeaks': summary.total_of_peaks,
+            'totalOfTFBS': summary.total_of_tfbs,
+            'totalOfGenes': summary.total_of_genes
+        }
+        summary_dict = {k: v for k, v in summary_dict.items() if v}
+        return summary_dict
