@@ -13,6 +13,7 @@ from src.ht_etl.domain.uniformized_data.peaks import Peaks
 from src.ht_etl.domain.uniformized_data.tus import TUs
 from src.ht_etl.domain.uniformized_data.tss import TSSs
 from src.ht_etl.domain.uniformized_data.tts import TTSs
+from src.ht_etl.domain.uniformized_data.gene_expressions import GeneExpressions
 
 
 class UniformizedData(object):
@@ -31,7 +32,7 @@ class UniformizedData(object):
         self.serie_id = kwargs.get("serie_id", None)
         self.type = kwargs.get("type", None)
         self.old_dataset_id = kwargs.get("old_dataset_id", None)
-        print(f'\t\t\tUniformized Data -- Type: {self.type}, SeireID: {self.serie_id}')
+        print(f'\t\t\tUniformized Data -- Type: {self.type}')
 
         # Local properties
 
@@ -49,6 +50,9 @@ class UniformizedData(object):
 
         # TTS
         self.tts = kwargs.get("tts", None)
+
+        # GeneExpression
+        self.gene_expression = kwargs.get("gene_expression", None)
 
     # Local properties
 
@@ -151,5 +155,23 @@ class UniformizedData(object):
                 old_dataset_id=self.old_dataset_id,
             )
         self._tts = tts
+
+    @property
+    def gene_expression(self):
+        return self._gene_expression
+
+    @gene_expression.setter
+    def gene_expression(self, gene_expression=None):
+        if gene_expression is None:
+            gene_expression = GeneExpressions(
+                bnumbers=self.bnumbers,
+                type=self.type,
+                dataset_id=self.dataset_id,
+                mg_api=self.mg_api,
+                collection_path=self.collection_path,
+                serie_id=self.serie_id,
+                old_dataset_id=self.old_dataset_id,
+            )
+        self._gene_expression = gene_expression
 
     # Static methods

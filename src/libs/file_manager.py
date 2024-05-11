@@ -178,5 +178,5 @@ def get_author_data_frame_tsv(filename: str) -> pandas.DataFrame:
     Returns:
         dataset_df: pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
     """
-    dataset_df = pandas.read_csv(filename, sep='\t',)
+    dataset_df = pandas.read_csv(filename, sep='\t')
     return dataset_df

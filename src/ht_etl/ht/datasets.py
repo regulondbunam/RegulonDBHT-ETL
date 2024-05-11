@@ -20,7 +20,7 @@ def get_dataset(**kwargs):
     """
     from src.ht_etl.collections.datasets_metadata import DatasetsMetadata
 
-    filename = kwargs.get('filename', None)
+    filename = kwargs.get('filename', '')
     rows_to_skip = kwargs.get('rows_to_skip', None)
 
     dataset_rows = dataset_dict(filename, rows_to_skip)
@@ -65,11 +65,7 @@ def dataset_dict(filename, rows_to_skip):
             rows_to_skip
         )
     if filename.endswith('.csv'):
-        data_dict = file_manager.get_excel_data(
-            filename,
-            METADATA_SHEET,
-            rows_to_skip
-        )
+        pass
     if filename.endswith('.tsv'):
         file_data_frame = file_manager.get_data_frame_tsv(
             filename=filename

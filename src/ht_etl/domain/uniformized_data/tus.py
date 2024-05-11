@@ -16,8 +16,8 @@ class TUs(Base):
     def __init__(self, **kwargs):
         super(TUs, self).__init__(**kwargs)
         # Params
-        # print(self.uniform_dataset_dict)
         self.bnumbers = kwargs.get("bnumbers", None)
+
         # Local properties
 
         # Object properties

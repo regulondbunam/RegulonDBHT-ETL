@@ -7,6 +7,7 @@ Build dataset object and special objects for every dataset.
 # third party
 
 # local
+from src.libs import constants
 from src.ht_etl.domain.publications import Publications
 from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
@@ -229,6 +230,7 @@ class Dataset(object):
                 'title': sample.title_for_replicates,
                 'ssrId': ''  # TODO: ask for this property
             }
+            sample_dict = {k: v for k, v in sample_dict.items() if v}
             self._sample = sample_dict
 
     @property
@@ -252,6 +254,7 @@ class Dataset(object):
                 'experimentId': linked_dataset.experiment_id,
                 'datasetType': linked_dataset.dataset_type,
             }
+            linked_dataset_dict = {k: v for k, v in linked_dataset_dict.items() if v}
             self._linked_dataset = linked_dataset_dict
 
     @property

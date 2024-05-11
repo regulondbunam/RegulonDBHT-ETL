@@ -58,6 +58,7 @@ def run(**kwargs):
     tus_data_list = []
     tss_data_list = []
     tts_data_list = []
+    gene_expression_data_list = []
 
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
@@ -66,7 +67,8 @@ def run(**kwargs):
             'collectionName': dataset_obj.collection_name
         }
         dataset_list.append(dataset_obj_dict)
-        authors_data_list.append(dataset_obj.authors_data)
+        if dataset_obj.authors_data:
+            authors_data_list.append(dataset_obj.authors_data)
         if kwargs.get('dataset_type', None) == constants.TFBINDING:
             tfbinding_data_list.extend(dataset_obj.sites)
             peaks_data_list.extend(dataset_obj.peaks)
@@ -76,6 +78,8 @@ def run(**kwargs):
             tss_data_list.append(dataset_obj.tss)
         if kwargs.get('dataset_type', None) == constants.TTS:
             tts_data_list.append(dataset_obj.tts)
+        if kwargs.get('dataset_type', None) == constants.RNA:
+            gene_expression_data_list.append(dataset_obj.gene_expressions)
 
     collection_data = file_manager.set_json_object(
         filename="dataset",
@@ -171,41 +175,19 @@ def run(**kwargs):
             output=kwargs.get('output_path')
         )
 
-    """if kwargs.get('datasets_record_path') is not None:
-        print(f'Reading Datasets from {kwargs.get("datasets_record_path")}')
-        logging.info(
-            f'Reading Datasets from {kwargs.get("datasets_record_path")}')
-        bnumbers_json = open(kwargs.get('bnumbers'))
-        bnumbers_data = json.load(bnumbers_json)
-        if kwargs.get('dataset_type') == 'GENE_EXPRESSION':
-            gene_exp_out_path = os.path.join(kwargs.get(
-                'output_path'), utils.get_collection_name(kwargs.get("datasets_record_path")))
-
-            if os.path.isdir(gene_exp_out_path):
-                shutil.rmtree(gene_exp_out_path)
-            os.mkdir(gene_exp_out_path)
-            datasets_list = gene_expression_dataset_metadata.open_tsv_file(
-                kwargs, bnumbers_data)
-        else:
-            datasets_list = dataset_metadata.open_excel_file(
-                file_name='',
-                bnumbers_data=bnumbers_data
-            )
-
-        '''readme_file_path = f'{kwargs.get("collection_path")}README.md'
-        if not os.path.isfile(readme_file_path):
-            readme_file_path = f'{kwargs.get("collection_path")}README.md'
-        elif os.path.isfile(readme_file_path):
-            document = Document(readme_file_path)
-            print(document)
-            for para in document.paragraphs:
-                print(para.text)'''
-
-        collection_data = file_manager.set_json_object(
-            "dataset", datasets_list, kwargs.get('organism'), 'MDD', None)
-        file_manager.create_json(collection_data,
-                          f'dataset_metadata_{utils.get_collection_name(kwargs.get("datasets_record_path"))}',
-                          kwargs.get('output_path'))"""
+    if kwargs.get('dataset_type', None) == constants.RNA:
+        genex_data = file_manager.set_json_object(
+            filename="geneExpression",
+            data_list=gene_expression_data_list,
+            organism=kwargs.get('organism'),
+            sub_class_acronym='GED',
+            child_class_acronym='GE'
+        )
+        file_manager.create_json(
+            objects=genex_data,
+            filename=f'gene_expression_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
+            output=kwargs.get('output_path')
+        )
 
 
 if __name__ == '__main__':

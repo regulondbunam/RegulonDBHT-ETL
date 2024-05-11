@@ -39,5 +39,7 @@ class Series(object):
                 'sourceId': self.source_id,
                 'sourceName': self.source_name
             }
-            series_list.append(series)
+            series = {k: v for k, v in series.items() if v}
+            if series != {}:
+                series_list.append(series)
         self._series = series_list

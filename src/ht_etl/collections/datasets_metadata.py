@@ -37,6 +37,7 @@ class DatasetsMetadata(object):
         self.tus = kwargs.get('tu', None)
         self.tss = kwargs.get('tss', None)
         self.tts = kwargs.get('tts', None)
+        self.gene_expressions = kwargs.get('gene_expressions', None)
 
         # Object properties
         self.dataset = kwargs.get('dataset', None)
@@ -56,9 +57,13 @@ class DatasetsMetadata(object):
         Gets all values from dataset catalog dict and build a Dataset object.
         """
         if dataset is None:
-            if self.dataset_source_dict.get(constants.DATASET_ID, None) is not None:
-                print(f"\tProcessing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
-                logging.info(f"Processing Dataset ID: {self.dataset_source_dict.get(constants.DATASET_ID, None)}")
+            dataset_id = (
+                self.dataset_source_dict.get(constants.DATASET_ID, None)
+                or self.dataset_source_dict.get(constants.GE_DATASET_ID, None)
+            )
+            if dataset_id:
+                print(f"\tProcessing Dataset ID: {dataset_id}")
+                logging.info(f"Processing Dataset ID: {dataset_id}")
                 dataset = Dataset(
                     bnumbers=self.bnumbers,
                     mg_api=self.mg_api,
@@ -71,7 +76,7 @@ class DatasetsMetadata(object):
                     database=self.database,
                     url=self.url,
                     email=self.email,
-                    dataset_id=self.dataset_source_dict.get(constants.DATASET_ID, None),
+                    dataset_id=dataset_id,
                     old_dataset_id=self.dataset_source_dict.get(constants.OLD_DATASET_ID, None),
                     pmid=self.dataset_source_dict.get(constants.PMID, None),
                     authors=self.dataset_source_dict.get(constants.AUTHORS, None),
@@ -85,8 +90,17 @@ class DatasetsMetadata(object):
                     strategy=self.dataset_source_dict.get(constants.STRATEGY, None),
                     library_layout=self.dataset_source_dict.get(constants.LIBRARY_LAYOUT, None),
                     method_name=self.dataset_source_dict.get(constants.METHOD_NAME, None),
-                    samples_replicates_exp_ids=self.dataset_source_dict.get(constants.SAMPLES_REPLICATES_EXPERIMET_ID, None),
-                    samples_replicates_control_ids=self.dataset_source_dict.get(constants.SAMPLES_REPLICATES_CONTROL_ID, None),
+                    samples_replicates_exp_ids=(
+                        self.dataset_source_dict.get(
+                            constants.SAMPLES_REPLICATES_EXPERIMET_ID, None
+                        )
+                        or self.dataset_source_dict.get(
+                            constants.GE_SAMPLES_REPLICATES_EXPERIMENT_ID, None
+                        )
+                    ),
+                    samples_replicates_control_ids=self.dataset_source_dict.get(
+                        constants.SAMPLES_REPLICATES_CONTROL_ID, None
+                    ),
                     title_for_all_replicates=self.dataset_source_dict.get(constants.TITLE_FOR_ALL_REPLICATES, None),
                     experiment_condition=self.dataset_source_dict.get(constants.EXPERIMENT_CONDITION, None),
                     grow_conditions_exp_ids=self.dataset_source_dict.get(constants.GC_EXPERIMENTAL, None),
@@ -105,14 +119,19 @@ class DatasetsMetadata(object):
                         constants.SAMPLES_CONTROL_REPLICATES_EXPRESSION_ID, None
                     ),
                     expression_growcon_ctrl=self.dataset_source_dict.get(constants.EXPRESSION_GC_CONTROL, None),
-                    expression_growcon_control_ids=self.dataset_source_dict.get(constants.EXPRESSION_GC_EXPERIMENTAL, None),
+                    expression_growcon_control_ids=self.dataset_source_dict.get(
+                        constants.EXPRESSION_GC_EXPERIMENTAL, None
+                    ),
                     source_cut_off=self.dataset_source_dict.get(constants.CUT_OFF, None),
                     public_notes=self.dataset_source_dict.get(constants.PUBLIC_NOTES, None),
                     exp_condition_notes=self.dataset_source_dict.get(constants.EXPERIMENT_CONDITION, None),
                     external_db_links=self.dataset_source_dict.get(constants.EXTERNAL_DB_LINK, None)
                 )
+                dataset_id = dataset.dataset_id
+                if self.dataset_type == constants.RNA:
+                    dataset_id = f"{self.dataset_type}_{dataset_id}"
                 dataset_dict = {
-                    '_id': dataset.dataset_id,
+                    '_id': dataset_id,
                     'publications': dataset.dataset_publications,
                     'objectsTested': dataset.objects_tested,
                     'sourceSerie': dataset.source_serie,
@@ -133,12 +152,14 @@ class DatasetsMetadata(object):
                     'geneExpressionFiltered': dataset.gene_expression_filtered,
                     'summary': dataset.summary,
                 }
+                dataset_dict = {k: v for k, v in dataset_dict.items() if v}
                 self._dataset = dataset_dict
-                self.authors_data = {
-                    'id': dataset.authors_data.id,
-                    'datasetIds': dataset.authors_data.dataset_ids,
-                    'authorsData': dataset.authors_data.data,
-                }
+                if dataset.authors_data.data:
+                    self.authors_data = {
+                        'id': dataset.authors_data.id,
+                        'datasetIds': dataset.authors_data.dataset_ids,
+                        'authorsData': dataset.authors_data.data,
+                    }
                 if self.dataset_type == constants.TFBINDING:
                     self.sites = dataset.uniformized_data.sites.sites_list
                     self.peaks = dataset.uniformized_data.peaks.peaks_list
@@ -148,6 +169,8 @@ class DatasetsMetadata(object):
                     self.tss = dataset.uniformized_data.tss.tss_list
                 if self.dataset_type == constants.TTS:
                     self.tts = dataset.uniformized_data.tts.tts_list
+                if self.dataset_type == constants.RNA:
+                    self.gene_expressions = dataset.uniformized_data.gene_expression.genex_list
             else:
                 self._dataset = {}
                 logging.warning(f"No Dataset ID provided for {self.dataset_source_dict.get(constants.PMID, None)}")
@@ -187,4 +210,5 @@ class DatasetsMetadata(object):
                 'release_date': metadata.release_date,
                 'reference': metadata.pmids
             }
+            metadata_dict = {k: v for k, v in metadata_dict.items() if v}
             self._metadata = metadata_dict

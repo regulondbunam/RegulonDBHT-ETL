@@ -92,6 +92,13 @@ class Base(object):
                     str(uniform_paths),
                     f'{ds_id}.tsv'
                 )
+            if self.type == constants.RNA:
+                if ds_id is None:
+                    ds_id = self.dataset_id
+                uniform_path = os.path.join(
+                    str(uniform_paths),
+                    f'{ds_id}.txt'
+                )
             self._uniform_dataset_path = uniform_path
 
     # Object properties
@@ -119,6 +126,23 @@ class Base(object):
             uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
             if ds_sub_type == constants.PEAKS:
                 uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
+        elif ds_type == constants.RNA:
+            uniform_dataset_rows = []
+            try:
+                print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
+                logging.info(f'Getting uniformized data from: {datasets_path}')
+                with open(datasets_path) as dataset_file:
+                    for row in dataset_file:
+                        if (
+                                not row.startswith('track')
+                                and not row.startswith('browser')
+                                and not row.startswith('##')
+                                and not row.startswith('#')
+                        ):
+                            uniform_dataset_rows.append(row.strip().split(','))
+            except FileNotFoundError:
+                logging.error(f"Dataset path {datasets_path} not found.")
+            uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
         else:
             try:
                 print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')

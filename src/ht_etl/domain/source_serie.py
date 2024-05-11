@@ -69,4 +69,5 @@ class SourceSerie(object):
                 '_id': platform.id,
                 'title': platform.title
             }
+            platform_dict = {k: v for k, v in platform_dict.items() if v}
             self._platform = platform_dict
