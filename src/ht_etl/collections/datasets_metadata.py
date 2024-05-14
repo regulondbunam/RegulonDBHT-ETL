@@ -17,6 +17,7 @@ from src.ht_etl.domain.summary import Summary
 class DatasetsMetadata(object):
     def __init__(self, **kwargs):
         # Params
+        self.nlp_growth_conditions_list = kwargs.get('nlp_growth_conditions_list', None)
         self.bnumbers = kwargs.get("bnumbers", None)
         self.mg_api = kwargs.get('mg_api')
         self.genes_ranges = kwargs.get("genes_ranges", None)

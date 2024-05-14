@@ -164,13 +164,13 @@ class UniformizedData(object):
     def gene_expression(self, gene_expression=None):
         if gene_expression is None and self.type == constants.RNA:
             gene_expression = GeneExpressions(
+                sub_type=constants.GENEX,
                 bnumbers=self.bnumbers,
                 type=self.type,
                 dataset_id=self.dataset_id,
                 mg_api=self.mg_api,
                 collection_path=self.collection_path,
-                serie_id=self.serie_id,
-                old_dataset_id=self.old_dataset_id,
+                serie_id=self.serie_id
             )
         self._gene_expression = gene_expression
 

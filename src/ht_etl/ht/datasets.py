@@ -6,8 +6,11 @@ Calls for Datasets class and returns a constructor with all datasets objects.
 
 # third party
 
-
 # local
+from src.libs import constants
+from src.libs import file_manager
+from src.libs import nlp_growth_conditions_utils
+
 
 def get_dataset(**kwargs):
     """
@@ -25,8 +28,17 @@ def get_dataset(**kwargs):
 
     dataset_rows = dataset_dict(filename, rows_to_skip)
 
+    nlp_growth_conditions_list = []
+    if kwargs.get('dataset_type', None) == constants.RNA:
+        nlp_growth_conditions_list = nlp_growth_conditions(
+            mg_api=kwargs.get('mg_api', None),
+            collection_name=kwargs.get('collection_name', None),
+            collection_path=kwargs.get('collection_path', None)
+        )
+
     for row in dataset_rows:
         dataset = DatasetsMetadata(
+            nlp_growth_conditions_list=nlp_growth_conditions_list,
             bnumbers=kwargs.get('bnumbers', None),
             mg_api=kwargs.get('mg_api', None),
             dataset_source_dict=row,
@@ -72,3 +84,37 @@ def dataset_dict(filename, rows_to_skip):
         )
         data_dict = file_manager.get_json_from_data_frame(file_data_frame)
     return data_dict
+
+
+def nlp_growth_conditions(mg_api, collection_path, collection_name):
+    """
+    Returns a constructor with all NLPGrowthConditions objects.
+    Args:
+        collection_name:
+        collection_path:
+        mg_api:
+
+    Returns:
+
+    """
+    geo_nlp_gc_json_path = nlp_growth_conditions_utils.geo_nlp_gc_json_path(collection_path)
+    no_geo_nlp_gc_json_path = nlp_growth_conditions_utils.no_geo_nlp_gc_json_path(collection_path)
+
+    nlp_gcs_list = []
+    nlp_gc_dict_list = file_manager.read_json_file(geo_nlp_gc_json_path)
+    for nlp_gc_data in nlp_gc_dict_list.items():
+        nlp_gc_dict = nlp_growth_conditions_utils.get_nlp_gc(
+            nlp_gc_data,
+            collection_name,
+            mg_api
+        )
+        nlp_gcs_list.append(nlp_gc_dict)
+    nlp_gc_dict_list = file_manager.read_json_file(no_geo_nlp_gc_json_path)
+    for nlp_gc_data in nlp_gc_dict_list.items():
+        nlp_gc_dict = nlp_growth_conditions_utils.get_nlp_gc(
+            nlp_gc_data,
+            collection_name,
+            mg_api
+        )
+        nlp_gcs_list.append(nlp_gc_dict)
+    return nlp_gcs_list

@@ -95,10 +95,11 @@ class Base(object):
             if self.type == constants.RNA:
                 if ds_id is None:
                     ds_id = self.dataset_id
-                uniform_path = os.path.join(
-                    str(uniform_paths),
-                    f'{ds_id}.txt'
-                )
+                if self.sub_type == constants.GENEX and ds_id:
+                    uniform_path = os.path.join(
+                        str(uniform_paths),
+                        f'{ds_id}.txt'
+                    )
             self._uniform_dataset_path = uniform_path
 
     # Object properties
@@ -110,8 +111,9 @@ class Base(object):
         if ds_type == constants.TFBINDING:
             uniform_dataset_rows = []
             try:
-                print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
-                logging.info(f'Getting uniformized data from: {datasets_path}')
+                if datasets_path:
+                    print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
+                    logging.info(f'Getting uniformized data from: {datasets_path}')
                 with open(datasets_path) as dataset_file:
                     for row in dataset_file:
                         if (
@@ -129,8 +131,9 @@ class Base(object):
         elif ds_type == constants.RNA:
             uniform_dataset_rows = []
             try:
-                print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
-                logging.info(f'Getting uniformized data from: {datasets_path}')
+                if datasets_path:
+                    print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
+                    logging.info(f'Getting uniformized data from: {datasets_path}')
                 with open(datasets_path) as dataset_file:
                     for row in dataset_file:
                         if (
@@ -145,8 +148,9 @@ class Base(object):
             uniform_datasets_dict.setdefault('uniform_datasets', uniform_dataset_rows)
         else:
             try:
-                print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
-                logging.info(f'Getting uniformized data from: {datasets_path}')
+                if datasets_path:
+                    print('\t\t\t\t', f'Getting uniformized data from: {datasets_path}')
+                    logging.info(f'Getting uniformized data from: {datasets_path}')
                 dataset_df = file_manager.get_data_frame_tsv(datasets_path)
                 uniform_datasets_dict = file_manager.get_json_from_data_frame(dataset_df)
             except FileNotFoundError:

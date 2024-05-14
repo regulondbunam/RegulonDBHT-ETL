@@ -180,3 +180,44 @@ def get_author_data_frame_tsv(filename: str) -> pandas.DataFrame:
     """
     dataset_df = pandas.read_csv(filename, sep='\t')
     return dataset_df
+
+
+def verify_json_path(json_path):
+    """
+    This function reads JSON file in the path and returns a valid dir for use
+
+    Args:
+        json_path: String, raw directory path.
+
+    Returns:
+        txt_path: String, verified directory path.
+    """
+
+    if os.path.isfile(json_path) and json_path.endswith('.json'):
+        logging.info(f'Reading JSON file {json_path}')
+        return json_path
+    else:
+        logging.warning(
+            f'{json_path} is not a valid JSON file will be ignored'
+        )
+        return None
+
+
+def read_json_file(filename: str) -> dict:
+    """
+    Read and convert the JSON file from file path.
+    Args:
+        filename: String, JSON file path.
+
+    Returns:
+        json_dict: Dict, JSON string converted  to a dictionary.
+    """
+    if verify_json_path(filename):
+        json_data = open(filename)
+        json_dict = json.load(json_data)
+        return json_dict
+    else:
+        raise FileNotFoundError(
+            f'{filename} is not a valid JSON file will be ignored'
+        )
+

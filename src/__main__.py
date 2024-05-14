@@ -6,7 +6,6 @@ import logging
 import datetime
 import shutil
 import os
-from json import load as j_load
 
 # third party
 import multigenomic_api as mg_api
@@ -31,8 +30,7 @@ def run(**kwargs):
     print(f"Reading data from {kwargs.get('datasets_record_path', None)}")
     logging.info(f"Reading data from {kwargs.get('datasets_record_path', None)}")
 
-    bnumbers_json = open(kwargs.get('bnumbers'))
-    bnumbers_data = j_load(bnumbers_json)
+    bnumbers_data = file_manager.read_json_file(kwargs.get('bnumbers'))
 
     datasets_objs = datasets.get_dataset(
         bnumbers=bnumbers_data,
@@ -59,6 +57,7 @@ def run(**kwargs):
     tss_data_list = []
     tts_data_list = []
     gene_expression_data_list = []
+    nlp_gc_data_list = []
 
     for dataset_obj in datasets_objs:
         dataset_obj_dict = {
@@ -79,6 +78,8 @@ def run(**kwargs):
         if kwargs.get('dataset_type', None) == constants.TTS:
             tts_data_list.append(dataset_obj.tts)
         if kwargs.get('dataset_type', None) == constants.RNA:
+            if not nlp_gc_data_list:
+                nlp_gc_data_list.extend(dataset_obj.nlp_growth_conditions_list)
             gene_expression_data_list.append(dataset_obj.gene_expressions)
 
     collection_data = file_manager.set_json_object(
@@ -176,6 +177,18 @@ def run(**kwargs):
         )
 
     if kwargs.get('dataset_type', None) == constants.RNA:
+        nlp_gc_data = file_manager.set_json_object(
+            filename="nlpGrowthConditions",
+            data_list=nlp_gc_data_list,
+            organism=kwargs.get('organism'),
+            sub_class_acronym='NLP_GC',
+            child_class_acronym='GC'
+        )
+        file_manager.create_json(
+            objects=nlp_gc_data,
+            filename=f'nlp_growth_conditions_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
+            output=kwargs.get('output_path')
+        )
         genex_data = file_manager.set_json_object(
             filename="geneExpression",
             data_list=gene_expression_data_list,
