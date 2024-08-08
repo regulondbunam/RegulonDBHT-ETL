@@ -87,6 +87,7 @@ class UniformizedData(object):
         self._peaks = peaks
         if peaks is None and self.type == constants.TFBINDING:
             peaks = Peaks(
+                dataset_id=self.dataset_id,
                 sites_list=self.sites.sites_list,
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,

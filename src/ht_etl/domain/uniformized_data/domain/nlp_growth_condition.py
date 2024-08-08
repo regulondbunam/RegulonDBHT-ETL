@@ -80,10 +80,10 @@ class NLPGrowthCondition(Base):
 
     @dataset_ids.setter
     def dataset_ids(self, value):
-        self._dataset_ids = NLPGrowthCondition.split_combined_ids(
-            self.dataset_id
-        )
-
+        # self._dataset_ids = NLPGrowthCondition.split_combined_ids(
+        #     self.dataset_id
+        # )
+        self._dataset_ids = [f'{self.type}_{self.dataset_id}']
 
     @property
     def temporal_id(self):
@@ -92,7 +92,7 @@ class NLPGrowthCondition(Base):
     @temporal_id.setter
     def temporal_id(self, temporal_id=None):
         if temporal_id is None:
-            temporal_id = f'{self.type}_{self.dataset_id}'
+            temporal_id = f'GC_{self.type}_{self.dataset_id}'
         self._temporal_id = temporal_id
 
     @property
@@ -110,40 +110,56 @@ class NLPGrowthCondition(Base):
         return self._organism
 
     @organism.setter
-    def organism(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+    def organism(self, term_objs=None):
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='organism'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Organism'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Strain'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Substrain'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._organism = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._organism = term_dicts
 
     @property
     def genetic_background(self):
@@ -151,33 +167,49 @@ class NLPGrowthCondition(Base):
 
     @genetic_background.setter
     def genetic_background(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='genetic_background'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Genetic background'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Gtype'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._genetic_background = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._genetic_background = term_dicts
 
     @property
     def medium(self):
@@ -185,33 +217,49 @@ class NLPGrowthCondition(Base):
 
     @medium.setter
     def medium(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='medium'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Medium'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Med'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._medium = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._medium = term_dicts
 
     @property
     def aeration(self):
@@ -219,33 +267,49 @@ class NLPGrowthCondition(Base):
 
     @aeration.setter
     def aeration(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='aeration'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Aeration'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Air'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._aeration = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._aeration = term_dicts
 
     @property
     def temperature(self):
@@ -253,33 +317,49 @@ class NLPGrowthCondition(Base):
 
     @temperature.setter
     def temperature(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='temperature'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Temperature'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Tem'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._temperature = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._temperature = term_dicts
 
     @property
     def ph(self):
@@ -287,33 +367,49 @@ class NLPGrowthCondition(Base):
 
     @ph.setter
     def ph(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='ph'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='pH'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='PH'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._ph = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._ph = term_dicts
 
     @property
     def pressure(self):
@@ -321,33 +417,49 @@ class NLPGrowthCondition(Base):
 
     @pressure.setter
     def pressure(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='pressure'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Pressure'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Press(NA)'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._pressure = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._pressure = term_dicts
 
     @property
     def optical_density(self):
@@ -355,33 +467,49 @@ class NLPGrowthCondition(Base):
 
     @optical_density.setter
     def optical_density(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='optical_density'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Optical Density (OD)'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='OD'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._optical_density = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._optical_density = term_dicts
 
     @property
     def growth_phase(self):
@@ -389,33 +517,49 @@ class NLPGrowthCondition(Base):
 
     @growth_phase.setter
     def growth_phase(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='growth_phase'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Growth phase'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Phase'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._growth_phase = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._growth_phase = term_dicts
 
     @property
     def growth_rate(self):
@@ -423,33 +567,49 @@ class NLPGrowthCondition(Base):
 
     @growth_rate.setter
     def growth_rate(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='growth_rate'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Growth rate'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Grate(NA)'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._growth_rate = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._growth_rate = term_dicts
 
     @property
     def vessel_type(self):
@@ -457,33 +617,49 @@ class NLPGrowthCondition(Base):
 
     @vessel_type.setter
     def vessel_type(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='vessel_type'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Vessel Type'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Vess'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._vessel_type = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._vessel_type = term_dicts
 
     @property
     def aeration_speed(self):
@@ -491,33 +667,49 @@ class NLPGrowthCondition(Base):
 
     @aeration_speed.setter
     def aeration_speed(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='aeration_speed'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Aeration speed'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Aeration Speed'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._aeration_speed = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._aeration_speed = term_dicts
 
     @property
     def medium_supplements(self):
@@ -525,33 +717,49 @@ class NLPGrowthCondition(Base):
 
     @medium_supplements.setter
     def medium_supplements(self, term_obj=None):
-        term_dict = {}
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        term_objs = []
+        term_dicts = []
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='medium_supplements'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Medium supplement'
             )
-        if term_obj is None:
-            term_obj = utils.find_one_in_dict_list(
+        if not term_objs:
+            term_objs = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='Supp'
             )
-        if term_obj is not None:
-            term_dict = {
-                'value': term_obj.get('value'),
-                'associated_phrase': term_obj.get('associated_phrase'),
-                'name_field': term_obj.get('name_field'),
-                'score': term_obj.get('score'),
-            }
-        self._medium_supplements = term_dict
+        if term_objs:
+            for term_obj in term_objs:
+                value = term_obj.get('value')
+                if not value or value == '':
+                    value = None
+                associated_phrase = term_obj.get('associated_phrase')
+                if not associated_phrase or associated_phrase == '':
+                    associated_phrase = None
+                name_field = term_obj.get('name_field')
+                if not name_field or name_field == '':
+                    name_field = None
+                score = term_obj.get('score')
+                if not score or score == '':
+                    score = None
+
+                term_dict = {
+                    'value': value,
+                    'associated_phrase': associated_phrase,
+                    'name_field': name_field,
+                    'score': score,
+                }
+                term_dicts.append(term_dict)
+        self._medium_supplements = term_dicts
 
     @property
     def additional_properties(self):
@@ -560,7 +768,7 @@ class NLPGrowthCondition(Base):
     @additional_properties.setter
     def additional_properties(self, additional_properties=None):
         if additional_properties is None:
-            additional_properties = utils.find_one_in_dict_list(
+            additional_properties = utils.find_many_in_dict_list(
                 dict_list=self.terms,
                 key_name='term_type',
                 value='additional_properties'

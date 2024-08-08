@@ -56,31 +56,79 @@ def run(**kwargs):
     tus_data_list = []
     tss_data_list = []
     tts_data_list = []
-    gene_expression_data_list = []
     nlp_gc_data_list = []
+    metadata_list = []
 
     for dataset_obj in datasets_objs:
-        dataset_obj_dict = {
-            'dataset': dataset_obj.dataset,
-            'metadata': dataset_obj.metadata,
-            'collectionName': dataset_obj.collection_name
-        }
+        dataset_obj_dict = dataset_obj.dataset
         dataset_list.append(dataset_obj_dict)
+        if dataset_obj.metadata and kwargs.get('dataset_type', None) != constants.RNA:
+            found_metadata = utils.find_one_in_dict_list(
+                dict_list=metadata_list,
+                key_name='_id',
+                value=dataset_obj.metadata.get('_id')
+            )
+            if not found_metadata:
+                metadata_list.append(dataset_obj.metadata)
+            else:
+                new_ref = dataset_obj.metadata.get('reference', None)
+                if new_ref:
+                    last_ref = found_metadata.get('reference')
+                    if new_ref not in last_ref:
+                        last_ref.extend(new_ref)
+                    last_ref = list(set(last_ref))
+                    found_metadata.update({'reference': last_ref})
         if dataset_obj.authors_data:
             authors_data_list.append(dataset_obj.authors_data)
         if kwargs.get('dataset_type', None) == constants.TFBINDING:
             tfbinding_data_list.extend(dataset_obj.sites)
             peaks_data_list.extend(dataset_obj.peaks)
         if kwargs.get('dataset_type', None) == constants.TUS:
-            tus_data_list.append(dataset_obj.tus)
+            for tu in dataset_obj.tus:
+                if tu not in tus_data_list:
+                    tus_data_list.append(tu)
         if kwargs.get('dataset_type', None) == constants.TSS:
-            tss_data_list.append(dataset_obj.tss)
+            for tss in dataset_obj.tss:
+                if tss not in tss_data_list:
+                    tss_data_list.append(tss)
         if kwargs.get('dataset_type', None) == constants.TTS:
-            tts_data_list.append(dataset_obj.tts)
+            for tts in dataset_obj.tts:
+                if tts not in tts_data_list:
+                    tts_data_list.append(tts)
         if kwargs.get('dataset_type', None) == constants.RNA:
             if not nlp_gc_data_list:
                 nlp_gc_data_list.extend(dataset_obj.nlp_growth_conditions_list)
-            gene_expression_data_list.append(dataset_obj.gene_expressions)
+            gene_expression_data_list = dataset_obj.gene_expressions
+            genex_data = file_manager.set_json_object(
+                filename=f"geneExpression",
+                data_list=gene_expression_data_list,
+                organism=kwargs.get('organism'),
+                sub_class_acronym='GED',
+                child_class_acronym='GE'
+            )
+            file_manager.create_json(
+                objects=genex_data,
+                filename=f'gene_expression_data_{dataset_obj.dataset.get("_id")}_{kwargs.get("collection_source")}_'
+                         f'{kwargs.get("collection_name")}',
+                output=f"{kwargs.get('output_path')}gene_expression/"
+            )
+
+    collection_metadata = file_manager.set_json_object(
+        filename="metadata",
+        data_list=metadata_list,
+        organism=kwargs.get('organism'),
+        sub_class_acronym='MDD',
+        child_class_acronym=None
+    )
+    file_manager.create_json(
+        objects=collection_metadata,
+        filename=f'dataset_metadata_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
+        output=kwargs.get('output_path')
+    )
+
+    output_path = kwargs.get('output_path')
+    if kwargs.get('dataset_type', None) == constants.RNA:
+        output_path = f"{kwargs.get('output_path')}gene_expression/"
 
     collection_data = file_manager.set_json_object(
         filename="dataset",
@@ -91,8 +139,8 @@ def run(**kwargs):
     )
     file_manager.create_json(
         objects=collection_data,
-        filename=f'dataset_metadata_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-        output=kwargs.get('output_path')
+        filename=f'dataset_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
+        output=output_path
     )
 
     authors_data = file_manager.set_json_object(
@@ -105,12 +153,12 @@ def run(**kwargs):
     file_manager.create_json(
         objects=authors_data,
         filename=f'authors_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-        output=kwargs.get('output_path')
+        output=output_path
     )
 
     if kwargs.get('dataset_type', None) == constants.TFBINDING:
         tfbinding_data = file_manager.set_json_object(
-            filename="tfbindingData",
+            filename="tfBinding",
             data_list=tfbinding_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='BSD',
@@ -122,7 +170,7 @@ def run(**kwargs):
             output=kwargs.get('output_path')
         )
         peaks_data = file_manager.set_json_object(
-            filename="peaksData",
+            filename="peaks",
             data_list=peaks_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='BSD',
@@ -136,7 +184,7 @@ def run(**kwargs):
 
     if kwargs.get('dataset_type', None) == constants.TUS:
         tus_data = file_manager.set_json_object(
-            filename="tusData",
+            filename="transcriptionUnit",
             data_list=tus_data_list,
             organism=kwargs.get('organism'),
             sub_class_acronym='TUD',
@@ -150,11 +198,11 @@ def run(**kwargs):
 
     if kwargs.get('dataset_type', None) == constants.TSS:
         tss_data = file_manager.set_json_object(
-            filename="tssData",
+            filename="transcriptionStartSite",
             data_list=tss_data_list,
             organism=kwargs.get('organism'),
-            sub_class_acronym='TUD',
-            child_class_acronym='TU'
+            sub_class_acronym='TSD',
+            child_class_acronym='TS'
         )
         file_manager.create_json(
             objects=tss_data,
@@ -164,11 +212,11 @@ def run(**kwargs):
 
     if kwargs.get('dataset_type', None) == constants.TTS:
         tts_data = file_manager.set_json_object(
-            filename="ttsData",
+            filename="transcriptionTerminationSite",
             data_list=tts_data_list,
             organism=kwargs.get('organism'),
-            sub_class_acronym='TUD',
-            child_class_acronym='TU'
+            sub_class_acronym='TTD',
+            child_class_acronym='TT'
         )
         file_manager.create_json(
             objects=tts_data,
@@ -187,19 +235,7 @@ def run(**kwargs):
         file_manager.create_json(
             objects=nlp_gc_data,
             filename=f'nlp_growth_conditions_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-            output=kwargs.get('output_path')
-        )
-        genex_data = file_manager.set_json_object(
-            filename="geneExpression",
-            data_list=gene_expression_data_list,
-            organism=kwargs.get('organism'),
-            sub_class_acronym='GED',
-            child_class_acronym='GE'
-        )
-        file_manager.create_json(
-            objects=genex_data,
-            filename=f'gene_expression_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-            output=kwargs.get('output_path')
+            output=f"{kwargs.get('output_path')}gene_expression/"
         )
 
 

@@ -50,9 +50,11 @@ class Site(Base):
                     or tf_center == (center_pos + constants.PAIR_OF_BASES)
                     or tf_center == (center_pos - constants.PAIR_OF_BASES)
                 ):
+                    lend = int(self.data_row[1])
+                    rend = int(self.data_row[2])
                     found_ri_obj = RegulatoryInteraction(
-                        lend=self.data_row[1],
-                        rend=self.data_row[2],
+                        lend=lend,
+                        rend=rend,
                         strand=self.data_row[5],
                         tf_site=tf_site,
                         mg_api=self.mg_api,

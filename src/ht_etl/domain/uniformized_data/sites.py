@@ -42,6 +42,8 @@ class Sites(Base):
         )
         for site_data in self.uniform_dataset_dict.get('uniform_datasets', []):
             site_obj = Site(
+                dataset_id=self.dataset_id,
+                type=self.type,
                 tf_sites=tf_sites,
                 collection_name=self.collection_name,
                 mg_api=self.mg_api,

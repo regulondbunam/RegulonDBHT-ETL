@@ -47,12 +47,13 @@ class GeneExpressions(Base):
             genex_dict = {
                 '_id': genex_obj.id,
                 'count': genex_obj.count,
-                'dataset_id': [genex_obj.dataset_id],
+                'datasetIds': genex_obj.dataset_ids,
                 'fpkm': genex_obj.fpkm,
                 'gene': genex_obj.gene,
                 'temporalId': genex_obj.temporal_id,
                 'tpm': genex_obj.tpm
             }
+            genex_dict = {key: value for key, value in genex_dict.items() if value}
             genex_list.append(genex_dict)
         self._genex_list = genex_list
 

@@ -63,7 +63,7 @@ class Base(object):
                         ds_id,
                         f'{ds_id}_sites.bed'
                     )
-                if self.sub_type == constants.PEAKS and ds_id:
+                if self.sub_type == constants.PEAKS and ds_id and self.serie_id:
                     uniform_path = os.path.join(
                         str(uniform_paths),
                         self.serie_id,

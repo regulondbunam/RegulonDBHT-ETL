@@ -63,7 +63,7 @@ class ObjectTested(object):
                 if mg_tf_object:
                     tf_id = mg_tf_object.id
                     tf_name = mg_tf_object.abbreviated_name
-                    prod_id = mg_tf_object.products_ids[0]
+                    prod_ids = mg_tf_object.products_ids
                     synonyms = mg_tf_object.synonyms
                     note = mg_tf_object.note
                     act_conf = ObjectTested.get_tf_act_conformations(
@@ -74,7 +74,7 @@ class ObjectTested(object):
                     )
                     genes = Genes(
                         tf_name=tf_name,
-                        prod_ids=prod_id,
+                        prod_ids=prod_ids,
                         database=self.database,
                         url=self.url
                     )
@@ -141,7 +141,7 @@ class ObjectTested(object):
         external_cross_refs_list = []
         for external_cross_ref in external_cross_refs:
             external_cross_refs_dict = {
-                'externalCrossReferences_id': external_cross_ref.external_cross_references_id,
+                'externalCrossReferencesId': external_cross_ref.external_cross_references_id,
                 'objectId': external_cross_ref.object_id
             }
             external_cross_refs_list.append(external_cross_refs_dict)

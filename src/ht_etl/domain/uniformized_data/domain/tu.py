@@ -22,6 +22,7 @@ class TU(Base):
         self.length = kwargs.get("length", None)
         self.term_type = kwargs.get("term_type", None)
         self.genes = kwargs.get("genes", None)
+        self.name = kwargs.get("name", None)
         self.phantom = kwargs.get("phantom", None)
         self.pseudo = kwargs.get("pseudo", None)
 
@@ -92,6 +93,22 @@ class TU(Base):
                         if tu_gene:
                             genes_list.append(tu_gene)
         self._genes = genes_list
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name=None):
+        if name is None:
+            if self.genes:
+                names = []
+                for gene in self.genes:
+                    names.append(gene.get('name', None))
+                if self.strand == '-':
+                    names.reverse()
+                name = '-'.join(names)
+            self._name = name
 
     # Static methods
     @staticmethod

@@ -395,3 +395,21 @@ def find_one_in_dict_list(dict_list, key_name, value):
         None
     )
     return found_dict
+
+
+def find_many_in_dict_list(dict_list, key_name, value):
+    """
+    Finds dictionaries in a dictionary List by certain key.
+
+    Args:
+        dict_list: List, Dictionaries List.
+        key_name: String, Key Name to search.
+        value: String, Value to find the dictionary by key name.
+    Returns:
+        found_dict: Dict, Dictionary that matches the search.
+    """
+    found_dicts = (item for item in dict_list if item[key_name] == value)
+    dicts_list = []
+    for found_dict in found_dicts:
+        dicts_list.append(found_dict)
+    return dicts_list

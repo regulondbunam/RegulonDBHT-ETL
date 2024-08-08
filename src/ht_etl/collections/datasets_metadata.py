@@ -156,7 +156,7 @@ class DatasetsMetadata(object):
                 }
                 if dataset.authors_data.data:
                     self.authors_data = {
-                        'id': dataset.authors_data.id,
+                        '_id': dataset.authors_data.id,
                         'datasetIds': dataset.authors_data.dataset_ids,
                         'authorsData': dataset.authors_data.data,
                     }
@@ -207,11 +207,12 @@ class DatasetsMetadata(object):
                 pmid=self.dataset_source_dict.get(constants.PMID, None)
             )
             metadata_dict = {
-                'dataset_type': metadata.dataset_type,
+                '_id': metadata.metadata_id,
+                'datasetType': metadata.dataset_type,
                 'source': metadata.source,
-                'metadata_content': metadata.metadata_content,
+                'metadataContent': metadata.metadata_content,
                 'status': metadata.status,
-                'release_date': metadata.release_date,
+                'releaseDate': metadata.release_date,
                 'reference': metadata.pmids
             }
             metadata_dict = {k: v for k, v in metadata_dict.items() if v}

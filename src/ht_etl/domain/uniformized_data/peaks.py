@@ -42,7 +42,9 @@ class Peaks(Base):
                 data_row=peak_data,
                 database=self.database,
                 url=self.url,
-                genes_ranges=self.genes_ranges
+                genes_ranges=self.genes_ranges,
+                dataset_id=self.dataset_id,
+                type=self.type
             )
             peak_dict = {
                 '_id': peak_obj.id,

@@ -96,6 +96,8 @@ class Base(object):
                 left_pos = self.data_row.get("start", None)
             if isinstance(self.data_row, list):
                 left_pos = f'{self.data_row[1]}'
+            if isinstance(left_pos, str) and self.type != constants.RNA:
+                left_pos = int(left_pos)
             self._left_pos = left_pos
 
     @property
@@ -109,6 +111,8 @@ class Base(object):
                 right_pos = self.data_row.get("stop", None)
             if isinstance(self.data_row, list):
                 right_pos = f'{self.data_row[2]}'
+            if isinstance(right_pos, str) and self.type != constants.RNA:
+                right_pos = int(right_pos)
             self._right_pos = right_pos
 
     @property
@@ -146,3 +150,14 @@ class Base(object):
                 except mongo_errors.InvalidOperation:
                     closest_genes = None
         self._closest_genes = closest_genes
+
+    @property
+    def dataset_ids(self):
+        return self._dataset_ids
+
+    @dataset_ids.setter
+    def dataset_ids(self, dataset_ids=None):
+        self._dataset_ids = dataset_ids
+        if dataset_ids is None:
+            dataset_ids = [self.dataset_id]
+            self._dataset_ids = dataset_ids

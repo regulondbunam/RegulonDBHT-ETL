@@ -290,7 +290,7 @@ class Dataset(object):
         if collection_data is None:
             collection_data = CollectionData(
                 collection_source=self.collection_source,
-                collection_name=self.collection_name
+                collection_name=self.dataset_type
             )
             collection_data_dict = {
                 'type': collection_data.collection_name_upper,

@@ -47,9 +47,10 @@ class TUs(Base):
             tu_dict = {
                 '_id': tu_obj.id,
                 'temporalId': tu_obj.temporal_id,
+                'name': tu_obj.name,
                 'chromosome': tu_obj.chromosome,
-                'leftPosition': tu_obj.left_pos,
-                'rightPosition': tu_obj.right_pos,
+                'leftEndPosition': tu_obj.left_pos,
+                'rightEndPosition': tu_obj.right_pos,
                 'strand': tu_obj.strand,
                 'length': tu_obj.length,
                 'termType': tu_obj.term_type,

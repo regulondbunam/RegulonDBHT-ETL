@@ -24,6 +24,7 @@ class Metadata(object):
         # Local properties
 
         # Object properties
+        self.metadata_id = kwargs.get("metadata_id", None)
         self.metadata_content = kwargs.get('metadata_content', None)
         self.pmids = kwargs.get('pmids', None)
         self.release_date = kwargs.get('release_date', None)
@@ -31,6 +32,15 @@ class Metadata(object):
     # Local properties
 
     # Object properties
+    @property
+    def metadata_id(self):
+        return self._metadata_id
+
+    @metadata_id.setter
+    def metadata_id(self, metadata_id):
+        metadata_id = f'METADATA_{self.collection_name}_{self.dataset_type}_{self.source}'
+        self._metadata_id = metadata_id
+
     @property
     def pmids(self):
         return self._pmids

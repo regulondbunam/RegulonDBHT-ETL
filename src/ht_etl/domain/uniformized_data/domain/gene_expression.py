@@ -30,13 +30,24 @@ class GeneExpression(Base):
 
     # Object properties
     @property
+    def dataset_ids(self):
+        return self._dataset_ids
+
+    @dataset_ids.setter
+    def dataset_ids(self, dataset_ids=None):
+        self._dataset_ids = dataset_ids
+        if dataset_ids is None:
+            dataset_ids = [f'{self.type}_{self.data_row[1]}']
+            self._dataset_ids = dataset_ids
+
+    @property
     def temporal_id(self):
         return self._temporal_id
 
     @temporal_id.setter
     def temporal_id(self, temporal_id=None):
         if temporal_id is None:
-            temporal_id = f'{self.type}_{self.data_row[1]}'
+            temporal_id = f'{self.type}_{self.data_row[1]}_{self.data_row[2]}'
         self._temporal_id = temporal_id
 
     @property
@@ -46,7 +57,7 @@ class GeneExpression(Base):
     @id.setter
     def id(self, genex_id=None):
         if genex_id is None:
-            genex_id = f'{self.data_row[1]},{self.data_row[2]}'
+            genex_id = self.temporal_id
         self._id = genex_id
 
     @property

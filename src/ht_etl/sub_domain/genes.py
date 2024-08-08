@@ -19,13 +19,13 @@ class Genes(object):
         self.url = kwargs.get('url', None)
 
         # Local properties
-        self.mg_prod = Genes.get_mg_prod_object(
+        self.mg_prods = Genes.get_mg_prod_object(
             prod_ids=self.prod_ids,
             database=self.database,
             url=self.url
         )
         self.mg_genes = Genes.get_mg_gene_object(
-            mg_prod=self.mg_prod,
+            mg_prod=self.mg_prods,
             database=self.database,
             url=self.url
         )
@@ -45,12 +45,15 @@ class Genes(object):
         """
         Set the Platform dict object
         """
+        genes = []
         self._genes = genes
-        if self._genes is None and self.mg_genes:
-            genes = {
-                '_id': self.mg_genes.get('id'),
-                'name': self.mg_genes.get('name')
-            }
+        if self.mg_genes:
+            for mg_gene in self.mg_genes:
+                gene = {
+                    '_id': mg_gene.get('_id'),
+                    'name': mg_gene.get('name')
+                }
+                genes.append(gene)
         self._genes = genes
 
     # Static methods
@@ -71,8 +74,11 @@ class Genes(object):
         client = MongoClient(url)
         db = client[database]
         collection = db['products']
-        mg_prod = collection.find_one({'_id': prod_ids})
-        return mg_prod
+        mg_prods = []
+        for prod_id in prod_ids:
+            mg_prod = collection.find_one({'_id': prod_id})
+            mg_prods.append(mg_prod)
+        return mg_prods
 
     @staticmethod
     def get_mg_gene_object(mg_prod, database, url):
@@ -92,5 +98,8 @@ class Genes(object):
         client = MongoClient(url)
         db = client[database]
         collection = db['genes']
-        mg_genes = collection.find_one({'_id': mg_prod.get('genes_id')})
+        mg_genes = []
+        for prod_id in mg_prod:
+            mg_gene = collection.find_one({'_id': prod_id.get('genes_id')})
+            mg_genes.append(mg_gene)
         return mg_genes
