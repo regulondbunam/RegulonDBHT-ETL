@@ -3,6 +3,7 @@ BED_PATHS = 'normalized'
 TSV_PATHS = 'normalized'
 AUTHORS_PATHS = 'author_files'
 METADATA_CATALOG = 'metadata'
+UNIFORMIZED = 'uniformized_data'
 
 # Closest Genes
 MINIMUM_DISTANCE = 800
@@ -11,22 +12,30 @@ INTERVALS = 200
 PAIR_OF_BASES = 30
 
 # Collections
+CHIP_CHIP = 'ChIP-CHIP'
 CHIP_EXO = 'ChIP-exo'
 CHIP_SEQ = 'ChIP-Seq'
-TUS = 'TU'
+TUS = 'TUS'
 TSS = 'TSS'
 TTS = 'TTS'
 RNA = 'GENE_EXPRESSION'
+GENEX = 'GENE_EXPRESSION'
+NLP_GC = 'NLP_GROWTH_CONDITIONS'
 GSELEX = 'GSELEX'
 DAPS = 'DAPS'
 
 # Metadata Columns
-METADATA_SHEET = 'Binding_dataset_ChIP-seq'
+METADATA_SHEET = 'DATASET'
 ROWS_TO_SKIP = 4
 DATASET_ID = 'Dataset ID'
 PMID = 'PMID'
 PDF_PATH = 'PDF Path'
 AUTHORS = 'Authors'
+REGULONDB_TF_NAME = 'RegulonDB TF Name'
+SOURCE_TF_NAME = 'TF name from source'
+ORGANISM = 'ORGANISM'
+
+
 PROTEIN_NAME = 'Protein Name'
 TF_NAME_TEC = 'TF name in TEC database'
 TF_NAME_CHIP = 'TF Name in proChIPdb'
@@ -68,8 +77,12 @@ CUT_OFF = 'cut-off'
 PUBLIC_NOTES = 'Public notes'
 OLD_DATASET_ID = 'Dataset ID Old'
 EXTERNAL_DB_LINK = 'External DB Links'
-REFERENCE_GENOME = 'Reference genome'
 SOURCE_REFERENCE_GENOME = 'Source reference genome'
 # GeneExpression
 GE_SAMPLES_REPLICATES_EXPERIMENT_ID = ' Samples Replicates  Experiment  Ids'
 GE_DATASET_ID = "#Dataset-ID"
+
+# Dataset types
+TFBINDING = 'TFBINDING'
+RNAP_BINDING_SITES = 'RNAP_BINDING_SITES'
+PEAKS = 'PEAKS'

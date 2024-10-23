@@ -64,9 +64,24 @@ rule data_validator:
     params:
         main_path = validation_config["main_path"],
         data = validation_config["raw_data"],
-        #data = data_upload_config["gene_expression"],
         schemas = validation_config["schemas"],
         valid_data = validation_config["verified_data"],
+        invalid_data = validation_config["invalid_data"],
+        log = validation_config["log_dir"]
+    log:
+        "../logs/validation_log/validation_log.log"
+    conda:
+        "envs/py_down_grade.yaml"
+    priority: 8
+    shell:
+        "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log} -sp"
+
+rule data_validator_ge:
+    params:
+        main_path = validation_config["main_path"],
+        data = validation_config["raw_data_ge"],
+        schemas = validation_config["schemas"],
+        valid_data = validation_config["verified_data_ge"],
         invalid_data = validation_config["invalid_data"],
         log = validation_config["log_dir"]
     log:
@@ -138,6 +153,21 @@ rule data_uploader:
     params:
         main_path = data_upload_config["main_path"],
         valid_data = revalidation_config["verified_persistent_ids"],
+        log = data_upload_config["log_dir"],
+        db = config["db"],
+        url = config["url"]
+    log:
+        "../logs/data_uploader_log/data_uploader_log.log"
+    conda:
+        "envs/db_dependencies.yaml"
+    priority: 4
+    shell:
+        "python {params.main_path} -i {params.valid_data} -u {params.url} -db {params.db} -l {params.log}"
+
+rule data_uploader_ge:
+    params:
+        main_path = data_upload_config["main_path"],
+        valid_data = data_upload_config["gene_expression"],
         log = data_upload_config["log_dir"],
         db = config["db"],
         url = config["url"]
