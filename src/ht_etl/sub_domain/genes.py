@@ -14,7 +14,7 @@ class Genes(object):
     def __init__(self, **kwargs):
         # Params
         self.tf_id = kwargs.get('tf_id', None)
-        self.prod_ids = kwargs.get('prod_ids', None)
+        self.prod_ids = kwargs.get('prod_ids')
         self.database = kwargs.get('database', None)
         self.url = kwargs.get('url', None)
 

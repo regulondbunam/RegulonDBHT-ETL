@@ -139,6 +139,7 @@ class Base(object):
                 self.type == constants.TFBINDING
                 or self.type == constants.TSS
                 or self.type == constants.TTS
+                or self.type == constants.RNAP_BINDING_SITES
             ):
                 try:
                     closest_genes = utils.find_closest_gene(

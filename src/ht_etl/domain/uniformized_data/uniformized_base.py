@@ -52,7 +52,7 @@ class Base(object):
         if uniform_dataset_path is None:
             uniform_paths = os.path.join(self.collection_path, constants.UNIFORMIZED)
             ds_id = self.old_dataset_id
-            if self.type == constants.TFBINDING:
+            if self.type == constants.TFBINDING or self.type == constants.RNAP_BINDING_SITES:
                 if ds_id is None:
                     ds_id = self.dataset_id
                 if ds_id and self.serie_id:
@@ -108,7 +108,7 @@ class Base(object):
     @staticmethod
     def get_uniform_datasets_dicts(datasets_path, ds_type, ds_sub_type):
         uniform_datasets_dict = {}
-        if ds_type == constants.TFBINDING:
+        if ds_type == constants.TFBINDING or ds_type == constants.RNAP_BINDING_SITES:
             uniform_dataset_rows = []
             try:
                 if datasets_path:

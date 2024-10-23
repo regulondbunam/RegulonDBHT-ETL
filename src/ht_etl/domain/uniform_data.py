@@ -64,18 +64,19 @@ class UniformizedData(object):
     @sites.setter
     def sites(self, sites=None):
         self._sites = sites
-        if sites is None and self.type == constants.TFBINDING:
-            sites = Sites(
-                tf_name=self.tf_name,
-                dataset_id=self.dataset_id,
-                collection_name=self.collection_name,
-                mg_api=self.mg_api,
-                genes_ranges=self.genes_ranges,
-                type=self.type,
-                collection_path=self.collection_path,
-                serie_id=self.serie_id,
-                old_dataset_id=self.old_dataset_id,
-            )
+        if sites is None:
+            if self.type == constants.TFBINDING or self.type == constants.RNAP_BINDING_SITES:
+                sites = Sites(
+                    tf_name=self.tf_name,
+                    dataset_id=self.dataset_id,
+                    collection_name=self.collection_name,
+                    mg_api=self.mg_api,
+                    genes_ranges=self.genes_ranges,
+                    type=self.type,
+                    collection_path=self.collection_path,
+                    serie_id=self.serie_id,
+                    old_dataset_id=self.old_dataset_id,
+                )
         self._sites = sites
 
     @property
@@ -85,19 +86,20 @@ class UniformizedData(object):
     @peaks.setter
     def peaks(self, peaks=None):
         self._peaks = peaks
-        if peaks is None and self.type == constants.TFBINDING:
-            peaks = Peaks(
-                dataset_id=self.dataset_id,
-                sites_list=self.sites.sites_list,
-                collection_name=self.collection_name,
-                mg_api=self.mg_api,
-                genes_ranges=self.genes_ranges,
-                type=self.type,
-                sub_type=constants.PEAKS,
-                collection_path=self.collection_path,
-                serie_id=self.serie_id,
-                old_dataset_id=self.old_dataset_id,
-            )
+        if peaks is None:
+            if self.type == constants.TFBINDING or self.type == constants.RNAP_BINDING_SITES:
+                peaks = Peaks(
+                    dataset_id=self.dataset_id,
+                    sites_list=self.sites.sites_list,
+                    collection_name=self.collection_name,
+                    mg_api=self.mg_api,
+                    genes_ranges=self.genes_ranges,
+                    type=self.type,
+                    sub_type=constants.PEAKS,
+                    collection_path=self.collection_path,
+                    serie_id=self.serie_id,
+                    old_dataset_id=self.old_dataset_id,
+                )
         self._peaks = peaks
 
     @property

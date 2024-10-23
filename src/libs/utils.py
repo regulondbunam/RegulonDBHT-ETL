@@ -413,3 +413,18 @@ def find_many_in_dict_list(dict_list, key_name, value):
     for found_dict in found_dicts:
         dicts_list.append(found_dict)
     return dicts_list
+
+
+def to_camel_case(snake_str):
+    """
+    Converts snake_case String into camelCase.
+    Capitalize the first letter of each component except the first one with the 'title' method and join them together.
+
+    Args:
+        snake_str: String, snake_case string.
+
+    Returns:
+        camelStr: String, camelCase string.
+    """
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])

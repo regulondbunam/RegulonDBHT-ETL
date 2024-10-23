@@ -9,7 +9,7 @@ replace_identifiers_config = config["replace_identifiers_config"]
 revalidation_config = config["revalidation_config"]
 data_upload_config = config["data_upload_config"]
 
-"""
+
 rule ht_extractor_workflow:
     params:
         compose_file = {ptools_config["compose_file"]}, # -f
@@ -25,9 +25,9 @@ rule ht_extractor_workflow:
     log: 
         "../logs/ht_extractor_log.log"
     run:
-        shell('python ../log_cleaner/log_cleaner.py')"""
+        shell('python ../log_cleaner/log_cleaner.py')
         
-"""rule ht_extractor:
+rule ht_extractor:
     params:
         main_path = ht_extractor_config["main_path"],
         output_dir = ht_extractor_config["raw_data"],
@@ -41,7 +41,7 @@ rule ht_extractor_workflow:
     priority: 10
     shell:
         "python {params.main_path} -ev -out {params.output_dir} -l {params.log_dir}"
-"""
+
 
 rule schema_loader:
     params:
@@ -76,7 +76,7 @@ rule data_validator:
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log} -sp"
 
-"""rule data_validator_ge:
+rule data_validator_ge:
     params:
         main_path = validation_config["main_path"],
         data = validation_config["raw_data_ge"],
@@ -91,7 +91,7 @@ rule data_validator:
     priority: 8
     shell:
         "python {params.main_path} -i {params.data} -s {params.schemas} -v {params.valid_data} -iv {params.invalid_data} -l {params.log} -sp"
-"""
+
 rule create_identifiers:
     params:
         main_path = create_identifiers_config["main_path"],
@@ -164,7 +164,7 @@ rule data_uploader:
     shell:
         "python {params.main_path} -i {params.valid_data} -u {params.url} -db {params.db} -l {params.log}"
 
-"""rule data_uploader_ge:
+rule data_uploader_ge:
     params:
         main_path = data_upload_config["main_path"],
         valid_data = data_upload_config["gene_expression"],
@@ -178,4 +178,3 @@ rule data_uploader:
     priority: 4
     shell:
         "python {params.main_path} -i {params.valid_data} -u {params.url} -db {params.db} -l {params.log}"
-"""

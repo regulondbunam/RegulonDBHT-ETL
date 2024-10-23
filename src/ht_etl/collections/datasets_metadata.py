@@ -105,7 +105,7 @@ class DatasetsMetadata(object):
                     ),
                     title_for_all_replicates=self.dataset_source_dict.get(constants.TITLE_FOR_ALL_REPLICATES, None),
                     experiment_condition=self.dataset_source_dict.get(constants.EXPERIMENT_CONDITION, None),
-                    grow_conditions_exp_ids=self.dataset_source_dict.get(constants.GC_EXPERIMENTAL, None),
+                    growth_conditions_experimental=self.dataset_source_dict.get(constants.GC_EXPERIMENTAL, None),
                     organism=self.dataset_source_dict.get(constants.ORGANISM, None),
                     src_reference_genome=self.dataset_source_dict.get(constants.SOURCE_REFERENCE_GENOME, None),
                     ref_genome=self.dataset_source_dict.get(constants.REFERENCE_GENOME, None),
@@ -150,8 +150,7 @@ class DatasetsMetadata(object):
                     'notes': dataset.public_notes,
                     'sourceReferenceGenome': dataset.src_reference_genome,
                     'externalReferences': dataset.external_references,
-                    'growConditionsContrast': dataset.grow_conditions_contrast,
-                    'geneExpressionFiltered': dataset.gene_expression_filtered,
+                    'growthConditions': dataset.growth_conditions,
                     'summary': dataset.summary,
                 }
                 if dataset.authors_data.data:
@@ -160,7 +159,7 @@ class DatasetsMetadata(object):
                         'datasetIds': dataset.authors_data.dataset_ids,
                         'authorsData': dataset.authors_data.data,
                     }
-                if self.dataset_type == constants.TFBINDING:
+                if self.dataset_type == constants.TFBINDING or self.dataset_type == constants.RNAP_BINDING_SITES:
                     self.sites = dataset.uniformized_data.sites.sites_list
                     self.peaks = dataset.uniformized_data.peaks.peaks_list
                 if self.dataset_type == constants.TUS:

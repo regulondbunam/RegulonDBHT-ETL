@@ -62,7 +62,8 @@ class ObjectTested(object):
             for mg_tf_object in self.mg_tf_objects:
                 if mg_tf_object:
                     tf_id = mg_tf_object.id
-                    tf_name = mg_tf_object.abbreviated_name
+                    tf_name = mg_tf_object.name
+                    tf_abb_name = mg_tf_object.abbreviated_name
                     prod_ids = mg_tf_object.products_ids
                     synonyms = mg_tf_object.synonyms
                     note = mg_tf_object.note
@@ -70,10 +71,12 @@ class ObjectTested(object):
                         mg_tf_object.active_conformations
                     )
                     external_cross_ref = ObjectTested.get_tf_ext_cross_ref(
-                        mg_tf_object.external_cross_references
+                        mg_tf_object.external_cross_references,
+                        self.mg_api
                     )
                     genes = Genes(
                         tf_name=tf_name,
+                        tf_abb_name=tf_abb_name,
                         prod_ids=prod_ids,
                         database=self.database,
                         url=self.url
@@ -81,6 +84,7 @@ class ObjectTested(object):
                     object_tested = {
                         '_id': tf_id,
                         'name': tf_name,
+                        'abbreviatedName': tf_abb_name,
                         'synonyms': synonyms,
                         'genes': genes.genes,
                         'note': note,
@@ -129,32 +133,25 @@ class ObjectTested(object):
         return act_conformations_list
 
     @staticmethod
-    def get_tf_ext_cross_ref(external_cross_refs):
+    def get_tf_ext_cross_ref(external_cross_refs, mg_api):
         """
         Gets External Cross References list from multigenomic_api object.
         Args:
             external_cross_refs: multigenomic_api.external_cross_ref object
+            mg_api: multigenomic_api Connection
 
         Returns:
             external_cross_refs_list: Dict List, list of External Cross References dicts.
         """
         external_cross_refs_list = []
         for external_cross_ref in external_cross_refs:
+            mg_cross_ref = mg_api.external_cross_references.find_by_id(external_cross_ref.external_cross_references_id)
             external_cross_refs_dict = {
-                'externalCrossReferencesId': external_cross_ref.external_cross_references_id,
-                'objectId': external_cross_ref.object_id
+                '_id': external_cross_ref.external_cross_references_id,
+                'objectId': external_cross_ref.object_id,
+                'name': mg_cross_ref.name,
+                'url': f'{mg_cross_ref.url.replace("~A", "")}{external_cross_ref.object_id}'
             }
             external_cross_refs_list.append(external_cross_refs_dict)
-            # TODO: This block was in previous HT Extractor version, maybe can be important for the frontend.
-            # mg_cross_ref = mg_api.external_cross_references.find_by_id(
-            #     cross_ref.get('externalCrossReferences_id'))
-            # external_cross_references.append(
-            #     {
-            #         'externalCrossReferenceId': cross_ref.get('externalCrossReferences_id'),
-            #         'objectId': cross_ref.get('objectId'),
-            #         'externalCrossReferenceName': mg_cross_ref.name,
-            #         'url': format_cross_reference_url(mg_cross_ref.url, cross_ref.get('objectId'))
-            #     }
-            # )
 
         return external_cross_refs_list

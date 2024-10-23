@@ -3,11 +3,12 @@ Dataset object.
 Build dataset object and special objects for every dataset.
 """
 # standard
+import logging
 
 # third party
 
 # local
-from src.libs import constants
+from src.libs import utils
 from src.ht_etl.domain.publications import Publications
 from src.ht_etl.domain.object_tested import ObjectTested
 from src.ht_etl.domain.source_serie import SourceSerie
@@ -52,7 +53,7 @@ class Dataset(object):
         self.samples_replicates_control_ids = kwargs.get('samples_replicates_control_ids', None)
         self.title_for_all_replicates = kwargs.get('title_for_all_replicates', None)
         self.exp_condition = kwargs.get('exp_condition', None)
-        self.grow_conditions_experimental = kwargs.get('grow_conditions_experimental', None)
+        self.growth_conditions_experimental = kwargs.get('growth_conditions_experimental', None)
         self.organism = kwargs.get('organism', None)
         self.src_reference_genome = kwargs.get('src_reference_genome', None)
         self.ref_genome = kwargs.get('ref_genome', None)
@@ -86,8 +87,7 @@ class Dataset(object):
             self.dataset_id
         )
         self.external_references = kwargs.get('external_references', None)
-        self.gene_expression_filtered = kwargs.get('gene_expression_filtered', None)
-        self.grow_conditions_contrast = kwargs.get('grow_conditions_contrast', None)
+        self.growth_conditions = kwargs.get('growth_conditions', None)
         self.summary = kwargs.get('summary', None)
 
         # Uniformized data
@@ -316,28 +316,16 @@ class Dataset(object):
             self._external_references = external_references.external_references
 
     @property
-    def grow_conditions_contrast(self):
-        return self._grow_conditions_contrast
+    def growth_conditions(self):
+        return self._growth_conditions
 
-    @grow_conditions_contrast.setter
-    def grow_conditions_contrast(self, grow_conditions_contrast=None):
+    @growth_conditions.setter
+    def growth_conditions(self, growth_conditions=None):
         """
         Sets grow conditions contrast.
         """
-        if grow_conditions_contrast is None:
-            self._grow_conditions_contrast = grow_conditions_contrast
-
-    @property
-    def gene_expression_filtered(self):
-        return self._gene_expression_filtered
-
-    @gene_expression_filtered.setter
-    def gene_expression_filtered(self, gene_expression_filtered=None):
-        """
-        Sets gene expression filtered.
-        """
-        if gene_expression_filtered is None:
-            self._gene_expression_filtered = gene_expression_filtered
+        if growth_conditions is None:
+            self._growth_conditions = Dataset.get_growth_conditions(self.growth_conditions_experimental)
 
     # Static methods
     @staticmethod
@@ -358,3 +346,48 @@ class Dataset(object):
             collection_type = collection_name.replace('-', '_').upper()
             temp_id = f"{dataset_type}_{collection_type}_{dataset_id}"
         return temp_id
+
+    @staticmethod
+    def get_growth_conditions(gc_raw):
+        """
+        Converts the growth conditions sentences in a dictionary.
+        Splits the phrase by | and separates the terms names from snake_case to camelCase in a dictionary format.
+
+        ORGANISM -> organism
+        GENETIC_BACKGROUND -> geneticBackground
+        MEDIUM -> medium
+        MEDIUM_SUPPLEMENTS -> mediumSupplements
+        AERATION -> aeration
+        TEMPERATURE -> temperature
+        pH -> ph
+        PRESSURE -> pressure
+        OPTICAL_DENSITY -> opticalDensity
+        GROWTH_PHASE -> growthPhase
+        GROWTH_RATE -> growthRate
+        VESSEL_TYPE -> vesselType
+        AGITATION_SPEED -> aerationSpeed
+
+        Args:
+            gc_raw: String, growth conditions phrase.
+
+        Returns:
+            gc_dict: Dict, dictionary with the growth conditions terms.
+
+        """
+        gc_dict = {}
+        if not gc_raw:
+            return None
+        if ' |' not in gc_raw:
+            gc_dict = {
+                'otherTerms': gc_raw
+            }
+            return gc_dict
+        gc_list = gc_raw.split(' |')
+        for condition in gc_list:
+            if ':' in condition:
+                condition = condition.split(':')
+                gc_dict.setdefault(utils.to_camel_case(
+                    condition[0].lower()), condition[1])
+        if gc_dict:
+            gc_dict = {k: v for k, v in gc_dict.items() if v}
+        return gc_dict
