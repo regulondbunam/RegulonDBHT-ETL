@@ -71,6 +71,14 @@ class Base(object):
                         ds_id,
                         f'{ds_id}_peaks.bed'
                     )
+                if self.sub_type == constants.PEAKS and ds_id and not self.serie_id:
+                    uniform_path = os.path.join(
+                        str(uniform_paths),
+                        ds_id,
+                        f'{ds_id}_peaks.bed'
+                    )
+
+                # TODO: New path format, uniformized_data/[ID_peaks.bed|ID_matrix.png|ID_heatmap.png]
             if self.type == constants.TUS:
                 if ds_id is None:
                     ds_id = self.dataset_id

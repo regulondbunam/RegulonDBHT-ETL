@@ -12,10 +12,11 @@ from src.ht_etl.domain.uniformized_data.domain.nlp_growth_condition import NLPGr
 from src.libs import constants
 
 
-def geo_nlp_gc_json_path(collection_path):
+def geo_nlp_gc_json_path(collection_path, file_name="metadata/srr_htregulondb_correct_full.json"):
     """
     Set path to geo-NLP Growth Conditions JSON.
     Args:
+        file_name:
         collection_path:
 
     Returns:
@@ -23,15 +24,16 @@ def geo_nlp_gc_json_path(collection_path):
     """
     json_path = os.path.join(
         collection_path,
-        "metadata/srr_htregulondb_correct_full.json"
+        file_name
     )
     return json_path
 
 
-def no_geo_nlp_gc_json_path(collection_path):
+def no_geo_nlp_gc_json_path(collection_path, file_name="metadata/no_geo_gc.json"):
     """
     Set path to NO-geo-NLP Growth Conditions JSON.
     Args:
+        file_name:
         collection_path:
 
     Returns:
@@ -39,7 +41,7 @@ def no_geo_nlp_gc_json_path(collection_path):
     """
     json_path = os.path.join(
         collection_path,
-        "metadata/no_geo_gc.json"
+        file_name
     )
     return json_path
 

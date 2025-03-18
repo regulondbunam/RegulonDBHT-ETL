@@ -15,7 +15,7 @@ import pandas
 
 def validate_directories(data_path):
     """
-    Verify if the output path directories exists.
+    Verify if the directory path exists.
 
     Args:
         data_path: String, directories path.
@@ -23,8 +23,21 @@ def validate_directories(data_path):
     Returns:
         Rise IOError if not valid directory
     """
-    if not os.path.isdir(data_path):
+    if not data_path or not os.path.isdir(data_path):
         raise IOError("Please, verify '{}' directory path".format(data_path))
+
+def validate_file_path(data_path):
+    """
+    Verify if the file path exists.
+
+    Args:
+        data_path: String, file path.
+
+    Returns:
+        Rise IOError if not valid path
+    """
+    if not data_path or not os.path.isfile(data_path):
+        raise IOError("Please, verify '{}' file path".format(data_path))
 
 
 def set_log(log_path, log_name, log_date):
@@ -178,7 +191,7 @@ def get_author_data_frame_tsv(filename: str) -> pandas.DataFrame:
     Returns:
         dataset_df: pandas.DataFrame, DataFrame with the Datasets Record Excel file data.
     """
-    dataset_df = pandas.read_csv(filename, sep='\t')
+    dataset_df = pandas.read_csv(filename, sep='\t', header=0, index_col=False)
     return dataset_df
 
 

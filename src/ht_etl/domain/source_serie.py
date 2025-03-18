@@ -12,6 +12,15 @@ from src.ht_etl.sub_domain.series import Series
 
 
 class SourceSerie(object):
+    strategies = {
+        "chip-seq": "ChIP-seq",
+        "dapseq": "DAP",
+        "gselex-chip": "gSELEX-chip",
+        "chip-exo": "ChIP-exo",
+        "gselex": "gSELEX",
+        "rna-seq": "RNA-seq",
+        "5'race": "5' RACE",
+    }
     def __init__(self, **kwargs):
         # Params
         self.serie_id = kwargs.get('serie_id', None)
@@ -19,7 +28,7 @@ class SourceSerie(object):
         self.platform_id = kwargs.get('platform_id', None)
         self.platform_title = kwargs.get('platform_title', None)
         self.title = kwargs.get('title', None)
-        self.strategy = kwargs.get('strategy', None)
+        self.strategy_text = kwargs.get('strategy', None)
         self.method = kwargs.get('method', None)
         self.read_type = kwargs.get('read_type', None)
         self.source_db = kwargs.get('source_db', None)
@@ -27,10 +36,26 @@ class SourceSerie(object):
         # Local properties
 
         # Object properties
+        self.strategy = kwargs.get('strategy', None)
         self.source_series = kwargs.get('source_series', None)
         self.platform = kwargs.get('platform', None)
 
     # Local properties
+    @property
+    def strategy(self):
+        return self._strategy
+
+    @strategy.setter
+    def strategy(self, strategy_value=None):
+        if self.strategy_text:
+            strategy_value = self.strategy_text.replace(' ', '')
+            strategy_value = strategy_value.lower()
+            if strategy_value in self.strategies:
+                self._strategy = self.strategies[strategy_value]
+            else:
+                self._strategy = self.strategy_text
+        else:
+            self._strategy = self.strategy_text
 
     # Object properties
     @property

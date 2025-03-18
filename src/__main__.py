@@ -22,10 +22,10 @@ def run(**kwargs):
     """
     Run function, controls program functions and generates output files.
 
-    Param
-        kwargs.datasets_record_path, String, Datasets record path.
-        kwargs.output_path, String, Output directory path.
-        kwargs.organism, String, Organism name.
+    Args:
+        kwargs.datasets_record_path: String, Datasets record path.
+        kwargs.output_path: String, Output directory path.
+        kwargs.organism: String, Organism name.
     """
     print(f"Reading data from {kwargs.get('datasets_record_path', None)}")
     logging.info(f"Reading data from {kwargs.get('datasets_record_path', None)}")
@@ -62,7 +62,7 @@ def run(**kwargs):
     for dataset_obj in datasets_objs:
         dataset_obj_dict = dataset_obj.dataset
         dataset_list.append(dataset_obj_dict)
-        if dataset_obj.metadata and kwargs.get('dataset_type', None) != constants.RNA:
+        if dataset_obj.metadata: # and kwargs.get('dataset_type', None): != constants.RNA:
             found_metadata = utils.find_one_in_dict_list(
                 dict_list=metadata_list,
                 key_name='_id',
@@ -72,7 +72,7 @@ def run(**kwargs):
                 metadata_list.append(dataset_obj.metadata)
             else:
                 new_ref = dataset_obj.metadata.get('reference', None)
-                if new_ref:
+                if new_ref and kwargs.get('dataset_type', None) != constants.RNA:
                     last_ref = found_metadata.get('reference')
                     if new_ref not in last_ref:
                         last_ref.extend(new_ref)

@@ -96,17 +96,28 @@ class AuthorsData(object):
                 f'Reading Author\'s Data files {excel_path}')
             return author_raw
         elif os.path.isfile(excel_path) and excel_path.endswith('.tsv'):
+            # TODO: quitar las , de header?
             raw = file_manager.get_author_data_frame_tsv(str(excel_path))
             raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
-            author_raw = raw.to_csv(encoding='utf-8', index=True)
+            raw = raw.map(lambda x: str(x).replace(',', ';'))
+            author_raw = raw.to_csv(encoding='utf-8', index=False)
             author_raw = author_raw.replace(',,,,,#', '#')
+            logging.info(
+                f'Reading Author\'s Data files {excel_path}')
+            return author_raw
+        elif os.path.isfile(excel_path) and excel_path.endswith('.bed'):
+            raw = file_manager.get_author_data_frame_tsv(str(excel_path))
+            raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
+            author_raw = raw.to_csv(encoding='utf-8', index=False)
+            author_raw = author_raw.replace(',,,,,#', '#')
+            author_raw = author_raw.lstrip('#')
             logging.info(
                 f'Reading Author\'s Data files {excel_path}')
             return author_raw
         elif os.path.isfile(excel_path) and excel_path.endswith('.txt'):
             raw = file_manager.get_author_data_frame_tsv(str(excel_path))
             raw = raw.loc[:, ~raw.columns.str.contains('^Unnamed')]
-            author_raw = raw.to_csv(encoding='utf-8', index=True)
+            author_raw = raw.to_csv(encoding='utf-8', index=False)
             author_raw = author_raw.replace(',,,,,#', '#')
             logging.info(
                 f'Reading Author\'s Data files {excel_path}')
