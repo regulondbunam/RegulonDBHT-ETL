@@ -2,9 +2,9 @@
   "url": "mongodb://127.0.0.1:27017",
   "db": "regulondbht",
   "organism": "ECOLI",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "source": "EcoCyc",
-  "source_version": 4.0,
+  "source_version": 4.1,
   "ptools_config": {
     "compose_file": "../pathway-tools-docker/docker-compose.yml",
     "dotenv_file": "../pathway-tools-docker/.env"
@@ -24,36 +24,37 @@
     "raw_data": "../RawData/",
     "raw_data_ge": "../RawData/gene_expression",
     "schemas": "../../RegulonDBHT-Model/jsonSchemas/htCollections/",
-    "verified_data": "../VerifiedData",
+    "verified_data": "../VerifiedData/",
     "verified_data_ge": "../VerifiedPersistentIdentifiers/gene_expression/",
-    "invalid_data": "../InvalidData",
+    "invalid_data": "../InvalidData/",
     "log_dir": "../logs/validation_log/"
   },
   "create_identifiers_config": {
     "main_path": "../../../Libs/data-release-tools/src/create_identifiers/",
-    "verified_data": "../VerifiedData",
+    "verified_data": "../VerifiedData/",
     "sub_verified_data": "../VerifiedData/subClasses",
     "log_dir": "../logs/create_identifiers_log/"
   },
   "replace_identifiers_config": {
     "main_path": "../../../Libs/data-release-tools/src/replace_identifiers/",
-    "verified_data": "../VerifiedData",
-    "persistent_ids": "../PersistentIdentifiers",
+    "verified_data": "../VerifiedData/",
+    "persistent_ids": "../PersistentIdentifiers/",
     "log_dir": "../logs/replace_identifiers_log/"
   },
   "revalidation_config": {
     "main_path": "../../../Libs/data-release-tools/src/data_validator/",
-    "persistent_ids": "../PersistentIdentifiers",
+    "persistent_ids": "../PersistentIdentifiers/",
     "schemas": "../../RegulonDBHT-Model/jsonSchemas/htCollections/",
-    "verified_persistent_ids": "../VerifiedPersistentIdentifiers",
-    "invalid_data": "../InvalidData",
+    "verified_persistent_ids": "../VerifiedPersistentIdentifiers/",
+    "invalid_data": "../InvalidData/",
     "log_dir": "../logs/re_validation_log/"
   },
   "data_upload_config": {
     "gene_expression": "../VerifiedPersistentIdentifiers/gene_expression/",
+    "raw_data_ge": "../RawData/gene_expression",
     "dap_2023": "../RawData/",
     "main_path": "../../../Libs/data-release-tools/src/data_uploader/",
-    "verified_persistent_ids": "../VerifiedPersistentIdentifiers",
+    "verified_persistent_ids": "../VerifiedPersistentIdentifiers/",
     "log_dir": "../logs/data_uploader_log/"
   }
 }

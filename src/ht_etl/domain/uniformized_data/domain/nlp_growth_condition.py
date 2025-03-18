@@ -17,7 +17,8 @@ class NLPGrowthCondition(Base):
     def __init__(self, **kwargs):
         super(NLPGrowthCondition, self).__init__(**kwargs)
         # Params
-
+        # TODO: build new class term to iterate terms property and get every single term, add extRef property and
+        #  citations (should it has RDB format?)
         # Local properties
         self.terms = kwargs.get("terms", None)
 

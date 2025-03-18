@@ -2,8 +2,6 @@
 TF Binding Sites object.
 Build uniformized data object for every dataset.
 """
-import os.path
-
 # standard
 
 # third party

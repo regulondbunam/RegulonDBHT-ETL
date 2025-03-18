@@ -4,9 +4,9 @@
 </p>
 
 [![License](https://img.shields.io/badge/license-APACHE-brightgreen?style=plastic)](LICENSE)
-[![RegulonDBVersion](https://img.shields.io/badge/RegulonDB_version-13.5-blue?style=plastic)](https://regulondb.ccg.unam.mx/)
+[![RegulonDBVersion](https://img.shields.io/badge/RegulonDB_version-13.6-blue?style=plastic)](https://regulondb.ccg.unam.mx/)
 [![EcocycVersion](https://img.shields.io/badge/last_Ecocyc_version_tested-28.5-red?style=plastic)](https://ecocyc.org/)
-[![Status](https://img.shields.io/badge/release_2.0.0-yellowgreen?style=plastic)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/release_2.0.1-yellowgreen?style=plastic)](CHANGELOG.md)
 
 This software is used for the extraction and processing of diferent collections of HT Datasets.
 
@@ -53,7 +53,8 @@ RegulonDB Ecocyc Extractor is [Apache 2.0 licensed](LICENSE).
 
 **Accessibility**
 
-<!--  - [ ] Unique DOI [identifier](http://....) (Please update identifier and link) -->
+<!--- [ ] Unique DOI [identifier](http://....) (Please update identifier and link) --->
+
 - [x] Version control system
 
 **Documentation**

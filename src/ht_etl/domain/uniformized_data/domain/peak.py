@@ -44,7 +44,11 @@ class Peak(Base):
     @score.setter
     def score(self, score=None):
         if score is None:
-            score = float(self.data_row[4])
+            try:
+                score = float(self.data_row[4])
+            except ValueError:
+                # max_norm_fold_enrichment
+                score = float(self.data_row[7])
         self._score = score
 
     @property

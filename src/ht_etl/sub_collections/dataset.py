@@ -325,7 +325,12 @@ class Dataset(object):
         Sets grow conditions contrast.
         """
         if growth_conditions is None:
-            self._growth_conditions = Dataset.get_growth_conditions(self.growth_conditions_experimental)
+            growth_conditions = Dataset.get_growth_conditions(self.growth_conditions_experimental)
+            if type(growth_conditions) is not list:
+                growth_conditions = [growth_conditions]
+            if growth_conditions == [None]:
+                growth_conditions = None
+            self._growth_conditions = growth_conditions
 
     # Static methods
     @staticmethod
@@ -374,20 +379,27 @@ class Dataset(object):
             gc_dict: Dict, dictionary with the growth conditions terms.
 
         """
-        gc_dict = {}
+        gc_list = []
         if not gc_raw:
             return None
-        if ' |' not in gc_raw:
-            gc_dict = {
-                'otherTerms': gc_raw
-            }
-            return gc_dict
-        gc_list = gc_raw.split(' |')
-        for condition in gc_list:
-            if ':' in condition:
-                condition = condition.split(':')
-                gc_dict.setdefault(utils.to_camel_case(
-                    condition[0].lower()), condition[1])
-        if gc_dict:
-            gc_dict = {k: v for k, v in gc_dict.items() if v}
-        return gc_dict
+        gc_raw = gc_raw.replace(' |', '|')
+        if '|' not in gc_raw:
+            gc_list = [
+                {
+                    'otherTerms': gc_raw
+                }
+            ]
+            return gc_list
+        gc_raw_list = gc_raw.split('|;|')
+        for gc_phrase in gc_raw_list:
+            gc_terms = gc_phrase.split('|')
+            gc_dict = {}
+            for condition in gc_terms:
+                if ':' in condition:
+                    condition = condition.split(':')
+                    gc_dict.setdefault(utils.to_camel_case(
+                        condition[0].lower()), condition[1])
+            if gc_dict:
+                gc_dict = {k: v for k, v in gc_dict.items() if v}
+            gc_list.append(gc_dict)
+        return gc_list

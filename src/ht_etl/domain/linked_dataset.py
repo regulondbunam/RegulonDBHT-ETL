@@ -69,9 +69,8 @@ class LinkedDataset(object):
             logging.warning('No sample_experimental_replicate_ids provided')
             return sample_replicates
         sample_replicate_ids = sample_replicate_ids.replace('\t', '')
-        sample_replicate_ids = sample_replicate_ids.split('] [')
-        for sample_replicate_id in sample_replicate_ids:
-            sample_replicate_id = sample_replicate_id.replace('[', '').replace(']', '')
-            sample_replicate_id = sample_replicate_id.replace(', ', ',').replace('  ', ',').replace(' ', ',').split(',')
-            sample_replicates.append(sample_replicate_id)
+
+        sample_replicate_ids = (sample_replicate_ids.replace(' ', '').replace('][', ',')
+                                .replace('[', '').replace(']', '').replace(';', ','))
+        sample_replicates.extend(sample_replicate_ids.split(','))
         return sample_replicates
