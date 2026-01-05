@@ -10,8 +10,8 @@ import logging
 import os
 from typing import Any, List, Optional
 
-from src.libs import file_manager
-from src.libs import constants
+from libs import file_manager
+from libs import constants
 
 
 class AuthorsData(object):

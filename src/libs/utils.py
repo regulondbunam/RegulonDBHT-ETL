@@ -7,7 +7,7 @@ import logging
 # third party
 
 # local
-from src.libs import constants
+from libs import constants
 
 
 def format_cross_reference_url(url, object_id):

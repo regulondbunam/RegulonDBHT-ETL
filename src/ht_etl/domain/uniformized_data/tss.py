@@ -8,8 +8,8 @@ import logging
 # third party
 
 # local
-from src.ht_etl.domain.uniformized_data.uniformized_base import Base
-from src.ht_etl.domain.uniformized_data.domain.tss import TSS
+from ht_etl.domain.uniformized_data.uniformized_base import Base
+from ht_etl.domain.uniformized_data.domain.tss import TSS
 
 
 class TSSs(Base):

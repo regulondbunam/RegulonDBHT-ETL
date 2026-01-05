@@ -9,8 +9,8 @@ import logging
 import pymongo.errors as mongo_errors
 
 # local
-from src.libs import utils
-from src.libs import constants
+from libs import utils
+from libs import constants
 
 
 class Base(object):

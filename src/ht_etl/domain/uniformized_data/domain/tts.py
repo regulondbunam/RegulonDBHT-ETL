@@ -7,8 +7,8 @@ Build uniformized data object.
 # third party
 
 # local
-from src.libs import utils
-from src.ht_etl.domain.uniformized_data.domain.base import Base
+from libs import utils
+from ht_etl.domain.uniformized_data.domain.base import Base
 
 
 class TTS(Base):

@@ -10,8 +10,8 @@ import pandas
 # third party
 
 # local
-from src.libs import file_manager
-from src.libs import constants
+from libs import file_manager
+from libs import constants
 
 
 class Base(object):

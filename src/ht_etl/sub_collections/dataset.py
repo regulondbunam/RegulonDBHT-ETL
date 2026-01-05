@@ -8,17 +8,17 @@ import logging
 # third party
 
 # local
-from src.libs import utils
-from src.ht_etl.domain.publications import Publications
-from src.ht_etl.domain.object_tested import ObjectTested
-from src.ht_etl.domain.source_serie import SourceSerie
-from src.ht_etl.domain.sample import Sample
-from src.ht_etl.domain.linked_dataset import LinkedDataset
-from src.ht_etl.domain.release_data_control import ReleaseControl
-from src.ht_etl.domain.collection_data import CollectionData
-from src.ht_etl.domain.external_references import ExternalReference
-from src.ht_etl.domain.authors_data import AuthorsData
-from src.ht_etl.domain.uniform_data import UniformizedData
+from libs import utils
+from ht_etl.domain.publications import Publications
+from ht_etl.domain.object_tested import ObjectTested
+from ht_etl.domain.source_serie import SourceSerie
+from ht_etl.domain.sample import Sample
+from ht_etl.domain.linked_dataset import LinkedDataset
+from ht_etl.domain.release_data_control import ReleaseControl
+from ht_etl.domain.collection_data import CollectionData
+from ht_etl.domain.external_references import ExternalReference
+from ht_etl.domain.authors_data import AuthorsData
+from ht_etl.domain.uniform_data import UniformizedData
 
 
 class Dataset(object):

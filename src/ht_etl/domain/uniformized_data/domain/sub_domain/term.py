@@ -6,7 +6,7 @@ Term object.
 # third party
 
 # local
-from src.libs import utils
+from libs import utils
 
 
 class Term(object):

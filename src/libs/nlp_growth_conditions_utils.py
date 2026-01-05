@@ -8,8 +8,8 @@ import os
 # third party
 
 # local
-from src.ht_etl.domain.uniformized_data.domain.nlp_growth_condition import NLPGrowthCondition
-from src.libs import constants
+from ht_etl.domain.uniformized_data.domain.nlp_growth_condition import NLPGrowthCondition
+from libs import constants
 
 
 def geo_nlp_gc_json_path(collection_path, file_name="metadata/srr_htregulondb_correct_full.json"):
