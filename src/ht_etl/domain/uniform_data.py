@@ -7,13 +7,13 @@ Build uniformized data objects for every dataset.
 # third party
 
 # local
-from src.libs import constants
-from src.ht_etl.domain.uniformized_data.sites import Sites
-from src.ht_etl.domain.uniformized_data.peaks import Peaks
-from src.ht_etl.domain.uniformized_data.tus import TUs
-from src.ht_etl.domain.uniformized_data.tss import TSSs
-from src.ht_etl.domain.uniformized_data.tts import TTSs
-from src.ht_etl.domain.uniformized_data.gene_expressions import GeneExpressions
+from libs import constants
+from ht_etl.domain.uniformized_data.sites import Sites
+from ht_etl.domain.uniformized_data.peaks import Peaks
+from ht_etl.domain.uniformized_data.tus import TUs
+from ht_etl.domain.uniformized_data.tss import TSSs
+from ht_etl.domain.uniformized_data.tts import TTSs
+from ht_etl.domain.uniformized_data.gene_expressions import GeneExpressions
 
 
 class UniformizedData(object):

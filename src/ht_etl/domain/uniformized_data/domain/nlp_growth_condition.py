@@ -7,9 +7,9 @@ Build uniformized data object.
 # third party
 
 # local
-from src.ht_etl.domain.uniformized_data.domain.base import Base
-from src.ht_etl.domain.uniformized_data.domain.sub_domain.term import Term
-from src.libs import utils
+from ht_etl.domain.uniformized_data.domain.base import Base
+from ht_etl.domain.uniformized_data.domain.sub_domain.term import Term
+from libs import utils
 
 
 class NLPGrowthCondition(Base):

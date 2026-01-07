@@ -8,10 +8,10 @@ import logging
 # third party
 
 # local
-from src.libs import constants
-from src.ht_etl.sub_collections.dataset import Dataset
-from src.ht_etl.sub_collections.metadata import Metadata
-from src.ht_etl.domain.summary import Summary
+from libs import constants
+from ht_etl.sub_collections.dataset import Dataset
+from ht_etl.sub_collections.metadata import Metadata
+from ht_etl.domain.summary import Summary
 
 
 class DatasetsMetadata(object):

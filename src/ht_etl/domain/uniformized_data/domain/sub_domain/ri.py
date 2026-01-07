@@ -6,8 +6,8 @@ Classic Regulatory Interaction object.
 # third party
 
 # local
-from src.libs import utils
-from src.ht_etl.domain.uniformized_data.domain.sub_domain.citation import Citation
+from libs import utils
+from ht_etl.domain.uniformized_data.domain.sub_domain.citation import Citation
 
 
 class RegulatoryInteraction(object):

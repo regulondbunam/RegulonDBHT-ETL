@@ -1,60 +1,101 @@
 """
-Specialized functions for Pubmed requests.
+Specialized functions for PubMed requests.
 """
+
 # standard
 import logging
+import os
+import ssl
+from urllib.error import URLError
 
 # third party
 from Bio import Entrez, Medline
-# local
+
+
+# Optional: allow disabling SSL verification via environment variable.
+# If you export HT_DISABLE_PUBMED_SSL_VERIFY=1 before running the ETL,
+# PubMed HTTPS requests will skip certificate verification.
+# if os.getenv("HT_DISABLE_PUBMED_SSL_VERIFY") == "1":
+ssl._create_default_https_context = ssl._create_unverified_context()
+logging.warning(
+    "HT_DISABLE_PUBMED_SSL_VERIFY=1 detected. SSL certificate verification "
+    "is DISABLED for HTTPS requests (PubMed). Use with caution."
+)
 
 
 def format_authors(pubmed_authors):
     """
-    Format pubmed authors names list.
-    Args:
-        pubmed_authors: String, list of pubmed authors.
+    Format PubMed authors list.
 
-    Returns:
-        pubmed_authors: List, formatted pubmed authors
+    Parameters
+    ----------
+    pubmed_authors : str or list
+        Authors as returned by Medline record (field 'AU').
+
+    Returns
+    -------
+    list
+        Formatted authors list.
     """
     if isinstance(pubmed_authors, str):
-        pubmed_authors = pubmed_authors.split(',')
+        pubmed_authors = pubmed_authors.split(",")
     return pubmed_authors
 
 
 def format_article_id(article_id):
     """
-    Format article id (doi) string.
-    Args:
-        article_id: List, un-formatted article id.
+    Format article id (DOI) string.
 
-    Returns:
-        doi: String, formatted article id.
+    Parameters
+    ----------
+    article_id : list or None
+        Unformatted article id list from Medline record (field 'AID').
+
+    Returns
+    -------
+    str or None
+        DOI string without the ' [doi]' suffix, or None if not found.
     """
+    if not article_id:
+        return None
+
     for doi in article_id:
-        if ' [doi]' in doi:
-            return doi.replace(' [doi]', '')
+        if " [doi]" in doi:
+            return doi.replace(" [doi]", "")
     return None
 
 
 def get_pubmed_data(dataset_id, pmids, email):
     """
-    Connects to PUBMED database through Entrez API and gets the necessary publication data.
-    The Entrez API returns a dictionary with the medline data, see also
-    https://biopython.org/docs/1.75/api/Bio.Medline.html for
-    more information about the keys obtained from this dictionary.
+    Connect to PubMed through the Entrez API and retrieve publication data.
 
-    Args:
-        dataset_id: String, dataset id.
-        pmids: Integer List, PUBMED publications ids.
-        email: String, User email address to connect to PUBMED database.
+    The Entrez API returns Medline data; see also:
+    https://biopython.org/docs/1.75/api/Bio.Medline.html
 
-    Returns:
-        publication: Dict, dictionary with the publication data.
+    Parameters
+    ----------
+    dataset_id : str
+        Dataset identifier associated with these PMIDs.
+    pmids : list
+        List of PubMed IDs (PMIDs) to fetch.
+    email : str
+        User email address for Entrez API (required by NCBI).
+
+    Returns
+    -------
+    list[dict]
+        List of publication dictionaries with the following possible keys:
+        - authors
+        - abstract
+        - date
+        - pmcid
+        - pmid
+        - title
+        - doi
+        Keys with None/empty values are removed from each publication.
     """
     if not pmids:
-        logging.warning(f'No PMIDs provided for dataset: {dataset_id}.')
+        logging.warning(f"No PMIDs provided for dataset: {dataset_id}.")
         return []
 
     Entrez.email = email
@@ -62,30 +103,48 @@ def get_pubmed_data(dataset_id, pmids, email):
     publications = []
 
     for pmid in pmids:
-        publication = {}
         if isinstance(pmid, float):
             pmid = int(pmid)
 
-        handle = Entrez.efetch(
-            db='pubmed',
-            id=pmid,
-            rettype='medline',
-            retmode='text'
-        )
-        record = Medline.read(handle)
+        try:
+            handle = Entrez.efetch(
+                db="pubmed",
+                id=str(pmid),
+                rettype="medline",
+                retmode="text",
+            )
+            record = Medline.read(handle)
+        except URLError as e:
+            logging.error(
+                f"Error fetching PubMed data for PMID {pmid} "
+                f"(dataset {dataset_id}): {e}"
+            )
+            # Skip this PMID but continue with the rest
+            continue
+        except Exception as e:
+            logging.error(
+                f"Unexpected error fetching PubMed data for PMID {pmid} "
+                f"(dataset {dataset_id}): {e}"
+            )
+            continue
 
-        pubmed_authors = format_authors(record.get('AU'))
-        doi = format_article_id(record.get('AID'))
+        publication = {}
 
-        publication.setdefault('authors', pubmed_authors)
-        publication.setdefault('abstract', record.get('AB'))
-        publication.setdefault('date', record.get('DP'))
-        publication.setdefault('pmcid', record.get('PMC'))
-        publication.setdefault('pmid', int(record.get('PMID')))
-        publication.setdefault('title', record.get('TI'))
-        publication.setdefault('doi', doi)
-        # Remove Null properties
+        pubmed_authors = format_authors(record.get("AU"))
+        doi = format_article_id(record.get("AID"))
+
+        publication.setdefault("authors", pubmed_authors)
+        publication.setdefault("abstract", record.get("AB"))
+        publication.setdefault("date", record.get("DP"))
+        publication.setdefault("pmcid", record.get("PMC"))
+        if record.get("PMID"):
+            publication.setdefault("pmid", int(record.get("PMID")))
+        publication.setdefault("title", record.get("TI"))
+        publication.setdefault("doi", doi)
+
+        # Remove null/empty properties
         publication = {k: v for k, v in publication.items() if v}
 
         publications.append(publication)
+
     return publications

@@ -82,6 +82,14 @@ def get_arguments():
     )
 
     parser.add_argument(
+        "-vout",
+        "--voutput",
+        help="Path where the json files of the process will be stored.",
+        metavar="../VerifiedPersistentIdentifiers//",
+        default="../VerifiedPersistentIdentifiers/",
+    )
+
+    parser.add_argument(
         "-l",
         "--log",
         help="Path where the log of the process will be stored.",

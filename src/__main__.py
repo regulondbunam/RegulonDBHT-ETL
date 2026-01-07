@@ -110,7 +110,7 @@ def run(**kwargs):
                 objects=genex_data,
                 filename=f'gene_expression_data_{dataset_obj.dataset.get("_id")}_{kwargs.get("collection_source")}_'
                          f'{kwargs.get("collection_name")}',
-                output=f"../VerifiedPersistentIdentifiers/gene_expression/"
+                output=f"{kwargs.get('voutput_path')}/gene_expression/"
             )
 
     collection_metadata = file_manager.set_json_object(
@@ -123,12 +123,12 @@ def run(**kwargs):
     file_manager.create_json(
         objects=collection_metadata,
         filename=f'dataset_metadata_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-        output='../VerifiedPersistentIdentifiers/'
+        output=kwargs.get('voutput_path')
     )
 
     output_path = kwargs.get('output_path')
     if kwargs.get('dataset_type', None) == constants.RNA:
-        output_path = f"../VerifiedPersistentIdentifiers/"
+        output_path = kwargs.get('voutput_path')
 
     collection_data = file_manager.set_json_object(
         filename="dataset",
@@ -235,7 +235,7 @@ def run(**kwargs):
         file_manager.create_json(
             objects=nlp_gc_data,
             filename=f'nlp_growth_conditions_data_{kwargs.get("collection_source")}_{kwargs.get("collection_name")}',
-            output=f"../VerifiedPersistentIdentifiers/"
+            output=kwargs.get('voutput_path')
         )
 
 
@@ -267,6 +267,7 @@ if __name__ == '__main__':
         release_process_date=str(datetime.datetime.now()),
         datasets_record_path=args.input,
         output_path=args.output,
+        voutput_path=args.voutput,
         organism=args.organism,
         version=args.version,
         url=args.url,

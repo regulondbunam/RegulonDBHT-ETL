@@ -8,7 +8,7 @@ import datetime
 # third party
 
 # local
-from src.libs.readme_data import ReadmeData
+from libs.readme_data import ReadmeData
 
 
 class Metadata(object):

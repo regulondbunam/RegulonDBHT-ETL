@@ -7,10 +7,10 @@ Build uniformized data object.
 # third party
 
 # local
-from src.libs import utils
-from src.libs import constants
-from src.ht_etl.domain.uniformized_data.domain.base import Base
-from src.ht_etl.domain.uniformized_data.domain.sub_domain.ri import RegulatoryInteraction
+from libs import utils
+from libs import constants
+from ht_etl.domain.uniformized_data.domain.base import Base
+from ht_etl.domain.uniformized_data.domain.sub_domain.ri import RegulatoryInteraction
 
 
 class Site(Base):

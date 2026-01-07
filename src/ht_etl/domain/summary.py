@@ -6,7 +6,7 @@ Summary object.
 # third party
 
 # local
-from src.ht_etl.sub_domain.total_of import TotalOf
+from ht_etl.sub_domain.total_of import TotalOf
 
 
 class Summary(object):

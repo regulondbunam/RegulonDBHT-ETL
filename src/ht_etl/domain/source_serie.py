@@ -7,8 +7,8 @@ import logging
 # third party
 
 # local
-from src.ht_etl.sub_domain.platform import Platform
-from src.ht_etl.sub_domain.series import Series
+from ht_etl.sub_domain.platform import Platform
+from ht_etl.sub_domain.series import Series
 
 
 class SourceSerie(object):

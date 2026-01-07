@@ -7,9 +7,9 @@ Calls for Datasets class and returns a constructor with all datasets objects.
 # third party
 
 # local
-from src.libs import constants
-from src.libs import file_manager
-from src.libs import nlp_growth_conditions_utils
+from libs import constants
+from libs import file_manager
+from libs import nlp_growth_conditions_utils
 
 
 def get_dataset(**kwargs):
@@ -21,7 +21,7 @@ def get_dataset(**kwargs):
     Returns:
         dataset: Datasets object
     """
-    from src.ht_etl.collections.datasets_metadata import DatasetsMetadata
+    from ht_etl.collections.datasets_metadata import DatasetsMetadata
 
     filename = kwargs.get('filename', '')
     rows_to_skip = kwargs.get('rows_to_skip', None)
@@ -67,8 +67,8 @@ def dataset_dict(filename, rows_to_skip):
     Returns:
         data_dict: Dictionary
     """
-    from src.libs.constants import METADATA_SHEET
-    from src.libs import file_manager
+    from libs.constants import METADATA_SHEET
+    from libs import file_manager
     data_dict = {}
     if filename.endswith('.xlsx'):
         data_dict = file_manager.get_excel_data(

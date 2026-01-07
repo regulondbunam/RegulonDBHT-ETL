@@ -7,7 +7,7 @@ import logging
 # third party
 
 # local
-from src.ht_etl.sub_domain.genes import Genes
+from ht_etl.sub_domain.genes import Genes
 
 
 class ObjectTested(object):

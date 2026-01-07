@@ -7,7 +7,7 @@ Build uniformized data object.
 # third party
 
 # local
-from src.ht_etl.domain.uniformized_data.domain.base import Base
+from ht_etl.domain.uniformized_data.domain.base import Base
 
 
 class GeneExpression(Base):

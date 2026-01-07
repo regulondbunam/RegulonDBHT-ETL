@@ -6,7 +6,7 @@ Publications object.
 # third party
 
 # local
-import src.libs.pubmed_tools as pubmed_tools
+import libs.pubmed_tools as pubmed_tools
 
 
 class Publications(object):
